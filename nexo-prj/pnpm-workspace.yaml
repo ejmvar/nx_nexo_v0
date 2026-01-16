@@ -1,4 +1,7 @@
 packages:
-  - "apps/*"
-
+  - 'apps/*'
+  - 'apps'
+  - 'apps-e2e'
+  - 'back_auth'
+  - 'back_auth-e2e'
 autoInstallPeers: true

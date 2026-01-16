@@ -8,6 +8,18 @@
     },
     {
       "path": "./apps/nexo-prj"
+    },
+    {
+      "path": "./apps-e2e"
+    },
+    {
+      "path": "./apps"
+    },
+    {
+      "path": "./back_auth-e2e"
+    },
+    {
+      "path": "./back_auth"
     }
   ]
 }
