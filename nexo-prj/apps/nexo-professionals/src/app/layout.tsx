@@ -1,5 +1,5 @@
 import './global.css';
-import MuiThemeProvider from './MuiThemeProvider';
+import SessionWrapper from './SessionWrapper';
 
 export const metadata = {
   title: 'NEXO Professionals Portal',
@@ -14,9 +14,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <MuiThemeProvider>
+        <SessionWrapper>
           {children}
-        </MuiThemeProvider>
+        </SessionWrapper>
       </body>
     </html>
   );

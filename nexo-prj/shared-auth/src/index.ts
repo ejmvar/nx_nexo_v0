@@ -1,1 +1,2 @@
-export * from './lib/shared-auth.js';
+export * from './lib/shared-auth';
+export * from './lib/types';
