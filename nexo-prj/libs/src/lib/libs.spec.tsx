@@ -1,10 +1,10 @@
 import { render } from '@testing-library/react';
 
-import NexoPrjUi from './libs';
+import { Button } from './components';
 
-describe('NexoPrjUi', () => {
+describe('Button', () => {
   it('should render successfully', () => {
-    const { baseElement } = render(<NexoPrjUi />);
+    const { baseElement } = render(<Button>Click me</Button>);
     expect(baseElement).toBeTruthy();
   });
 });

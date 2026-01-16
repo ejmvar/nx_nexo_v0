@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@nexo-prj/ui": "workspace:*",
+    "@nexo-prj/api-client": "workspace:*",
     "next": "~16.0.1",
     "next-auth": "^4.24.13",
     "react": "^19.0.0",
