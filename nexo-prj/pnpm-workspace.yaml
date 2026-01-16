@@ -1,4 +1,22 @@
 packages:
-  - "apps/*"
-
+  - 'apps/*'
+  - 'apps'
+  - 'apps-e2e'
+  - 'api-gateway'
+  - 'api-gateway-e2e'
+  - 'crm-core'
+  - 'crm-core-e2e'
+  - 'stock'
+  - 'stock-e2e'
+  - 'purchases'
+  - 'purchases-e2e'
+  - 'sales'
+  - 'sales-e2e'
+  - 'production'
+  - 'production-e2e'
+  - 'notifications'
+  - 'notifications-e2e'
+  - 'auth'
+  - 'auth-e2e'
+  - 'shared'
 autoInstallPeers: true

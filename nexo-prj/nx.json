@@ -28,7 +28,8 @@
           "buildDepsName": "build-deps",
           "watchDepsName": "watch-deps"
         }
-      }
+      },
+      "exclude": ["shared/*"]
     },
     {
       "plugin": "@nx/next/plugin",
@@ -57,6 +58,38 @@
       "plugin": "@nx/jest/plugin",
       "options": {
         "targetName": "test"
+      },
+      "exclude": [
+        "apps-e2e/**/*",
+        "apps-e2e/**/*",
+        "api-gateway-e2e/**/*",
+        "crm-core-e2e/**/*",
+        "stock-e2e/**/*",
+        "purchases-e2e/**/*",
+        "sales-e2e/**/*",
+        "production-e2e/**/*",
+        "notifications-e2e/**/*",
+        "auth-e2e/**/*"
+      ]
+    },
+    {
+      "plugin": "@nx/webpack/plugin",
+      "options": {
+        "buildTargetName": "build",
+        "serveTargetName": "serve",
+        "previewTargetName": "preview",
+        "buildDepsTargetName": "build-deps",
+        "watchDepsTargetName": "watch-deps",
+        "serveStaticTargetName": "serve-static"
+      }
+    },
+    {
+      "plugin": "@nx/js/typescript",
+      "include": ["shared/*"],
+      "options": {
+        "typecheck": {
+          "targetName": "typecheck"
+        }
       }
     }
   ],

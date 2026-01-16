@@ -8,6 +8,63 @@
     },
     {
       "path": "./apps/nexo-prj"
+    },
+    {
+      "path": "./apps-e2e"
+    },
+    {
+      "path": "./apps"
+    },
+    {
+      "path": "./api-gateway-e2e"
+    },
+    {
+      "path": "./api-gateway"
+    },
+    {
+      "path": "./crm-core-e2e"
+    },
+    {
+      "path": "./crm-core"
+    },
+    {
+      "path": "./stock-e2e"
+    },
+    {
+      "path": "./stock"
+    },
+    {
+      "path": "./purchases-e2e"
+    },
+    {
+      "path": "./purchases"
+    },
+    {
+      "path": "./sales-e2e"
+    },
+    {
+      "path": "./sales"
+    },
+    {
+      "path": "./production-e2e"
+    },
+    {
+      "path": "./production"
+    },
+    {
+      "path": "./notifications-e2e"
+    },
+    {
+      "path": "./notifications"
+    },
+    {
+      "path": "./auth-e2e"
+    },
+    {
+      "path": "./auth"
+    },
+    {
+      "path": "./shared"
     }
   ]
 }
