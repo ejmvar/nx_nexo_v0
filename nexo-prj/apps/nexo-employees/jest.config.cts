@@ -6,7 +6,7 @@ const createJestConfig = nextJest({
 
 const config = {
   displayName: '@nexo-prj/nexo-employees',
-  preset: '../jest.preset.js',
+  preset: '../../jest.preset.js',
   transform: {
     '^(?!.*\\.(js|jsx|ts|tsx|css|json)$)': '@nx/react/plugins/jest',
   },

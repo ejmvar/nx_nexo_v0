@@ -1,15 +1,17 @@
-import { Box, Heading, Text, Button } from '@chakra-ui/react';
+import { Box, Typography, Button } from '@mui/material';
 
 export default function ClientsPortal() {
   return (
-    <Box p={8}>
-      <Heading as="h1" size="xl" mb={4}>
+    <Box sx={{ p: 8 }}>
+      <Typography variant="h4" component="h1" gutterBottom>
         Welcome to NEXO Clients Portal
-      </Heading>
-      <Text mb={6}>
+      </Typography>
+      <Typography variant="body1" gutterBottom>
         Access your account, view orders, and manage your services.
-      </Text>
-      <Button colorScheme="green">Login</Button>
+      </Typography>
+      <Button variant="contained" color="primary">
+        Login
+      </Button>
     </Box>
   );
 }

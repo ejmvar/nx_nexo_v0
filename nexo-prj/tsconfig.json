@@ -4,12 +4,6 @@
   "files": [],
   "references": [
     {
-      "path": "./apps/nexo-prj-e2e"
-    },
-    {
-      "path": "./apps/nexo-prj"
-    },
-    {
       "path": "./shared-types"
     },
     {
@@ -20,6 +14,30 @@
     },
     {
       "path": "./shared-api"
+    },
+    {
+      "path": "./apps/nexo-professionals-e2e"
+    },
+    {
+      "path": "./apps/nexo-employees-e2e"
+    },
+    {
+      "path": "./apps/nexo-professionals"
+    },
+    {
+      "path": "./apps/nexo-suppliers-e2e"
+    },
+    {
+      "path": "./apps/nexo-clients-e2e"
+    },
+    {
+      "path": "./apps/nexo-suppliers"
+    },
+    {
+      "path": "./apps/nexo-clients"
+    },
+    {
+      "path": "./apps/nexo-employees"
     }
   ]
 }

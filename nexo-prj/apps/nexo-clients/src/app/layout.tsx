@@ -1,5 +1,5 @@
 import './global.css';
-import { ChakraProvider } from '@chakra-ui/react';
+import MuiThemeProvider from './MuiThemeProvider';
 
 export const metadata = {
   title: 'NEXO Clients Portal',
@@ -14,9 +14,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <ChakraProvider>
+        <MuiThemeProvider>
           {children}
-        </ChakraProvider>
+        </MuiThemeProvider>
       </body>
     </html>
   );
