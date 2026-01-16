@@ -2,7 +2,7 @@
 
 import { useSession, signIn, signOut } from 'next-auth/react';
 
-export default function Index() {
+export default function AuthPage() {
   const { data: session, status } = useSession();
 
   if (status === 'loading') {
@@ -13,10 +13,10 @@ export default function Index() {
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Supplier Portal
+          Employee Portal
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          NEXO CRM - Supplier Access
+          NEXO CRM - Employee Access
         </p>
       </div>
 
@@ -29,7 +29,7 @@ export default function Index() {
                   Welcome, {session.user?.name || session.user?.email}
                 </h3>
                 <p className="mt-1 text-sm text-gray-600">
-                  You are signed in as a supplier user.
+                  You are signed in as an employee user.
                 </p>
               </div>
               <div className="mt-6">
@@ -48,7 +48,7 @@ export default function Index() {
                   Sign In Required
                 </h3>
                 <p className="mt-1 text-sm text-gray-600">
-                  Please sign in to access the supplier portal.
+                  Please sign in to access the employee portal.
                 </p>
               </div>
               <div className="mt-6">
