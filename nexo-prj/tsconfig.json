@@ -10,30 +10,6 @@
       "path": "./apps/nexo-prj"
     },
     {
-      "path": "./nexo-employees-e2e"
-    },
-    {
-      "path": "./nexo-employees"
-    },
-    {
-      "path": "./nexo-clients-e2e"
-    },
-    {
-      "path": "./nexo-clients"
-    },
-    {
-      "path": "./nexo-suppliers-e2e"
-    },
-    {
-      "path": "./nexo-suppliers"
-    },
-    {
-      "path": "./nexo-professionals-e2e"
-    },
-    {
-      "path": "./nexo-professionals"
-    },
-    {
       "path": "./shared-types"
     },
     {
