@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
 import { unstable_noStore as noStore } from 'next/cache';
 import {
   Layout,
@@ -16,11 +15,26 @@ import {
   Badge,
   Alert
 } from '@nexo-prj/ui';
-import { ContactsService, Contact } from '@nexo-prj/api-client';
+
+// Temporary Contact type definition until import issue is resolved
+interface Contact {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string;
+  company?: string;
+  position?: string;
+  tags: string[];
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: string;
+  assignedTo: string;
+}
 
 export default function Contacts() {
   noStore();
-  const { data: session } = useSession();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -30,11 +44,6 @@ export default function Contacts() {
     const fetchContacts = async () => {
       try {
         setLoading(true);
-        // In a real app, you'd get the API client from a context or service
-        const contactsService = new ContactsService({
-          baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api',
-        });
-
         // For demo purposes, we'll use mock data
         const mockContacts: Contact[] = [
           {
@@ -137,7 +146,7 @@ export default function Contacts() {
                     <Input
                       placeholder="Search contacts..."
                       value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
                     />
                   </div>
                   <Button variant="secondary">Filter</Button>
@@ -185,7 +194,7 @@ export default function Contacts() {
                         </div>
                         <div className="flex items-center space-x-2">
                           <div className="flex space-x-1">
-                            {contact.tags.map((tag) => (
+                            {contact.tags.map((tag: string) => (
                               <Badge key={tag} variant="secondary" size="sm">
                                 {tag}
                               </Badge>

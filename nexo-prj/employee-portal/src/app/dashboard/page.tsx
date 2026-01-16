@@ -50,10 +50,10 @@ export default function Dashboard() {
       <div className="flex">
         <Sidebar>
           <nav className="space-y-2">
-            <a href="#" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded">
+            <a href="/dashboard" className="block px-4 py-2 bg-blue-50 text-blue-700 rounded">
               Dashboard
             </a>
-            <a href="#" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded">
+            <a href="/contacts" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded">
               Contacts
             </a>
             <a href="#" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded">
@@ -128,9 +128,11 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Button variant="primary">
-                    Add New Contact
-                  </Button>
+                  <a href="/contacts">
+                    <Button variant="primary">
+                      Add New Contact
+                    </Button>
+                  </a>
                   <Button variant="secondary">
                     Create Project
                   </Button>

@@ -16,6 +16,10 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "es2022",
-    "customConditions": ["@nexo-prj/source"]
+    "customConditions": ["@nexo-prj/source"],
+    "paths": {
+      "@nexo-prj/api-client": ["./api-client/src/index.ts"],
+      "@nexo-prj/ui": ["./libs/src/index.ts"]
+    }
   }
 }
