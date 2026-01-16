@@ -17,10 +17,13 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@nexo-prj/shared-auth": ["../../shared-auth/src"],
+      "@nexo-prj/shared-types": ["../../shared-types/src"],
+      "@nexo-prj/shared-ui": ["../../shared-ui/src"],
+      "@nexo-prj/shared-api": ["../../shared-api/src"]
     },
-    "outDir": "dist",
-    "rootDir": "src",
+    "types": ["jest", "node"],
     "tsBuildInfoFile": "dist/tsconfig.tsbuildinfo"
   },
   "include": [
