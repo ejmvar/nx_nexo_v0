@@ -27,14 +27,11 @@ import {
   Checkbox,
   TablePagination,
   Toolbar,
-  Chip,
   Menu,
   MenuItem,
-  Button,
 } from '@mui/material';
 import {
   Search as SearchIcon,
-  FilterList as FilterIcon,
   ViewColumn as ColumnIcon,
   ArrowUpward as SortAscIcon,
   ArrowDownward as SortDescIcon,
@@ -102,20 +99,36 @@ export function DataTable<T extends Record<string, any>>({
 
   // Convert our column definitions to TanStack Table format
   const tableColumns = useMemo<ColumnDef<T>[]>(() => {
-    const cols: ColumnDef<T>[] = columns.map((col) => ({
-      id: col.id,
-      accessorKey: col.accessorKey,
-      accessorFn: col.accessorFn,
-      header: col.header,
-      cell: col.cell || (({ getValue }) => getValue()),
-      size: col.size,
-      minSize: col.minSize,
-      maxSize: col.maxSize,
-      enableSorting: col.enableSorting ?? enableSorting,
-      enableColumnFilter: col.enableFiltering ?? enableFiltering,
-      enableHiding: col.enableHiding ?? enableColumnVisibility,
-      filterFn: col.filterFn,
-    }));
+    const cols: ColumnDef<T>[] = columns.map((col) => {
+      const columnDef: any = {
+        id: col.id,
+        header: col.header,
+        cell: col.cell || (({ getValue }: any) => getValue()),
+        size: col.size,
+        minSize: col.minSize,
+        maxSize: col.maxSize,
+        enableSorting: col.enableSorting ?? enableSorting,
+        enableColumnFilter: col.enableFiltering ?? enableFiltering,
+        enableHiding: col.enableHiding ?? enableColumnVisibility,
+      };
+
+      // Only add accessorKey if it exists
+      if (col.accessorKey) {
+        columnDef.accessorKey = col.accessorKey;
+      }
+
+      // Only add accessorFn if it exists
+      if (col.accessorFn) {
+        columnDef.accessorFn = col.accessorFn;
+      }
+
+      // Only add filterFn if it exists
+      if (col.filterFn) {
+        columnDef.filterFn = col.filterFn as any;
+      }
+
+      return columnDef as ColumnDef<T>;
+    });
 
     // Add row selection column if enabled
     if (enableRowSelection) {
@@ -221,7 +234,7 @@ export function DataTable<T extends Record<string, any>>({
             <TextField
               placeholder="Search..."
               value={globalFilter}
-              onChange={(e) => setGlobalFilter(e.target.value)}
+              onChange={(e: any) => setGlobalFilter(e.target.value)}
               size="small"
               InputProps={{
                 startAdornment: (
@@ -324,7 +337,7 @@ export function DataTable<T extends Record<string, any>>({
           page={table.getState().pagination.pageIndex}
           onPageChange={(_, page) => table.setPageIndex(page)}
           rowsPerPage={table.getState().pagination.pageSize}
-          onRowsPerPageChange={(e) => table.setPageSize(Number(e.target.value))}
+          onRowsPerPageChange={(e: any) => table.setPageSize(Number(e.target.value))}
           rowsPerPageOptions={pageSizeOptions}
         />
       )}

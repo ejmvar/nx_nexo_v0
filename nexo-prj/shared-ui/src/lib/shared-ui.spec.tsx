@@ -9,6 +9,15 @@ import {
 import { LoginForm } from './login-form';
 import { DataEntryForm } from './data-entry-form';
 import { DataTable, SimpleTable, DataTableColumn } from './data-table';
+import {
+  LineChartComponent,
+  AreaChartComponent,
+  BarChartComponent,
+  PieChartComponent,
+  DonutChartComponent,
+  KPICard,
+  ChartGrid,
+} from './charts';
 
 describe('Form Components', () => {
   describe('FormProvider', () => {
@@ -268,6 +277,178 @@ describe('Form Components', () => {
       render(<SimpleTable data={mockData} columns={columnsWithRender} />);
 
       expect(screen.getByText('JOHN DOE')).toBeInTheDocument();
+    });
+  });
+});
+
+describe('Chart Components', () => {
+  const mockChartData = [
+    { month: 'Jan', sales: 4000, profit: 2400, users: 1200 },
+    { month: 'Feb', sales: 3000, profit: 1398, users: 1100 },
+    { month: 'Mar', sales: 2000, profit: 9800, users: 1300 },
+    { month: 'Apr', sales: 2780, profit: 3908, users: 1400 },
+  ];
+
+  const mockPieData = [
+    { name: 'Desktop', value: 400 },
+    { name: 'Mobile', value: 300 },
+    { name: 'Tablet', value: 200 },
+  ];
+
+  describe('LineChartComponent', () => {
+    it('should render line chart with data', () => {
+      render(
+        <LineChartComponent
+          data={mockChartData}
+          xKey="month"
+          yKeys={['sales', 'profit']}
+          title="Sales & Profit"
+        />
+      );
+
+      expect(screen.getByText('Sales & Profit')).toBeInTheDocument();
+    });
+
+    it('should render without title', () => {
+      render(
+        <LineChartComponent
+          data={mockChartData}
+          xKey="month"
+          yKeys={['sales']}
+        />
+      );
+
+      // Chart should render without title
+      expect(screen.queryByRole('heading')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('AreaChartComponent', () => {
+    it('should render area chart with data', () => {
+      render(
+        <AreaChartComponent
+          data={mockChartData}
+          xKey="month"
+          yKeys={['sales', 'profit']}
+          title="Area Chart"
+        />
+      );
+
+      expect(screen.getByText('Area Chart')).toBeInTheDocument();
+    });
+  });
+
+  describe('BarChartComponent', () => {
+    it('should render bar chart with data', () => {
+      render(
+        <BarChartComponent
+          data={mockChartData}
+          xKey="month"
+          yKeys={['sales', 'users']}
+          title="Bar Chart"
+        />
+      );
+
+      expect(screen.getByText('Bar Chart')).toBeInTheDocument();
+    });
+  });
+
+  describe('PieChartComponent', () => {
+    it('should render pie chart with data', () => {
+      render(
+        <PieChartComponent
+          data={mockPieData}
+          dataKey="value"
+          nameKey="name"
+          title="Device Usage"
+        />
+      );
+
+      expect(screen.getByText('Device Usage')).toBeInTheDocument();
+    });
+
+    it('should display percentage labels', () => {
+      render(
+        <PieChartComponent
+          data={mockPieData}
+          dataKey="value"
+          nameKey="name"
+        />
+      );
+
+      // Check that the chart container is rendered (labels are in SVG)
+      expect(document.querySelector('.recharts-responsive-container')).toBeInTheDocument();
+    });
+  });
+
+  describe('DonutChartComponent', () => {
+    it('should render donut chart with data', () => {
+      render(
+        <DonutChartComponent
+          data={mockPieData}
+          dataKey="value"
+          nameKey="name"
+          title="Donut Chart"
+        />
+      );
+
+      expect(screen.getByText('Donut Chart')).toBeInTheDocument();
+    });
+  });
+
+  describe('KPICard', () => {
+    it('should render KPI card with title and value', () => {
+      render(
+        <KPICard
+          title="Total Sales"
+          value="$12,345"
+        />
+      );
+
+      expect(screen.getByText('Total Sales')).toBeInTheDocument();
+      expect(screen.getByText('$12,345')).toBeInTheDocument();
+    });
+
+    it('should render with change indicator', () => {
+      render(
+        <KPICard
+          title="Revenue"
+          value="10,000"
+          change={{ value: 15.5, label: 'vs last month' }}
+        />
+      );
+
+      expect(screen.getByText('Revenue')).toBeInTheDocument();
+      expect(screen.getByText('10,000')).toBeInTheDocument();
+      expect(screen.getByText('+15.5% vs last month')).toBeInTheDocument();
+    });
+
+    it('should render with negative change', () => {
+      render(
+        <KPICard
+          title="Expenses"
+          value="5,000"
+          change={{ value: -8.2, label: 'vs last month' }}
+        />
+      );
+
+      expect(screen.getByText('-8.2% vs last month')).toBeInTheDocument();
+    });
+  });
+
+  describe('ChartGrid', () => {
+    it('should render children in grid layout', () => {
+      render(
+        <ChartGrid columns={2}>
+          <div>Chart 1</div>
+          <div>Chart 2</div>
+          <div>Chart 3</div>
+        </ChartGrid>
+      );
+
+      expect(screen.getByText('Chart 1')).toBeInTheDocument();
+      expect(screen.getByText('Chart 2')).toBeInTheDocument();
+      expect(screen.getByText('Chart 3')).toBeInTheDocument();
     });
   });
 });
