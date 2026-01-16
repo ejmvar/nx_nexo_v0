@@ -20,6 +20,10 @@ export default defineConfig(() => ({
       entryRoot: 'src',
       tsconfigPath: path.join(import.meta.dirname, 'tsconfig.lib.json'),
     }),
+    dts({
+      entryRoot: 'src',
+      tsconfigPath: path.join(import.meta.dirname, 'tsconfig.lib.json'),
+    }),
   ],
   // Uncomment this if you are using workers.
   // worker: {
@@ -41,13 +45,21 @@ export default defineConfig(() => ({
     formats: ['es' as const],
     external: [],
     transformMixedEsModules: true,
+    entry: 'src/index.ts',
+    name: 'auth',
+    fileName: 'index',
+    formats: ['es' as const],
+    external: [],
+    transformMixedEsModules: true,
     lib: {
       entry: 'src/index.ts',
-      name: 'auth',
+      name: '@nexo-prj/ui',
       fileName: 'index',
       formats: ['es' as const],
     },
-    rollupOptions: { external: [] },
+    rollupOptions: {
+      external: ["'react'", "'react-dom'", "'react/jsx-runtime'"],
+    },
     outDir: './dist',
     reportCompressedSize: true,
     commonjsOptions: { transformMixedEsModules: true },
@@ -56,7 +68,7 @@ export default defineConfig(() => ({
     name: '@nexo-prj/libs',
     watch: false,
     globals: true,
-    environment: 'node',
+    environment: 'jsdom',
     include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     reporters: ['default'],
     coverage: {

@@ -1,8 +1,10 @@
 'use client';
 
 import { useSession, signIn, signOut } from 'next-auth/react';
+import { unstable_noStore as noStore } from 'next/cache';
 
 export default function Index() {
+  noStore();
   const { data: session, status } = useSession();
 
   if (status === 'loading') {

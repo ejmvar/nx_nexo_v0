@@ -1,7 +1,6 @@
 {
-  "name": "@nexo-prj/auth",
+  "name": "@nexo-prj/ui",
   "version": "0.0.1",
-  "private": true,
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -14,9 +13,5 @@
       "import": "./dist/index.js",
       "default": "./dist/index.js"
     }
-  },
-  "nx": {
-    "name": "auth"
-  },
-  "dependencies": {}
+  }
 }

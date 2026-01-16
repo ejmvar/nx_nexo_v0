@@ -1,10 +1,10 @@
 import { render } from '@testing-library/react';
 
-import NexoPrjLibs from './libs';
+import NexoPrjUi from './libs';
 
-describe('NexoPrjLibs', () => {
+describe('NexoPrjUi', () => {
   it('should render successfully', () => {
-    const { baseElement } = render(<NexoPrjLibs />);
+    const { baseElement } = render(<NexoPrjUi />);
     expect(baseElement).toBeTruthy();
   });
 });
