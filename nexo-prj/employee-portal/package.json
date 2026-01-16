@@ -1,0 +1,11 @@
+{
+  "name": "@nexo-prj/employee-portal",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "next": "~16.0.1",
+    "next-auth": "^4.24.13",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  }
+}

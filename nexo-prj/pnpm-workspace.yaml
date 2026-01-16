@@ -19,4 +19,12 @@ packages:
   - 'auth'
   - 'auth-e2e'
   - 'shared'
+  - 'employee-portal'
+  - 'client-portal'
+  - 'supplier-portal'
+  - 'professional-portal'
+  - 'libs'
+  - 'auth-lib'
+  - 'api-client'
+  - 'types'
 autoInstallPeers: true

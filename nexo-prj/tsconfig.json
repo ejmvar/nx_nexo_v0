@@ -4,16 +4,10 @@
   "files": [],
   "references": [
     {
-      "path": "./apps/nexo-prj-e2e"
-    },
-    {
       "path": "./apps/nexo-prj"
     },
     {
       "path": "./apps-e2e"
-    },
-    {
-      "path": "./apps"
     },
     {
       "path": "./api-gateway-e2e"
@@ -65,6 +59,42 @@
     },
     {
       "path": "./shared"
+    },
+    {
+      "path": "./employee-portal-e2e"
+    },
+    {
+      "path": "./employee-portal"
+    },
+    {
+      "path": "./client-portal-e2e"
+    },
+    {
+      "path": "./client-portal"
+    },
+    {
+      "path": "./supplier-portal-e2e"
+    },
+    {
+      "path": "./supplier-portal"
+    },
+    {
+      "path": "./professional-portal-e2e"
+    },
+    {
+      "path": "./professional-portal"
+    },
+    {
+      "path": "./libs"
+    },
+    {
+      "path": "./auth-lib"
+    },
+    {
+      "path": "./api-client"
+    },
+    {
+      "path": "./types"
     }
   ]
 }
