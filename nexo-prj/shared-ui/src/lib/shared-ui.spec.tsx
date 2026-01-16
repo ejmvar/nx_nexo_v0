@@ -8,6 +8,7 @@ import {
 } from './shared-ui';
 import { LoginForm } from './login-form';
 import { DataEntryForm } from './data-entry-form';
+import { DataTable, SimpleTable, DataTableColumn } from './data-table';
 
 describe('Form Components', () => {
   describe('FormProvider', () => {
@@ -151,6 +152,122 @@ describe('Form Components', () => {
       fireEvent.mouseDown(select!);
       expect(screen.getByText('Admin')).toBeInTheDocument();
       expect(screen.getByText('User')).toBeInTheDocument();
+    });
+  });
+
+  describe('DataTable', () => {
+    interface TestData {
+      id: number;
+      name: string;
+      email: string;
+      role: string;
+    }
+
+    const mockData: TestData[] = [
+      { id: 1, name: 'John Doe', email: 'john@example.com', role: 'Admin' },
+      { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'User' },
+      { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: 'User' },
+    ];
+
+    const mockColumns: DataTableColumn<TestData>[] = [
+      { id: 'name', header: 'Name', accessorKey: 'name' },
+      { id: 'email', header: 'Email', accessorKey: 'email' },
+      { id: 'role', header: 'Role', accessorKey: 'role' },
+    ];
+
+    it('should render table with data', () => {
+      render(<DataTable data={mockData} columns={mockColumns} />);
+
+      expect(screen.getByText('John Doe')).toBeInTheDocument();
+      expect(screen.getByText('jane@example.com')).toBeInTheDocument();
+      expect(screen.getByText('Admin')).toBeInTheDocument();
+      expect(screen.getAllByText('User')).toHaveLength(2);
+    });
+
+    it('should render table headers', () => {
+      render(<DataTable data={mockData} columns={mockColumns} />);
+
+      expect(screen.getByText('Name')).toBeInTheDocument();
+      expect(screen.getByText('Email')).toBeInTheDocument();
+      expect(screen.getByText('Role')).toBeInTheDocument();
+    });
+
+    it('should show title when provided', () => {
+      render(<DataTable data={mockData} columns={mockColumns} title="Test Table" />);
+
+      expect(screen.getByText('Test Table')).toBeInTheDocument();
+    });
+
+    it('should show empty message when no data', () => {
+      render(<DataTable data={[]} columns={mockColumns} emptyMessage="No users found" />);
+
+      expect(screen.getByText('No users found')).toBeInTheDocument();
+    });
+
+    it('should render loading state', () => {
+      render(<DataTable data={[]} columns={mockColumns} loading />);
+
+      expect(screen.getByText('Loading...')).toBeInTheDocument();
+    });
+
+    it('should render row selection checkboxes when enabled', () => {
+      render(<DataTable data={mockData} columns={mockColumns} enableRowSelection />);
+
+      const checkboxes = screen.getAllByRole('checkbox');
+      expect(checkboxes.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('SimpleTable', () => {
+    interface TestData {
+      id: number;
+      name: string;
+      email: string;
+    }
+
+    const mockData: TestData[] = [
+      { id: 1, name: 'John Doe', email: 'john@example.com' },
+      { id: 2, name: 'Jane Smith', email: 'jane@example.com' },
+    ];
+
+    const mockColumns = [
+      { key: 'name' as keyof TestData, header: 'Name' },
+      { key: 'email' as keyof TestData, header: 'Email' },
+    ];
+
+    it('should render simple table with data', () => {
+      render(<SimpleTable data={mockData} columns={mockColumns} />);
+
+      expect(screen.getByText('John Doe')).toBeInTheDocument();
+      expect(screen.getByText('jane@example.com')).toBeInTheDocument();
+    });
+
+    it('should render table headers', () => {
+      render(<SimpleTable data={mockData} columns={mockColumns} />);
+
+      expect(screen.getByText('Name')).toBeInTheDocument();
+      expect(screen.getByText('Email')).toBeInTheDocument();
+    });
+
+    it('should show title when provided', () => {
+      render(<SimpleTable data={mockData} columns={mockColumns} title="Simple Test Table" />);
+
+      expect(screen.getByText('Simple Test Table')).toBeInTheDocument();
+    });
+
+    it('should render custom cell content', () => {
+      const columnsWithRender = [
+        {
+          key: 'name' as keyof TestData,
+          header: 'Name',
+          render: (value: string) => <strong>{value.toUpperCase()}</strong>,
+        },
+        { key: 'email' as keyof TestData, header: 'Email' },
+      ];
+
+      render(<SimpleTable data={mockData} columns={columnsWithRender} />);
+
+      expect(screen.getByText('JOHN DOE')).toBeInTheDocument();
     });
   });
 });
