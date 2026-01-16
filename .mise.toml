@@ -1,11 +1,14 @@
-
+[vars]
+PROJECT_NAME = "nexo-prj"
 
 # /myproject/mise.toml
 experimental_monorepo_root = true
 
 [env]
-MISE_EXPERIMENTAL=1
+MISE_EXPERIMENTAL=0
 _.file = ".GITHUB_EJMV_OWN.env"
+PROJECT_NAME = "nexo-prj"
+
 
 [tools]
 node = "latest"
@@ -16,23 +19,32 @@ pnpm = "latest"
 
 
 
-[tasks.100-nx-npm-install]
-description = "Installs/Updates Nx CLI"
-raw = true
-run = "npx npm install -g nx"
-[tasks.100-nx-pnpm-install]
+# [tasks.100-nx-npm-install]
+# description = "Installs/Updates Nx CLI"
+# raw = true
+# run = "npx npm install -g nx"
+
+[tasks.100-000-001-nx-pnpm-install]
 description = "Installs/Updates Nx CLI using PNPM"
 raw = true
-run = "npx pnpm install -g nx"
+run = ". ~/.bashrc && pnpm setup && . ~/.bashrc && pnpm install -g nx"
+# ------------------------------
+# # If necessary to approve builds:
+# pnpm approve-builds -g
+# # or
+# pnpm approve-builds nx -g
+# ------------------------------
 
-[tasks.100-000-nx-init-this-project]
-description = "Initialize NX in this EXISTING project"
+
+# [tasks.100-000-nx-init-this-project]
+# description = "Initialize NX in this EXISTING project"
 
 
-[tasks.100-000-nx-CREATE-pnpm-project-here]
+[tasks.100-000-002-nx-CREATE-pnpm-project-here]
 description = "Initialize NX in this EXISTING project"
 raw = true
-run = "npx create-nx-workspace@latest your-workspace-name --package-manager=pnpm"
+# run = "npx create-nx-workspace@latest your-workspace-name --package-manager=pnpm"
+run = "npx create-nx-workspace@latest {{vars.PROJECT_NAME}} --package-manager=pnpm"
 
 
 [tasks.build-nx]
