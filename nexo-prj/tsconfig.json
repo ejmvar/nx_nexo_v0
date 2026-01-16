@@ -20,6 +20,12 @@
     },
     {
       "path": "./back_auth"
+    },
+    {
+      "path": "./auth-service-e2e"
+    },
+    {
+      "path": "./auth-service"
     }
   ]
 }

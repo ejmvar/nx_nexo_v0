@@ -62,7 +62,8 @@
         "apps-e2e/**/*",
         "apps-e2e/**/*",
         "back_auth-e2e/**/*",
-        "back_auth-e2e/**/*"
+        "back_auth-e2e/**/*",
+        "auth-service-e2e/**/*"
       ]
     },
     {
