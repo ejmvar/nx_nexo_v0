@@ -1,0 +1,98 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: nexo-postgres
+    environment:
+      POSTGRES_DB: nexo
+      POSTGRES_USER: nexo_user
+      POSTGRES_PASSWORD: nexo_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - nexo-network
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: nexo-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - nexo-network
+    restart: unless-stopped
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: nexo-keycloak
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/nexo
+      KC_DB_USERNAME: nexo_user
+      KC_DB_PASSWORD: nexo_password
+      KC_HOSTNAME_STRICT: false
+      KC_HTTP_ENABLED: true
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    networks:
+      - nexo-network
+    restart: unless-stopped
+    command: start-dev
+
+  frontend:
+    build:
+      context: ../nexo-prj/apps/nexo-prj
+      dockerfile: Dockerfile
+    container_name: nexo-frontend
+    ports:
+      - "3000:3000"
+    networks:
+      - nexo-network
+    restart: unless-stopped
+    # For development, uncomment the following and comment build
+    # volumes:
+    #   - ../nexo-prj/apps/nexo-prj:/app
+    #   - /app/node_modules
+    # command: npm run dev
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: nexo-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - nexo-network
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: nexo-grafana
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - nexo-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+  grafana_data:
+
+networks:
+  nexo-network:
+    driver: bridge
