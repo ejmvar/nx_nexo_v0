@@ -1,7 +1,7 @@
 import NextAuth from 'next-auth';
 import KeycloakProvider from 'next-auth/providers/keycloak';
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
+const handler = NextAuth({
   providers: [
     KeycloakProvider({
       clientId: process.env.KEYCLOAK_CLIENT_ID || 'nexo-frontend',
@@ -18,11 +18,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return token;
     },
     async session({ session, token }) {
-      session.accessToken = token.accessToken;
-      session.idToken = token.idToken;
+      session.accessToken = token.accessToken as string;
+      session.idToken = token.idToken as string;
       return session;
     },
   },
 });
 
-export const { GET, POST } = handlers;
+export { handler as GET, handler as POST };
