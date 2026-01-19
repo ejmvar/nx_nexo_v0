@@ -1,5 +1,15 @@
+# ============================================================================
+# NEXO CRM - Development Environment Configuration
+# ============================================================================
+# Testing Philosophy: Every step must be testable and simple
+# Run 'mise tasks' to see all available tasks
+# Run 'mise run test:all' to run all tests
+# Run 'mise run dev' to start development environment
+# ============================================================================
+
 [vars]
 PROJECT_NAME = "nexo-prj"
+DOCKER_COMPOSE_FILE = "docker/docker-compose.yml"
 
 # /myproject/mise.toml
 experimental_monorepo_root = true
@@ -9,78 +19,250 @@ MISE_EXPERIMENTAL=0
 _.file = ".GITHUB_EJMV_OWN.env"
 PROJECT_NAME = "nexo-prj"
 
-
 [tools]
 node = "latest"
 npm = "latest"
 pnpm = "latest"
 
-# "nix:nx" = "latest" # Manages Nx via Nix
-
-
-
-# [tasks.100-nx-npm-install]
-# description = "Installs/Updates Nx CLI"
-# raw = true
-# run = "npx npm install -g nx"
+# ============================================================================
+# BASIC SETUP TASKS
+# ============================================================================
 
 [tasks.100-000-001-nx-pnpm-install]
 description = "Installs/Updates Nx CLI using PNPM"
 raw = true
 run = ". ~/.bashrc && pnpm setup && . ~/.bashrc && pnpm install -g nx"
-# ------------------------------
-# # If necessary to approve builds:
-# pnpm approve-builds -g
-# # or
-# pnpm approve-builds nx -g
-# ------------------------------
-
-
-# [tasks.100-000-nx-init-this-project]
-# description = "Initialize NX in this EXISTING project"
-
 
 [tasks.100-000-002-nx-CREATE-pnpm-project-here]
 description = "Initialize NX in this EXISTING project"
 raw = true
-# run = "npx create-nx-workspace@latest your-workspace-name --package-manager=pnpm"
 run = "npx create-nx-workspace@latest {{vars.PROJECT_NAME}} --package-manager=pnpm"
 
+# ============================================================================
+# DOCKER INFRASTRUCTURE TESTING TASKS
+# ============================================================================
 
-[tasks.build-nx]
- # Example of a task that uses Nx after installation
-# command = "nx build my-app"
-run = "nx build my-app"
-depends = ["nx-install"] # Runs nx-install first
-description = "Builds the Nx 'my-app' project"
-# Run it: mise run nx-install or mise run build-nx. 
-# Method 3: Using the Nix plugin (Most Integrated)
-# Install the plugin: mise plugin install nix https://github.com/jbadeau/mise-nix.git.
+[tasks."docker:validate"]
+description = "Validate docker-compose.yml syntax"
+run = "docker compose -f {{vars.DOCKER_COMPOSE_FILE}} config > /dev/null && echo '✓ Docker Compose configuration is valid'"
 
+[tasks."docker:build"]
+description = "Build all Docker images"
+run = "docker compose -f {{vars.DOCKER_COMPOSE_FILE}} build"
 
+[tasks."docker:up"]
+description = "Start all Docker services"
+run = "docker compose -f {{vars.DOCKER_COMPOSE_FILE}} up -d"
 
-# https://mise.jdx.dev/tasks/monorepo.html
-# NOP # "npx:nx" = "latest"
+[tasks."docker:down"]
+description = "Stop all Docker services"
+run = "docker compose -f {{vars.DOCKER_COMPOSE_FILE}} down"
 
-# ### TASKS ### https://mise.jdx.dev/tasks/toml-tasks.html
-#[task.
-#mise tasks add nx-install --description "Installs/Updates Nx CLI" --raw -- npx npm install -g nx
+[tasks."docker:logs"]
+description = "View Docker logs"
+run = "docker compose -f {{vars.DOCKER_COMPOSE_FILE}} logs -f"
 
-# ---------------
+[tasks."docker:ps"]
+description = "List running Docker containers"
+run = "docker compose -f {{vars.DOCKER_COMPOSE_FILE}} ps"
 
-# # .mise.toml
-# [tasks]
-# nx-install = { command = "npx npm install -g nx", description = "Installs/Updates Nx CLI", raw = true }
+[tasks."docker:clean"]
+description = "Clean Docker resources (containers, volumes, networks)"
+run = "docker compose -f {{vars.DOCKER_COMPOSE_FILE}} down -v --remove-orphans"
 
-# # Or, if you prefer using pnpm:
-# # nx-install = { command = "pnpm install -g nx", description = "Installs/Updates Nx CLI", raw = true }
+[tasks."docker:restart"]
+description = "Restart Docker services"
+run = "mise run docker:down && mise run docker:up"
 
-# [tasks.build-nx] # Example of a task that uses Nx after installation
-# command = "nx build my-app"
-# depends = ["nx-install"] # Runs nx-install first
-# description = "Builds the Nx 'my-app' project"
+[tasks."test:docker:health"]
+description = "Test Docker services health"
+run = "bash scripts/test-docker-health.sh"
 
+[tasks."test:docker:connectivity"]
+description = "Test connectivity between Docker services"
+run = "bash scripts/test-docker-connectivity.sh"
 
+# ============================================================================
+# KUBERNETES TESTING TASKS
+# ============================================================================
 
-# ---------------
+[tasks."k8s:validate"]
+description = "Validate Kubernetes manifests"
+run = "bash scripts/validate-k8s.sh"
 
+[tasks."k8s:dry-run"]
+description = "Dry run K8s deployment"
+run = "kubectl apply -f k8s/ --dry-run=client"
+
+[tasks."k8s:deploy"]
+description = "Deploy to Kubernetes"
+run = "bash scripts/deploy.sh"
+
+# ============================================================================
+# APPLICATION TESTING TASKS
+# ============================================================================
+
+[tasks."test:nx:install"]
+description = "Test Nx installation"
+run = "cd {{vars.PROJECT_NAME}} && nx --version && echo '✓ Nx is installed'"
+
+[tasks."test:pnpm:install"]
+description = "Test pnpm dependencies"
+run = "cd {{vars.PROJECT_NAME}} && pnpm install && echo '✓ Dependencies installed'"
+
+[tasks."test:nx:build:all"]
+description = "Test build all Nx projects"
+run = "cd {{vars.PROJECT_NAME}} && nx run-many --target=build --all"
+
+[tasks."test:nx:lint:all"]
+description = "Test lint all Nx projects"
+run = "cd {{vars.PROJECT_NAME}} && nx run-many --target=lint --all"
+
+[tasks."test:nx:test:all"]
+description = "Test all Nx projects"
+run = "cd {{vars.PROJECT_NAME}} && nx run-many --target=test --all"
+
+[tasks."nx:graph"]
+description = "Show Nx project dependency graph"
+run = "cd {{vars.PROJECT_NAME}} && nx graph"
+
+[tasks."nx:affected:build"]
+description = "Build affected projects"
+run = "cd {{vars.PROJECT_NAME}} && nx affected --target=build"
+
+[tasks."nx:affected:test"]
+description = "Test affected projects"
+run = "cd {{vars.PROJECT_NAME}} && nx affected --target=test"
+
+[tasks."nx:affected:lint"]
+description = "Lint affected projects"
+run = "cd {{vars.PROJECT_NAME}} && nx affected --target=lint"
+
+# ============================================================================
+# DEVELOPMENT WORKFLOW TASKS
+# ============================================================================
+
+[tasks."dev"]
+description = "Start full development environment"
+run = "mise run docker:up && cd {{vars.PROJECT_NAME}} && echo '✓ Development environment started'"
+
+[tasks."dev:frontend"]
+description = "Start frontend development server"
+run = "cd {{vars.PROJECT_NAME}} && nx dev employee-portal"
+
+[tasks."dev:backend"]
+description = "Start backend development server"
+run = "cd {{vars.PROJECT_NAME}} && nx serve api-gateway"
+
+[tasks."dev:stop"]
+description = "Stop development environment"
+run = "mise run docker:down"
+
+# ============================================================================
+# COMPREHENSIVE TESTING TASKS
+# ============================================================================
+
+[tasks."test:all"]
+description = "Run ALL tests (Docker, K8s, Application)"
+run = """echo '🧪 Running comprehensive test suite...'
+mise run docker:validate
+mise run test:docker:health
+mise run k8s:validate
+mise run test:nx:install
+mise run test:pnpm:install
+echo '✅ All tests passed!'
+"""
+
+[tasks."test:quick"]
+description = "Quick validation tests"
+run = """echo '⚡ Running quick tests...'
+mise run docker:validate
+mise run k8s:validate
+mise run test:nx:install
+echo '✅ Quick tests passed!'
+"""
+
+[tasks."ci:test"]
+description = "CI/CD test pipeline"
+run = "bash scripts/ci-test.sh"
+
+# ============================================================================
+# UTILITY TASKS
+# ============================================================================
+
+[tasks."clean:all"]
+description = "Clean everything (Docker, node_modules, dist)"
+run = """mise run docker:clean
+cd {{vars.PROJECT_NAME}} && rm -rf node_modules dist .nx
+echo '✓ Cleaned all build artifacts'
+"""
+
+[tasks."setup"]
+description = "Setup development environment for new users"
+run = "bash scripts/setup-dev.sh"
+
+[tasks."help"]
+description = "Show available tasks"
+run = "mise tasks"
+
+[tasks."urls"]
+description = "Show all service URLs"
+run = """echo '============================================'
+echo 'NEXO CRM Service URLs'
+echo '============================================'
+echo 'Frontend:    http://localhost:3000'
+echo 'Keycloak:    http://localhost:8080'
+echo 'Prometheus:  http://localhost:9090'
+echo 'Grafana:     http://localhost:3001'
+echo 'PostgreSQL:  localhost:5432'
+echo 'Redis:       localhost:6379'
+echo '============================================'
+"""
+
+# ============================================================================
+# DATABASE TASKS
+# ============================================================================
+
+[tasks."db:shell"]
+description = "Connect to PostgreSQL shell"
+run = "docker compose -f {{vars.DOCKER_COMPOSE_FILE}} exec postgres psql -U nexo_user -d nexo_crm"
+
+[tasks."db:backup"]
+description = "Backup PostgreSQL database"
+run = "docker compose -f {{vars.DOCKER_COMPOSE_FILE}} exec postgres pg_dump -U nexo_user nexo_crm > backup_$(date +%Y%m%d_%H%M%S).sql && echo '✓ Database backed up'"
+
+[tasks."redis:shell"]
+description = "Connect to Redis CLI"
+run = "docker compose -f {{vars.DOCKER_COMPOSE_FILE}} exec redis redis-cli"
+
+[tasks."redis:flush"]
+description = "Flush Redis cache (WARNING: deletes all data)"
+run = "docker compose -f {{vars.DOCKER_COMPOSE_FILE}} exec redis redis-cli FLUSHALL && echo '⚠️  Redis cache flushed'"
+
+# ============================================================================
+# MONITORING TASKS
+# ============================================================================
+
+[tasks."logs:frontend"]
+description = "View frontend logs"
+run = "docker compose -f {{vars.DOCKER_COMPOSE_FILE}} logs -f frontend"
+
+[tasks."logs:postgres"]
+description = "View PostgreSQL logs"
+run = "docker compose -f {{vars.DOCKER_COMPOSE_FILE}} logs -f postgres"
+
+[tasks."logs:redis"]
+description = "View Redis logs"
+run = "docker compose -f {{vars.DOCKER_COMPOSE_FILE}} logs -f redis"
+
+[tasks."logs:keycloak"]
+description = "View Keycloak logs"
+run = "docker compose -f {{vars.DOCKER_COMPOSE_FILE}} logs -f keycloak"
+
+[tasks."logs:prometheus"]
+description = "View Prometheus logs"
+run = "docker compose -f {{vars.DOCKER_COMPOSE_FILE}} logs -f prometheus"
+
+[tasks."logs:grafana"]
+description = "View Grafana logs"
+run = "docker compose -f {{vars.DOCKER_COMPOSE_FILE}} logs -f grafana"
