@@ -121,7 +121,12 @@ if ! test_service_health prometheus 9090 localhost /-/healthy; then
 fi
 
 # Test Grafana
-if ! test_service_health grafana 3001 localhost /api/health; then
+if ! test_service_health grafana 3002 localhost /api/health; then
+    FAILED=$((FAILED + 1))
+fi
+
+# Test Backend API
+if ! test_service_health backend 3001 localhost /health; then
     FAILED=$((FAILED + 1))
 fi
 

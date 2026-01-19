@@ -54,6 +54,26 @@ if ! test_connectivity prometheus frontend 3000; then
     FAILED=$((FAILED + 1))
 fi
 
+# Test Frontend -> Backend API
+if ! test_connectivity frontend backend 3001; then
+    FAILED=$((FAILED + 1))
+fi
+
+# Test Backend -> PostgreSQL
+if ! test_connectivity backend postgres 5432; then
+    FAILED=$((FAILED + 1))
+fi
+
+# Test Backend -> Redis
+if ! test_connectivity backend redis 6379; then
+    FAILED=$((FAILED + 1))
+fi
+
+# Test Backend -> Keycloak
+if ! test_connectivity backend keycloak 8080; then
+    FAILED=$((FAILED + 1))
+fi
+
 # Summary
 echo ""
 echo "============================================"

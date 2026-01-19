@@ -48,13 +48,51 @@ services:
     restart: unless-stopped
     command: start-dev
 
+  backend:
+    build:
+      context: ../nexo-prj
+      dockerfile: apps/api-gateway/Dockerfile
+    container_name: nexo-backend
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: postgresql://nexo_user:nexo_password@postgres:5432/nexo
+      REDIS_URL: redis://redis:6379
+      KEYCLOAK_URL: http://keycloak:8080
+      JWT_SECRET: change-this-in-production
+    ports:
+      - "3001:3001"
+    depends_on:
+      - postgres
+      - redis
+      - keycloak
+    networks:
+      - nexo-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 40s
+    # For development, uncomment the following
+    # volumes:
+    #   - ../nexo-prj:/app
+    #   - /app/node_modules
+    # command: pnpm nx serve api-gateway
+
   frontend:
     build:
       context: ../nexo-prj/apps/nexo-prj
       dockerfile: Dockerfile
     container_name: nexo-frontend
+    environment:
+      NEXT_PUBLIC_API_URL: http://backend:3001/graphql
+      NEXT_PUBLIC_KEYCLOAK_URL: http://localhost:8080
     ports:
       - "3000:3000"
+    depends_on:
+      - backend
     networks:
       - nexo-network
     restart: unless-stopped
@@ -81,7 +119,7 @@ services:
     environment:
       GF_SECURITY_ADMIN_PASSWORD: admin
     ports:
-      - "3001:3000"
+      - "3002:3000"
     volumes:
       - grafana_data:/var/lib/grafana
     networks:

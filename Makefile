@@ -78,6 +78,12 @@ test-docker-health: ## Test Docker services health
 test-docker-connectivity: ## Test connectivity between Docker services
 	@bash scripts/test-docker-connectivity.sh
 
+test-backend-health: ## Test backend API health
+	@bash scripts/test-backend-health.sh
+
+test-backend-database: ## Test backend database connectivity
+	@bash scripts/test-backend-database.sh
+
 test-k8s-validate: ## Validate Kubernetes manifests
 	@bash scripts/validate-k8s.sh
 
@@ -221,6 +227,9 @@ logs-prometheus: ## View Prometheus logs
 logs-grafana: ## View Grafana logs
 	@docker compose -f $(COMPOSE_FILE) logs -f grafana
 
+logs-backend: ## View backend API logs
+	@docker compose -f $(COMPOSE_FILE) logs -f backend
+
 # ============================================================================
 # DATABASE COMMANDS
 # ============================================================================
@@ -256,9 +265,10 @@ urls: ## Show all service URLs
 	@echo 'NEXO CRM Service URLs'
 	@echo '============================================'
 	@echo 'Frontend:    http://localhost:3000'
+	@echo 'Backend API: http://localhost:3001'
 	@echo 'Keycloak:    http://localhost:8080'
 	@echo 'Prometheus:  http://localhost:9090'
-	@echo 'Grafana:     http://localhost:3001'
+	@echo 'Grafana:     http://localhost:3002'
 	@echo 'PostgreSQL:  localhost:5432'
 	@echo 'Redis:       localhost:6379'
 	@echo '============================================'

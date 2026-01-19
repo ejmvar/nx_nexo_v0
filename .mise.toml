@@ -82,6 +82,14 @@ run = "bash scripts/test-docker-health.sh"
 description = "Test connectivity between Docker services"
 run = "bash scripts/test-docker-connectivity.sh"
 
+[tasks."test:backend:health"]
+description = "Test backend API health and endpoints"
+run = "bash scripts/test-backend-health.sh"
+
+[tasks."test:backend:database"]
+description = "Test backend database connectivity"
+run = "bash scripts/test-backend-database.sh"
+
 # ============================================================================
 # KUBERNETES TESTING TASKS
 # ============================================================================
@@ -211,9 +219,10 @@ run = """echo '============================================'
 echo 'NEXO CRM Service URLs'
 echo '============================================'
 echo 'Frontend:    http://localhost:3000'
+echo 'Backend API: http://localhost:3001'
 echo 'Keycloak:    http://localhost:8080'
 echo 'Prometheus:  http://localhost:9090'
-echo 'Grafana:     http://localhost:3001'
+echo 'Grafana:     http://localhost:3002'
 echo 'PostgreSQL:  localhost:5432'
 echo 'Redis:       localhost:6379'
 echo '============================================'
@@ -266,3 +275,7 @@ run = "docker compose -f {{vars.DOCKER_COMPOSE_FILE}} logs -f prometheus"
 [tasks."logs:grafana"]
 description = "View Grafana logs"
 run = "docker compose -f {{vars.DOCKER_COMPOSE_FILE}} logs -f grafana"
+
+[tasks."logs:backend"]
+description = "View backend API logs"
+run = "docker compose -f {{vars.DOCKER_COMPOSE_FILE}} logs -f backend"

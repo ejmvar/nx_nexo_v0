@@ -38,6 +38,15 @@ run_test "Docker Compose Validation" \
 run_test "Kubernetes Manifests Validation" \
     "bash scripts/validate-k8s.sh"
 
+# 2a. Test backend health (if running)
+if docker compose -f docker/docker-compose.yml ps backend 2>/dev/null | grep -q "Up"; then
+    run_test "Backend API Health Check" \
+        "bash scripts/test-backend-health.sh"
+    
+    run_test "Backend Database Connectivity" \
+        "bash scripts/test-backend-database.sh"
+fi
+
 # 3. Check if Nx is installed (if nexo-prj exists)
 if [ -d "nexo-prj" ]; then
     run_test "Nx Installation Check" \
