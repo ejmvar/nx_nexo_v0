@@ -38,6 +38,9 @@
     },
     {
       "path": "./apps/nexo-employees"
+    },
+    {
+      "path": "./apps/nexo-prj"
     }
   ]
 }

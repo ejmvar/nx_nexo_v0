@@ -540,7 +540,7 @@ describe('PDF Components', () => {
           url="test.pdf"
           numPages={3}
           currentPage={1}
-          onPageSelect={jest.fn()}
+          onPageSelect={vi.fn()}
         />
       );
 
