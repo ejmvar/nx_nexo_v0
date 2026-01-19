@@ -18,4 +18,5 @@ packages:
   - 'ventas-service-e2e'
   - 'produccion-service'
   - 'produccion-service-e2e'
+  - 'e2e'
 autoInstallPeers: true

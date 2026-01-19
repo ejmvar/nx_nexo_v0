@@ -1,67 +1,19 @@
 {
   "extends": "./tsconfig.base.json",
-  "compileOnSave": false,
   "files": [],
+  "include": [],
   "references": [
     {
-      "path": "./apps/nexo-prj-e2e"
+      "path": "./tsconfig.app.json"
     },
     {
-      "path": "./apps/nexo-prj"
+      "path": "./tsconfig.spec.json"
     },
     {
-      "path": "./apps-e2e"
+      "path": "./e2e"
     },
     {
-      "path": "./apps"
-    },
-    {
-      "path": "./back_auth-e2e"
-    },
-    {
-      "path": "./back_auth"
-    },
-    {
-      "path": "./auth-service-e2e"
-    },
-    {
-      "path": "./auth-service"
-    },
-    {
-      "path": "./api-gateway-e2e"
-    },
-    {
-      "path": "./api-gateway"
-    },
-    {
-      "path": "./core-crm-service-e2e"
-    },
-    {
-      "path": "./core-crm-service"
-    },
-    {
-      "path": "./stock-service-e2e"
-    },
-    {
-      "path": "./stock-service"
-    },
-    {
-      "path": "./compras-service-e2e"
-    },
-    {
-      "path": "./compras-service"
-    },
-    {
-      "path": "./ventas-service-e2e"
-    },
-    {
-      "path": "./ventas-service"
-    },
-    {
-      "path": "./produccion-service-e2e"
-    },
-    {
-      "path": "./produccion-service"
+      "path": "./."
     }
   ]
 }
