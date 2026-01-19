@@ -1,0 +1,26 @@
+{
+  "name": "@nexo-prj/ventas-service-e2e",
+  "version": "0.0.1",
+  "private": true,
+  "nx": {
+    "implicitDependencies": [
+      "@nexo-prj/ventas-service"
+    ],
+    "targets": {
+      "e2e": {
+        "executor": "@nx/jest:jest",
+        "outputs": [
+          "{projectRoot}/test-output/jest/coverage"
+        ],
+        "options": {
+          "jestConfig": "ventas-service-e2e/jest.config.cts",
+          "passWithNoTests": true
+        },
+        "dependsOn": [
+          "@nexo-prj/ventas-service:build",
+          "@nexo-prj/ventas-service:serve"
+        ]
+      }
+    }
+  }
+}

@@ -63,7 +63,13 @@
         "apps-e2e/**/*",
         "back_auth-e2e/**/*",
         "back_auth-e2e/**/*",
-        "auth-service-e2e/**/*"
+        "auth-service-e2e/**/*",
+        "api-gateway-e2e/**/*",
+        "core-crm-service-e2e/**/*",
+        "stock-service-e2e/**/*",
+        "compras-service-e2e/**/*",
+        "ventas-service-e2e/**/*",
+        "produccion-service-e2e/**/*"
       ]
     },
     {

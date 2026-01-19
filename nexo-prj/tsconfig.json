@@ -26,6 +26,42 @@
     },
     {
       "path": "./auth-service"
+    },
+    {
+      "path": "./api-gateway-e2e"
+    },
+    {
+      "path": "./api-gateway"
+    },
+    {
+      "path": "./core-crm-service-e2e"
+    },
+    {
+      "path": "./core-crm-service"
+    },
+    {
+      "path": "./stock-service-e2e"
+    },
+    {
+      "path": "./stock-service"
+    },
+    {
+      "path": "./compras-service-e2e"
+    },
+    {
+      "path": "./compras-service"
+    },
+    {
+      "path": "./ventas-service-e2e"
+    },
+    {
+      "path": "./ventas-service"
+    },
+    {
+      "path": "./produccion-service-e2e"
+    },
+    {
+      "path": "./produccion-service"
     }
   ]
 }
