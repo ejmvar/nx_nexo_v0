@@ -18,6 +18,12 @@ import {
   KPICard,
   ChartGrid,
 } from './charts';
+import {
+  PDFViewer,
+  PDFThumbnail,
+  PDFThumbnails,
+  PDFViewerWithThumbnails,
+} from './pdf-viewer';
 
 describe('Form Components', () => {
   describe('FormProvider', () => {
@@ -449,6 +455,117 @@ describe('Chart Components', () => {
       expect(screen.getByText('Chart 1')).toBeInTheDocument();
       expect(screen.getByText('Chart 2')).toBeInTheDocument();
       expect(screen.getByText('Chart 3')).toBeInTheDocument();
+    });
+  });
+});
+
+describe('PDF Components', () => {
+  // Mock PDF.js
+  beforeAll(() => {
+    // Mock PDF.js library
+    (window as any).pdfjsLib = {
+      getDocument: vi.fn(() => ({
+        promise: Promise.resolve({
+          numPages: 3,
+          getPage: vi.fn((pageNum) => ({
+            getViewport: vi.fn(() => ({ width: 600, height: 800 })),
+            getTextContent: vi.fn(() => ({
+              items: [{ str: 'Sample text' }]
+            })),
+            render: vi.fn(() => ({ promise: Promise.resolve() }))
+          }))
+        })
+      })),
+      GlobalWorkerOptions: {
+        workerSrc: ''
+      }
+    };
+  });
+
+  describe('PDFViewer', () => {
+    it('should render loading state initially', () => {
+      render(<PDFViewer url="test.pdf" />);
+
+      expect(screen.getByText('Loading PDF...')).toBeInTheDocument();
+    });
+
+    it('should render with custom title', () => {
+      render(<PDFViewer url="test.pdf" showToolbar={false} />);
+
+      // Should not show toolbar when disabled
+      expect(screen.queryByRole('toolbar')).not.toBeInTheDocument();
+    });
+
+    it('should handle error state', async () => {
+      // Mock a failed PDF load
+      (window as any).pdfjsLib.getDocument.mockImplementationOnce(() => ({
+        promise: Promise.reject(new Error('Failed to load PDF'))
+      }));
+
+      const onError = vi.fn();
+      render(<PDFViewer url="invalid.pdf" onError={onError} />);
+
+      await waitFor(() => {
+        expect(onError).toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('PDFThumbnail', () => {
+    it('should render loading state', () => {
+      render(<PDFThumbnail url="test.pdf" pageNumber={1} />);
+
+      expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    });
+
+    it('should render page number', () => {
+      render(<PDFThumbnail url="test.pdf" pageNumber={2} />);
+
+      expect(screen.getByText('Page 2')).toBeInTheDocument();
+    });
+
+    it('should handle click events', () => {
+      const onClick = vi.fn();
+      render(<PDFThumbnail url="test.pdf" pageNumber={1} onClick={onClick} />);
+
+      fireEvent.click(screen.getByText('Page 1').closest('div')!);
+      expect(onClick).toHaveBeenCalledWith(1);
+    });
+  });
+
+  describe('PDFThumbnails', () => {
+    it('should render thumbnails for all pages', () => {
+      render(
+        <PDFThumbnails
+          url="test.pdf"
+          numPages={3}
+          currentPage={1}
+          onPageSelect={jest.fn()}
+        />
+      );
+
+      expect(screen.getByText('Pages')).toBeInTheDocument();
+      expect(screen.getAllByText(/Page \d/)).toHaveLength(3);
+    });
+  });
+
+  describe('PDFViewerWithThumbnails', () => {
+    it('should render viewer with thumbnails when pages are loaded', async () => {
+      render(<PDFViewerWithThumbnails url="test.pdf" />);
+
+      // Initially should show loading
+      expect(screen.getByText('Loading PDF...')).toBeInTheDocument();
+
+      // After PDF loads, thumbnails should appear
+      await waitFor(() => {
+        expect(screen.getByText('Pages')).toBeInTheDocument();
+      });
+    });
+
+    it('should hide thumbnails when disabled', () => {
+      render(<PDFViewerWithThumbnails url="test.pdf" showThumbnails={false} />);
+
+      expect(screen.queryByText('Pages')).not.toBeInTheDocument();
     });
   });
 });
