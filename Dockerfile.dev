@@ -1,0 +1,35 @@
+# NEXO Frontend - Development Docker Build
+# =========================================
+# Development environment with hot reload
+
+FROM node:20-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Install pnpm
+RUN npm install -g pnpm nx
+
+# Set environment to development
+ENV NODE_ENV=development
+
+# Copy package files
+COPY nexo-prj/package.json nexo-prj/pnpm-lock.yaml* ./
+COPY nexo-prj/pnpm-workspace.yaml ./
+
+# Install dependencies
+RUN pnpm install
+
+# Copy workspace configuration
+COPY nexo-prj/nx.json ./
+COPY nexo-prj/tsconfig.base.json ./
+COPY nexo-prj/tsconfig.json ./
+
+# Copy source code
+COPY nexo-prj/ ./
+
+# Expose port
+EXPOSE 4200
+
+# Start development server
+CMD ["pnpm", "exec", "nx", "serve", "nexo-prj", "--host", "0.0.0.0"]
