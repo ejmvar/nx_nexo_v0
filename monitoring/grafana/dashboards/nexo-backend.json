@@ -1,0 +1,278 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "nexo-backend",
+    "title": "NEXO CRM - Backend API Metrics",
+    "tags": ["nexo", "backend", "api"],
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "version": 1,
+    "refresh": "10s",
+    "panels": [
+      {
+        "id": 1,
+        "gridPos": {
+          "h": 8,
+          "w": 24,
+          "x": 0,
+          "y": 0
+        },
+        "type": "graph",
+        "title": "GraphQL Query Performance",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, rate(graphql_query_duration_seconds_bucket[5m]))",
+            "legendFormat": "p50 {{operation}}",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(graphql_query_duration_seconds_bucket[5m]))",
+            "legendFormat": "p95 {{operation}}",
+            "refId": "B"
+          },
+          {
+            "expr": "histogram_quantile(0.99, rate(graphql_query_duration_seconds_bucket[5m]))",
+            "legendFormat": "p99 {{operation}}",
+            "refId": "C"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "s",
+            "label": "Duration"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 8
+        },
+        "type": "graph",
+        "title": "Database Query Performance",
+        "targets": [
+          {
+            "expr": "rate(database_query_duration_seconds_sum[5m]) / rate(database_query_duration_seconds_count[5m])",
+            "legendFormat": "Avg Query Time",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(database_query_duration_seconds_bucket[5m]))",
+            "legendFormat": "p95 Query Time",
+            "refId": "B"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "s",
+            "label": "Duration"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 8
+        },
+        "type": "graph",
+        "title": "Active Database Queries",
+        "targets": [
+          {
+            "expr": "database_queries_active",
+            "legendFormat": "Active Queries",
+            "refId": "A"
+          },
+          {
+            "expr": "database_queries_waiting",
+            "legendFormat": "Waiting Queries",
+            "refId": "B"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "short",
+            "label": "Queries"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 16
+        },
+        "type": "graph",
+        "title": "Cache Hit Rate",
+        "targets": [
+          {
+            "expr": "rate(cache_hits_total[5m]) / (rate(cache_hits_total[5m]) + rate(cache_misses_total[5m])) * 100",
+            "legendFormat": "Hit Rate %",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "percent",
+            "label": "Hit Rate",
+            "max": 100,
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 16
+        },
+        "type": "graph",
+        "title": "Event Loop Lag",
+        "targets": [
+          {
+            "expr": "nodejs_eventloop_lag_seconds",
+            "legendFormat": "Event Loop Lag",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "s",
+            "label": "Lag"
+          }
+        ],
+        "alert": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [0.1],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": ["A", "5m", "now"]
+              },
+              "reducer": {
+                "params": [],
+                "type": "avg"
+              },
+              "type": "query"
+            }
+          ],
+          "name": "High Event Loop Lag",
+          "message": "Backend event loop lag is above 100ms"
+        }
+      },
+      {
+        "id": 6,
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 24
+        },
+        "type": "graph",
+        "title": "Heap Memory Usage",
+        "targets": [
+          {
+            "expr": "nodejs_heap_size_used_bytes / 1024 / 1024",
+            "legendFormat": "Used Heap",
+            "refId": "A"
+          },
+          {
+            "expr": "nodejs_heap_size_total_bytes / 1024 / 1024",
+            "legendFormat": "Total Heap",
+            "refId": "B"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "decmbytes",
+            "label": "Memory"
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 24
+        },
+        "type": "graph",
+        "title": "Garbage Collection Duration",
+        "targets": [
+          {
+            "expr": "rate(nodejs_gc_duration_seconds_sum[5m])",
+            "legendFormat": "GC Duration",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "s",
+            "label": "Duration"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "gridPos": {
+          "h": 8,
+          "w": 24,
+          "x": 0,
+          "y": 32
+        },
+        "type": "graph",
+        "title": "Authentication & Authorization",
+        "targets": [
+          {
+            "expr": "rate(auth_requests_total{status=\"success\"}[5m])",
+            "legendFormat": "Successful Auth",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(auth_requests_total{status=\"failed\"}[5m])",
+            "legendFormat": "Failed Auth",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(jwt_validation_total{status=\"valid\"}[5m])",
+            "legendFormat": "Valid Tokens",
+            "refId": "C"
+          },
+          {
+            "expr": "rate(jwt_validation_total{status=\"invalid\"}[5m])",
+            "legendFormat": "Invalid Tokens",
+            "refId": "D"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "reqps",
+            "label": "Requests/sec"
+          }
+        ]
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "timepicker": {
+      "refresh_intervals": ["5s", "10s", "30s", "1m", "5m"]
+    }
+  }
+}

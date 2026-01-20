@@ -1,0 +1,135 @@
+# Staging environment values
+# Medium resources for testing and QA
+
+global:
+  environment: staging
+  domain: staging.nexo.com
+  imagePullPolicy: Always
+
+postgresql:
+  replicaCount: 2
+  persistence:
+    enabled: true
+    size: 20Gi
+    storageClass: "ssd"
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
+
+redis:
+  replicaCount: 2
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClass: "ssd"
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "200m"
+    limits:
+      memory: "512Mi"
+      cpu: "400m"
+
+keycloak:
+  replicaCount: 2
+  resources:
+    requests:
+      memory: "1Gi"
+      cpu: "500m"
+    limits:
+      memory: "2Gi"
+      cpu: "1000m"
+
+backend:
+  replicaCount: 3
+  image:
+    tag: "staging"
+  env:
+    nodeEnv: staging
+    logLevel: info
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 8
+    targetCPUUtilizationPercentage: 70
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
+
+frontend:
+  replicaCount: 2
+  image:
+    tag: "staging"
+  service:
+    type: ClusterIP
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 70
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
+
+prometheus:
+  replicaCount: 1
+  persistence:
+    enabled: true
+    size: 20Gi
+    storageClass: "ssd"
+  resources:
+    requests:
+      memory: "1Gi"
+      cpu: "500m"
+    limits:
+      memory: "2Gi"
+      cpu: "1000m"
+
+grafana:
+  replicaCount: 1
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClass: "ssd"
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+    limits:
+      memory: "1Gi"
+      cpu: "500m"
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-staging
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+  hosts:
+    - host: staging.nexo.com
+      paths:
+        - path: /
+          pathType: Prefix
+          service: frontend
+    - host: api-staging.nexo.com
+      paths:
+        - path: /
+          pathType: Prefix
+          service: backend
+  tls:
+    - secretName: nexo-staging-tls
+      hosts:
+        - staging.nexo.com
+        - api-staging.nexo.com

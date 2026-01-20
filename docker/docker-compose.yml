@@ -1,0 +1,212 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: nexo-postgres
+    environment:
+      POSTGRES_DB: nexo
+      POSTGRES_USER: nexo_user
+      POSTGRES_PASSWORD: nexo_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - nexo-network
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: nexo-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - nexo-network
+    restart: unless-stopped
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: nexo-keycloak
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/nexo
+      KC_DB_USERNAME: nexo_user
+      KC_DB_PASSWORD: nexo_password
+      KC_HOSTNAME_STRICT: false
+      KC_HTTP_ENABLED: true
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    networks:
+      - nexo-network
+    restart: unless-stopped
+    command: start-dev
+
+  backend:
+    build:
+      context: ../nexo-prj
+      dockerfile: apps/api-gateway/Dockerfile
+    container_name: nexo-backend
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: postgresql://nexo_user:nexo_password@postgres:5432/nexo
+      REDIS_URL: redis://redis:6379
+      KEYCLOAK_URL: http://keycloak:8080
+      JWT_SECRET: change-this-in-production
+    ports:
+      - "3001:3001"
+    depends_on:
+      - postgres
+      - redis
+      - keycloak
+    networks:
+      - nexo-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 40s
+    # For development, uncomment the following
+    # volumes:
+    #   - ../nexo-prj:/app
+    #   - /app/node_modules
+    # command: pnpm nx serve api-gateway
+
+  frontend:
+    build:
+      context: ../nexo-prj/apps/nexo-prj
+      dockerfile: Dockerfile
+    container_name: nexo-frontend
+    environment:
+      NEXT_PUBLIC_API_URL: http://backend:3001/graphql
+      NEXT_PUBLIC_KEYCLOAK_URL: http://localhost:8080
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - nexo-network
+    restart: unless-stopped
+    # For development, uncomment the following and comment build
+    # volumes:
+    #   - ../nexo-prj/apps/nexo-prj:/app
+    #   - /app/node_modules
+    # command: npm run dev
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: nexo-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ../monitoring/prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    networks:
+      - nexo-network
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: nexo-grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_INSTALL_PLUGINS: "grafana-clock-panel,grafana-simple-json-datasource"
+    ports:
+      - "3002:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ../monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+    networks:
+      - nexo-network
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: nexo-otel-collector
+    command: ["--config=/etc/otel/config.yaml"]
+    ports:
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+      - "8889:8889"   # Prometheus exporter
+      - "13133:13133" # Health check
+      - "55679:55679" # zpages
+    volumes:
+      - ../monitoring/otel/otel-collector-config.yaml:/etc/otel/config.yaml:ro
+      - otel_logs:/var/log/otel
+    networks:
+      - nexo-network
+    restart: unless-stopped
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: nexo-jaeger
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    ports:
+      - "16686:16686" # Jaeger UI
+      - "14250:14250" # gRPC collector
+    networks:
+      - nexo-network
+    restart: unless-stopped
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: nexo-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@nexo.local
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - nexo-network
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  redisinsight:
+    image: redis/redisinsight:latest
+    container_name: nexo-redisinsight
+    ports:
+      - "5540:5540"
+    volumes:
+      - redisinsight_data:/data
+    networks:
+      - nexo-network
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+  grafana_data:
+  prometheus_data:
+  pgadmin_data:
+  redisinsight_data:
+  otel_logs:
+
+networks:
+  nexo-network:
+    driver: bridge
