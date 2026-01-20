@@ -172,6 +172,52 @@ nx-affected-lint: ## Lint affected projects
 	@cd $(PROJECT_NAME) && nx affected --target=lint
 
 # ============================================================================
+# HELM COMMANDS
+# ============================================================================
+
+helm-lint: ## Lint Helm chart
+	@helm lint helm/nexo-crm
+
+helm-template: ## Render Helm templates (default)
+	@helm template nexo-crm helm/nexo-crm
+
+helm-template-dev: ## Render Helm templates (development)
+	@helm template nexo-crm helm/nexo-crm -f helm/nexo-crm/values-dev.yaml
+
+helm-template-staging: ## Render Helm templates (staging)
+	@helm template nexo-crm helm/nexo-crm -f helm/nexo-crm/values-staging.yaml
+
+helm-template-prod: ## Render Helm templates (production)
+	@helm template nexo-crm helm/nexo-crm -f helm/nexo-crm/values-prod.yaml
+
+helm-install-dev: ## Install Helm chart (development)
+	@helm install nexo-crm helm/nexo-crm -f helm/nexo-crm/values-dev.yaml
+
+helm-install-staging: ## Install Helm chart (staging)
+	@helm install nexo-crm helm/nexo-crm -f helm/nexo-crm/values-staging.yaml
+
+helm-install-prod: ## Install Helm chart (production)
+	@helm install nexo-crm helm/nexo-crm -f helm/nexo-crm/values-prod.yaml
+
+helm-upgrade-dev: ## Upgrade Helm release (development)
+	@helm upgrade nexo-crm helm/nexo-crm -f helm/nexo-crm/values-dev.yaml
+
+helm-upgrade-staging: ## Upgrade Helm release (staging)
+	@helm upgrade nexo-crm helm/nexo-crm -f helm/nexo-crm/values-staging.yaml
+
+helm-upgrade-prod: ## Upgrade Helm release (production)
+	@helm upgrade nexo-crm helm/nexo-crm -f helm/nexo-crm/values-prod.yaml
+
+helm-uninstall: ## Uninstall Helm release
+	@helm uninstall nexo-crm
+
+helm-list: ## List Helm releases
+	@helm list
+
+helm-status: ## Show Helm release status
+	@helm status nexo-crm
+
+# ============================================================================
 # UTILITY COMMANDS
 # ============================================================================
 

@@ -107,6 +107,66 @@ description = "Deploy to Kubernetes"
 run = "bash scripts/deploy.sh"
 
 # ============================================================================
+# HELM TASKS
+# ============================================================================
+
+[tasks."helm:lint"]
+description = "Lint Helm chart"
+run = "helm lint helm/nexo-crm"
+
+[tasks."helm:template"]
+description = "Render Helm templates"
+run = "helm template nexo-crm helm/nexo-crm"
+
+[tasks."helm:template:dev"]
+description = "Render Helm templates for development"
+run = "helm template nexo-crm helm/nexo-crm -f helm/nexo-crm/values-dev.yaml"
+
+[tasks."helm:template:staging"]
+description = "Render Helm templates for staging"
+run = "helm template nexo-crm helm/nexo-crm -f helm/nexo-crm/values-staging.yaml"
+
+[tasks."helm:template:prod"]
+description = "Render Helm templates for production"
+run = "helm template nexo-crm helm/nexo-crm -f helm/nexo-crm/values-prod.yaml"
+
+[tasks."helm:install:dev"]
+description = "Install Helm chart (development)"
+run = "helm install nexo-crm helm/nexo-crm -f helm/nexo-crm/values-dev.yaml"
+
+[tasks."helm:install:staging"]
+description = "Install Helm chart (staging)"
+run = "helm install nexo-crm helm/nexo-crm -f helm/nexo-crm/values-staging.yaml"
+
+[tasks."helm:install:prod"]
+description = "Install Helm chart (production)"
+run = "helm install nexo-crm helm/nexo-crm -f helm/nexo-crm/values-prod.yaml"
+
+[tasks."helm:upgrade:dev"]
+description = "Upgrade Helm release (development)"
+run = "helm upgrade nexo-crm helm/nexo-crm -f helm/nexo-crm/values-dev.yaml"
+
+[tasks."helm:upgrade:staging"]
+description = "Upgrade Helm release (staging)"
+run = "helm upgrade nexo-crm helm/nexo-crm -f helm/nexo-crm/values-staging.yaml"
+
+[tasks."helm:upgrade:prod"]
+description = "Upgrade Helm release (production)"
+run = "helm upgrade nexo-crm helm/nexo-crm -f helm/nexo-crm/values-prod.yaml"
+
+[tasks."helm:uninstall"]
+description = "Uninstall Helm release"
+run = "helm uninstall nexo-crm"
+
+[tasks."helm:list"]
+description = "List Helm releases"
+run = "helm list"
+
+[tasks."helm:status"]
+description = "Show Helm release status"
+run = "helm status nexo-crm"
+
+# ============================================================================
 # APPLICATION TESTING TASKS
 # ============================================================================
 
