@@ -94,6 +94,8 @@ make dev-stop              # Alternative
 | Keycloak | http://localhost:8080 | admin/admin |
 | Prometheus | http://localhost:9090 | - |
 | Grafana | http://localhost:3002 | admin/admin |
+| **pgAdmin** | **http://localhost:5050** | **admin@nexo.local/admin** |
+| **RedisInsight** | **http://localhost:5540** | - |
 | PostgreSQL | localhost:5432 | nexo_user/nexo_password |
 | Redis | localhost:6379 | - |
 

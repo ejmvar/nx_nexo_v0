@@ -223,6 +223,12 @@ echo 'Backend API: http://localhost:3001'
 echo 'Keycloak:    http://localhost:8080'
 echo 'Prometheus:  http://localhost:9090'
 echo 'Grafana:     http://localhost:3002'
+echo ''
+echo 'Database Admin Tools:'
+echo 'pgAdmin:     http://localhost:5050'
+echo 'RedisInsight: http://localhost:5540'
+echo ''
+echo 'Database Connections:'
 echo 'PostgreSQL:  localhost:5432'
 echo 'Redis:       localhost:6379'
 echo '============================================'
@@ -279,3 +285,11 @@ run = "docker compose -f {{vars.DOCKER_COMPOSE_FILE}} logs -f grafana"
 [tasks."logs:backend"]
 description = "View backend API logs"
 run = "docker compose -f {{vars.DOCKER_COMPOSE_FILE}} logs -f backend"
+
+[tasks."logs:pgadmin"]
+description = "View pgAdmin logs"
+run = "docker compose -f {{vars.DOCKER_COMPOSE_FILE}} logs -f pgadmin"
+
+[tasks."logs:redisinsight"]
+description = "View RedisInsight logs"
+run = "docker compose -f {{vars.DOCKER_COMPOSE_FILE}} logs -f redisinsight"

@@ -193,12 +193,21 @@ bash scripts/ci-test.sh
 
 After starting with `mise run dev` or `make dev`:
 
+### Main Services
 - **Frontend**: http://localhost:3000
 - **Backend API**: http://localhost:3001 (GraphQL: http://localhost:3001/graphql)
 - **Keycloak**: http://localhost:8080
+
+### Monitoring
 - **Prometheus**: http://localhost:9090
 - **Grafana**: http://localhost:3002
-- **PostgreSQL**: localhost:5432
+
+### Database Admin Tools
+- **pgAdmin**: http://localhost:5050 (admin@nexo.local / admin)
+- **RedisInsight**: http://localhost:5540
+
+### Database Connections
+- **PostgreSQL**: localhost:5432 (nexo_user / nexo_password)
 - **Redis**: localhost:6379
 
 ## 📚 Documentation

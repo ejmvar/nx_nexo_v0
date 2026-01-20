@@ -130,6 +130,16 @@ if ! test_service_health backend 3001 localhost /health; then
     FAILED=$((FAILED + 1))
 fi
 
+# Test pgAdmin
+if ! test_service_health pgadmin 5050 localhost /misc/ping; then
+    FAILED=$((FAILED + 1))
+fi
+
+# Test RedisInsight
+if ! test_service_health redisinsight 5540; then
+    FAILED=$((FAILED + 1))
+fi
+
 # Summary
 echo ""
 echo "============================================"

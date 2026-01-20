@@ -230,6 +230,12 @@ logs-grafana: ## View Grafana logs
 logs-backend: ## View backend API logs
 	@docker compose -f $(COMPOSE_FILE) logs -f backend
 
+logs-pgadmin: ## View pgAdmin logs
+	@docker compose -f $(COMPOSE_FILE) logs -f pgadmin
+
+logs-redisinsight: ## View RedisInsight logs
+	@docker compose -f $(COMPOSE_FILE) logs -f redisinsight
+
 # ============================================================================
 # DATABASE COMMANDS
 # ============================================================================
@@ -269,6 +275,12 @@ urls: ## Show all service URLs
 	@echo 'Keycloak:    http://localhost:8080'
 	@echo 'Prometheus:  http://localhost:9090'
 	@echo 'Grafana:     http://localhost:3002'
+	@echo ''
+	@echo 'Database Admin Tools:'
+	@echo 'pgAdmin:     http://localhost:5050'
+	@echo 'RedisInsight: http://localhost:5540'
+	@echo ''
+	@echo 'Database Connections:'
 	@echo 'PostgreSQL:  localhost:5432'
 	@echo 'Redis:       localhost:6379'
 	@echo '============================================'
