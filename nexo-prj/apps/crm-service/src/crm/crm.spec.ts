@@ -264,5 +264,4 @@ describe('CrmService', () => {
       await expect(service.deleteLead('999')).rejects.toThrow('Lead not found');
     });
   });
-});</content>
-<parameter name="filePath">/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/apps/crm-service/src/crm/crm.spec.ts
+});

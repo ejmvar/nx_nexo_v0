@@ -136,5 +136,4 @@ describe('ProxyService', () => {
       );
     });
   });
-});</content>
-<parameter name="filePath">/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/apps/api-gateway/src/proxy/proxy.spec.ts
+});
