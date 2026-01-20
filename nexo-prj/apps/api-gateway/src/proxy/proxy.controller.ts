@@ -1,5 +1,5 @@
 import { Controller, All, Body, Headers, Req } from '@nestjs/common';
-import { ProxyService } from './proxy.service.js';
+import { ProxyService } from './proxy.service';
 
 @Controller('api/v1')
 export class ProxyController {
