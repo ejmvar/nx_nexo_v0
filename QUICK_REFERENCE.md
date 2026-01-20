@@ -89,9 +89,11 @@ make dev-stop              # Alternative
 | Service | URL | Default Credentials |
 |---------|-----|---------------------|
 | Frontend | http://localhost:3000 | - |
+| Backend API | http://localhost:3001 | - |
+| GraphQL Playground | http://localhost:3001/graphql | - |
 | Keycloak | http://localhost:8080 | admin/admin |
 | Prometheus | http://localhost:9090 | - |
-| Grafana | http://localhost:3001 | admin/admin |
+| Grafana | http://localhost:3002 | admin/admin |
 | PostgreSQL | localhost:5432 | nexo_user/nexo_password |
 | Redis | localhost:6379 | - |
 

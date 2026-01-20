@@ -194,9 +194,10 @@ bash scripts/ci-test.sh
 After starting with `mise run dev` or `make dev`:
 
 - **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:3001 (GraphQL: http://localhost:3001/graphql)
 - **Keycloak**: http://localhost:8080
 - **Prometheus**: http://localhost:9090
-- **Grafana**: http://localhost:3001
+- **Grafana**: http://localhost:3002
 - **PostgreSQL**: localhost:5432
 - **Redis**: localhost:6379
 
