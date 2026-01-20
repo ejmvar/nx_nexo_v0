@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Put, Delete, Body, Param, Query } from '@nestjs/common';
-import { CrmService } from './crm.service.js';
+import { CrmService } from './crm.service';
 
 @Controller('crm')
 export class CrmController {

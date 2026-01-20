@@ -10,7 +10,7 @@
     "allowSyntheticDefaultImports": true,
     "target": "ES2021",
     "sourceMap": true,
-    "outDir": "../../../../dist/apps/crm-service/src",
+    "outDir": "../../../dist/apps/crm-service/src",
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": false,
@@ -21,5 +21,6 @@
     "lib": ["es2021"],
     "noEmitOnError": false
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "exclude": ["src/**/*.spec.ts", "src/**/*.test.ts"]
 }

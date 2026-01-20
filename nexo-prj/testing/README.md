@@ -11,7 +11,7 @@ This directory contains manual testing examples for the NEXO ERP backend microse
 ## Current Services Status:
 - ✅ API Gateway: http://localhost:3001 (implemented and tested)
 - ✅ Auth Service: http://localhost:3000 (implemented with JWT authentication)
-- ✅ CRM Service: http://localhost:3002 (implemented with mock data)
+- ✅ CRM Service: http://localhost:3002 (implemented with mock data and 28 tests passing)
 - ⏳ Stock Service: http://localhost:3003 (planned)
 - ⏳ Sales Service: http://localhost:3004 (planned)
 - ⏳ Purchases Service: http://localhost:3005 (planned)
@@ -21,9 +21,9 @@ This directory contains manual testing examples for the NEXO ERP backend microse
 ## Implemented Features:
 - JWT Authentication with login/profile endpoints
 - API Gateway proxy routing for all services
-- CRM module with customers and leads management
+- CRM module with customers and leads management (full CRUD)
 - Comprehensive testing infrastructure
-- Unit tests for all services (Auth, CRM, API Gateway)
+- Unit tests for all services (Auth: 8 tests, CRM: 28 tests, API Gateway: 7 tests)
 
 ## Prerequisites:
 1. Install dependencies: `pnpm install`
@@ -49,12 +49,14 @@ npx nx test api-gateway
 ```
 
 ## CRM Service Endpoints:
-- `GET /api/v1/crm/customers` - List customers
+- `GET /api/v1/crm/customers` - List customers with pagination and search
 - `GET /api/v1/crm/customers/:id` - Get customer by ID
 - `POST /api/v1/crm/customers` - Create customer
 - `PUT /api/v1/crm/customers/:id` - Update customer
 - `DELETE /api/v1/crm/customers/:id` - Delete customer
-- `GET /api/v1/crm/leads` - List leads
+- `GET /api/v1/crm/customers/:customerId/contacts` - Get customer contacts
+- `POST /api/v1/crm/customers/:customerId/contacts` - Create customer contact
+- `GET /api/v1/crm/leads` - List leads with pagination and filtering
 - `GET /api/v1/crm/leads/:id` - Get lead by ID
 - `POST /api/v1/crm/leads` - Create lead
 - `PUT /api/v1/crm/leads/:id` - Update lead
@@ -64,6 +66,6 @@ npx nx test api-gateway
 - ✅ Manual testing scripts (curl, REST Client)
 - ✅ Health check automation (Python & Bash)
 - ✅ CI/CD integration scripts
-- 🔄 Unit tests (Jest configuration needs resolution)
+- ✅ Unit tests (Auth: 8/8, CRM: 28/28, API Gateway: 7/7)
 - ⏳ Integration tests (pending database setup)
 - ⏳ End-to-end tests (pending full service implementation)
