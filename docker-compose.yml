@@ -1,0 +1,39 @@
+# NEXO Frontend - Docker Compose
+# ===============================
+# Multi-container orchestration for development
+
+version: '3.8'
+
+services:
+  # Frontend development server
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: nexo-frontend-dev
+    ports:
+      - "4200:4200"
+    volumes:
+      - ./nexo-prj:/app
+      - /app/node_modules
+      - /app/.next
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    networks:
+      - nexo-network
+    command: pnpm exec nx serve nexo-prj --host 0.0.0.0
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:4200"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  nexo-network:
+    driver: bridge
+
+volumes:
+  node_modules:
+  next_cache:
