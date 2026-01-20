@@ -11,7 +11,7 @@ The `ft/docker` branch contains complete Docker and Kubernetes infrastructure fo
 ## ✅ Completed Features
 
 ### 1. Docker Infrastructure
-- ✅ Docker Compose configuration with **7 services**:
+- ✅ Docker Compose configuration with **9 services**:
   1. PostgreSQL 15 (database)
   2. Redis 7 (cache)
   3. Keycloak (auth)
@@ -19,10 +19,13 @@ The `ft/docker` branch contains complete Docker and Kubernetes infrastructure fo
   5. Backend (NestJS) ⭐ NEW
   6. Prometheus (metrics)
   7. Grafana (monitoring)
+  8. pgAdmin (PostgreSQL admin) ⭐ NEW
+  9. RedisInsight (Redis admin) ⭐ NEW
 - ✅ All services with health checks
 - ✅ Proper networking and dependencies
 - ✅ Volume management for persistence
 - ✅ Environment variable configuration
+- ✅ Database admin tools integrated ⭐ NEW
 
 ### 2. Backend API Infrastructure ⭐ NEW
 - ✅ Multi-stage Dockerfile for NestJS
@@ -49,8 +52,8 @@ The `ft/docker` branch contains complete Docker and Kubernetes infrastructure fo
 - ✅ Total: **8 manifest files**
 
 ### 4. Testing Infrastructure
-- ✅ **5 test scripts** (all executable):
-  - `test-docker-health.sh` - Tests all 7 services
+- ✅ **7 test scripts** (all executable):
+  - `test-docker-health.sh` - Tests all 9 services ⭐ UPDATED
   - `test-docker-connectivity.sh` - Tests 9 connections
   - `test-backend-health.sh` - Backend API health ⭐ NEW
   - `test-backend-database.sh` - Database connectivity ⭐ NEW
@@ -82,37 +85,41 @@ The `ft/docker` branch contains complete Docker and Kubernetes infrastructure fo
 - ✅ **docs/docker.md** - Docker setup guide
 - ✅ **ARCHITECTURE.md** - System architecture
 
-## 🔧 Recent Updates (Backend API)
+## 🔧 Recent Updates
 
-### Files Modified
+### Latest: Database Admin Tools (Commit 459d2a0)
+- ✅ `docker/docker-compose.yml` - Added pgAdmin and RedisInsight services
+- ✅ `.mise.toml` - Added admin tool tasks
+- ✅ `Makefile` - Added admin tool targets
+- ✅ `README.md` - Updated with admin tools documentation
+- ✅ `QUICK_REFERENCE.md` - Added admin tools to quick reference
+- ✅ `docs/DATABASE_ADMIN_TOOLS.md` - Complete admin tools guide ⭐ NEW
+- ✅ `scripts/test-docker-health.sh` - Tests 9 services (was 7)
+
+### Backend API (Previous Update)
 - ✅ `docker/docker-compose.yml` - Added backend service, changed Grafana port to 3002
 - ✅ `docker/prometheus.yml` - Added backend:3001 to scrape targets
 - ✅ `.mise.toml` - Added backend tasks and updated URLs
 - ✅ `Makefile` - Added backend targets and updated URLs
-- ✅ `README.md` - Updated service URLs
-- ✅ `QUICK_REFERENCE.md` - Updated service URLs
-- ✅ `scripts/test-docker-health.sh` - Tests 7 services (was 6)
 - ✅ `scripts/test-docker-connectivity.sh` - Tests 9 connections (was 4)
 - ✅ `scripts/ci-test.sh` - Includes backend tests
-
-### Files Created
-- ✅ `nexo-prj/apps/api-gateway/Dockerfile` - Multi-stage NestJS build
-- ✅ `nexo-prj/apps/api-gateway/README.md` - Backend docs
-- ✅ `k8s/backend.yml` - Complete K8s configuration
-- ✅ `scripts/test-backend-health.sh` - Backend health tests
-- ✅ `scripts/test-backend-database.sh` - Database connectivity tests
+- ✅ `nexo-prj/apps/api-gateway/Dockerfile` - Multi-stage NestJS build ⭐ NEW
+- ✅ `nexo-prj/apps/api-gateway/README.md` - Backend docs ⭐ NEW
+- ✅ `k8s/backend.yml` - Complete K8s configuration ⭐ NEW
+- ✅ `scripts/test-backend-health.sh` - Backend health tests ⭐ NEW
+- ✅ `scripts/test-backend-database.sh` - Database connectivity tests ⭐ NEW
 
 ## 📈 Statistics
 
-- **Total Commits**: 9
-- **Files Changed**: ~30
-- **Lines Added**: ~3,500+
+- **Total Commits**: 10
+- **Files Changed**: ~37
+- **Lines Added**: ~3,860+
 - **Test Scripts**: 7
 - **MISE Tasks**: 40+
 - **Makefile Targets**: 60+
-- **Docker Services**: 7
+- **Docker Services**: 9
 - **K8s Manifests**: 8
-- **Documentation Files**: 6
+- **Documentation Files**: 7
 
 ## 🎯 Service URLs
 
@@ -124,6 +131,8 @@ The `ft/docker` branch contains complete Docker and Kubernetes infrastructure fo
 | Keycloak | 8080 | http://localhost:8080 |
 | Prometheus | 9090 | http://localhost:9090 |
 | Grafana | 3002 | http://localhost:3002 |
+| pgAdmin | 5050 | http://localhost:5050 |
+| RedisInsight | 5540 | http://localhost:5540 |
 | PostgreSQL | 5432 | localhost:5432 |
 | Redis | 6379 | localhost:6379 |
 
@@ -135,34 +144,29 @@ The `ft/docker` branch contains complete Docker and Kubernetes infrastructure fo
 ### Optional Enhancements (Can Be Separate Tasks)
 These items are **NOT BLOCKERS** for merging this branch. They can be added later:
 
-1. **Database Admin Tools** (Nice-to-have)
-   - pgAdmin for PostgreSQL
-   - RedisInsight for Redis
-   - Can add in separate branch
-
-2. **Production Configuration** (Future work)
+1. **Production Configuration** (Future work)
    - `docker-compose.prod.yml` for production-specific settings
    - SSL/TLS certificates
    - Secrets management (Vault)
    - Can add when deploying to production
 
-3. **Load Balancer** (Future work)
+2. **Load Balancer** (Future work)
    - Nginx or Traefik for load balancing
    - Only needed when scaling beyond single instance
    - Can add when traffic increases
 
-4. **Advanced Monitoring** (Enhancement)
+3. **Advanced Monitoring** (Enhancement)
    - Custom Grafana dashboards for backend metrics
    - Prometheus alert rules
    - Application Performance Monitoring (APM)
    - Can add when monitoring needs mature
 
-5. **Helm Charts** (Future work)
+4. **Helm Charts** (Future work)
    - Package K8s manifests as Helm charts
    - Useful for multi-environment deployments
    - Can add when deploying to multiple clusters
 
-6. **Backup Automation** (Enhancement)
+5. **Backup Automation** (Enhancement)
    - Automated PostgreSQL backup scripts
    - Backup rotation and retention policies
    - Can add as operational maturity increases
