@@ -1,0 +1,159 @@
+# NEXO ERP Backend - REST Client Examples
+# Install VS Code extension: "REST Client" by Huachao Mao
+# Then open this file and click "Send Request" on each request
+
+@baseUrl = http://localhost:3001
+@authBaseUrl = http://localhost:3000
+
+### API Gateway Health Check
+GET {{baseUrl}}/health
+
+### Auth Service Health Check (Direct)
+GET {{authBaseUrl}}/health
+
+### ============================================================================
+### AUTHENTICATION ENDPOINTS
+### ============================================================================
+
+### Login through API Gateway
+POST {{baseUrl}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "password"
+}
+
+### Login directly to Auth Service
+POST {{authBaseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "password"
+}
+
+### Get User Profile (requires JWT token)
+POST {{baseUrl}}/api/v1/auth/profile
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{}
+
+### ============================================================================
+### CRM SERVICE ENDPOINTS (Planned)
+### ============================================================================
+
+### CRM Health Check
+GET {{baseUrl}}/api/v1/crm/health
+
+### Get All Customers
+GET {{baseUrl}}/api/v1/crm/customers
+Authorization: Bearer {{jwt_token}}
+
+### Create Customer
+POST {{baseUrl}}/api/v1/crm/customers
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "name": "Example Corp",
+  "email": "contact@example.com",
+  "phone": "+1234567890",
+  "address": "123 Main St, City, State 12345"
+}
+
+### ============================================================================
+### STOCK SERVICE ENDPOINTS (Planned)
+### ============================================================================
+
+### Stock Health Check
+GET {{baseUrl}}/api/v1/stock/health
+
+### Get All Products
+GET {{baseUrl}}/api/v1/stock/products
+Authorization: Bearer {{jwt_token}}
+
+### Get Product by ID
+GET {{baseUrl}}/api/v1/stock/products/1
+Authorization: Bearer {{jwt_token}}
+
+### ============================================================================
+### SALES SERVICE ENDPOINTS (Planned)
+### ============================================================================
+
+### Sales Health Check
+GET {{baseUrl}}/api/v1/sales/health
+
+### Get All Orders
+GET {{baseUrl}}/api/v1/sales/orders
+Authorization: Bearer {{jwt_token}}
+
+### Create Order
+POST {{baseUrl}}/api/v1/sales/orders
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "customerId": 1,
+  "items": [
+    {
+      "productId": 1,
+      "quantity": 2,
+      "unitPrice": 29.99
+    }
+  ],
+  "totalAmount": 59.98
+}
+
+### ============================================================================
+### PURCHASES SERVICE ENDPOINTS (Planned)
+### ============================================================================
+
+### Purchases Health Check
+GET {{baseUrl}}/api/v1/purchases/health
+
+### Get All Purchase Orders
+GET {{baseUrl}}/api/v1/purchases/orders
+Authorization: Bearer {{jwt_token}}
+
+### ============================================================================
+### PRODUCTION SERVICE ENDPOINTS (Planned)
+### ============================================================================
+
+### Production Health Check
+GET {{baseUrl}}/api/v1/production/health
+
+### Get All Production Orders
+GET {{baseUrl}}/api/v1/production/orders
+Authorization: Bearer {{jwt_token}}
+
+### ============================================================================
+### NOTIFICATIONS SERVICE ENDPOINTS (Planned)
+### ============================================================================
+
+### Notifications Health Check
+GET {{baseUrl}}/api/v1/notifications/health
+
+### Get User Notifications
+GET {{baseUrl}}/api/v1/notifications/user/1
+Authorization: Bearer {{jwt_token}}
+
+### ============================================================================
+### UTILITY ENDPOINTS
+### ============================================================================
+
+### Test Invalid Credentials
+POST {{baseUrl}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "invalid",
+  "password": "invalid"
+}
+
+### Test Missing Authorization
+GET {{baseUrl}}/api/v1/crm/customers
+
+### Test Invalid Endpoint
+GET {{baseUrl}}/api/v1/nonexistent/endpoint

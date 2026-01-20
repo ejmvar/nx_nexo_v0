@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "composite": false,
+    "module": "Node16",
+    "moduleResolution": "node16",
+    "declaration": true,
+    "emitDeclarationOnly": false,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2021",
+    "sourceMap": true,
+    "outDir": "../../../../dist/apps/crm-service/src",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "forceConsistentCasingInFileNames": false,
+    "noFallthroughCasesInSwitch": false,
+    "lib": ["es2021"],
+    "noEmitOnError": false
+  },
+  "include": ["src/**/*"]
+}

@@ -1,49 +1,19 @@
 {
   "extends": "./tsconfig.base.json",
-  "compileOnSave": false,
   "files": [],
+  "include": [],
   "references": [
     {
-      "path": "./shared-types"
+      "path": "./tsconfig.app.json"
     },
     {
-      "path": "./shared-ui"
+      "path": "./tsconfig.spec.json"
     },
     {
-      "path": "./shared-auth"
+      "path": "./e2e"
     },
     {
-      "path": "./shared-api"
-    },
-    {
-      "path": "./apps/nexo-professionals-e2e"
-    },
-    {
-      "path": "./apps/nexo-employees-e2e"
-    },
-    {
-      "path": "./apps/nexo-professionals"
-    },
-    {
-      "path": "./apps/nexo-suppliers-e2e"
-    },
-    {
-      "path": "./apps/nexo-clients-e2e"
-    },
-    {
-      "path": "./apps/nexo-suppliers"
-    },
-    {
-      "path": "./apps/nexo-clients"
-    },
-    {
-      "path": "./apps/nexo-employees"
-    },
-    {
-      "path": "./apps/nexo-prj"
-    },
-    {
-      "path": "./libs"
+      "path": "./."
     }
   ]
 }
