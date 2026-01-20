@@ -11,16 +11,18 @@ The `ft/docker` branch contains complete Docker and Kubernetes infrastructure fo
 ## ✅ Completed Features
 
 ### 1. Docker Infrastructure
-- ✅ Docker Compose configuration with **9 services**:
+- ✅ **Docker Compose configuration** with **11 services**:
   1. PostgreSQL 15 (database)
   2. Redis 7 (cache)
   3. Keycloak (auth)
   4. Frontend (Next.js)
-  5. Backend (NestJS) ⭐ NEW
+  5. Backend (NestJS) ⭐
   6. Prometheus (metrics)
   7. Grafana (monitoring)
-  8. pgAdmin (PostgreSQL admin) ⭐ NEW
-  9. RedisInsight (Redis admin) ⭐ NEW
+  8. pgAdmin (PostgreSQL admin) ⭐
+  9. RedisInsight (Redis admin) ⭐
+  10. OpenTelemetry Collector (APM) ⭐ NEW
+  11. Jaeger (distributed tracing) ⭐ NEW
 - ✅ All services with health checks
 - ✅ Proper networking and dependencies
 - ✅ Volume management for persistence
@@ -95,13 +97,33 @@ The `ft/docker` branch contains complete Docker and Kubernetes infrastructure fo
 - ✅ **10 Makefile backup targets** - Alternative task runner
 - ✅ Retention policies: Daily (7d), Weekly (30d), Monthly (365d)
 
-### 9. Documentation
+### 9. Advanced Monitoring ⭐ NEW
+- ✅ **Grafana Dashboards** (3 dashboards):
+  - System Overview: Request rate, response time, errors, resources
+  - Backend API Metrics: GraphQL, database, cache, event loop
+  - Database Metrics: Size, connections, transactions, slow queries
+- ✅ **Prometheus Alert Rules** (6 alert groups):
+  - Critical: Service down, high errors, connection exhaustion
+  - Performance: Slow responses, event loop lag, slow queries
+  - Database: Size growth, rollbacks, deadlocks, cache hit ratio
+  - Redis: Memory usage, evicted keys, connection errors
+  - Security: Auth failures, invalid tokens, suspicious activity
+  - Disk: Low/critical disk space
+- ✅ **OpenTelemetry APM**:
+  - OTEL Collector for distributed tracing
+  - Jaeger for trace visualization
+  - Metrics export to Prometheus
+  - Log aggregation
+- ✅ **Docker Compose**: Added otel-collector and jaeger services
+
+### 10. Documentation
 - ✅ **README.md** - Complete main documentation ⭐ UPDATED
-- ✅ **QUICK_REFERENCE.md** - Command cheat sheet ⭐ UPDATED
-- ✅ **helm/README.md** - Helm chart guide ⭐ NEW
+- ✅ **QUICK_REFERENCE.md** - Command cheat sheet
+- ✅ **helm/README.md** - Helm chart guide
 - ✅ **docs/TESTING.md** - Comprehensive testing guide
 - ✅ **docs/TESTING_IMPLEMENTATION_SUMMARY.md** - Implementation details
-- ✅ **docs/BACKUP_AUTOMATION.md** - Backup and recovery guide ⭐ NEW
+- ✅ **docs/ADVANCED_MONITORING.md** - Monitoring, alerts, and APM guide ⭐ NEW
+- ✅ **docs/BACKUP_AUTOMATION.md** - Backup and recovery guide
 - ✅ **docs/DATABASE_ADMIN_TOOLS.md** - Database admin UI guide
 - ✅ **docs/docker.md** - Docker setup guide
 - ✅ **ARCHITECTURE.md** - System architecture
@@ -132,16 +154,18 @@ The `ft/docker` branch contains complete Docker and Kubernetes infrastructure fo
 
 ## 📈 Statistics
 
-- **Total Commits**: 12
-- **Files Changed**: ~50
-- **Lines Added**: ~7,000+
+- **Total Commits**: 13
+- **Files Changed**: ~60
+- **Lines Added**: ~11,000+
 - **Test Scripts**: 7
 - **MISE Tasks**: 55+
 - **Makefile Targets**: 75+
-- **Docker Services**: 9
+- **Docker Services**: 11
 - **K8s Manifests**: 8
 - **Helm Chart**: 1 (with 4 environment configs)
-- **Documentation Files**: 10
+- **Grafana Dashboards**: 3
+- **Prometheus Alert Rules**: 6 groups (30+ alerts)
+- **Documentation Files**: 11
 
 ## 🎯 Service URLs
 
@@ -155,6 +179,8 @@ The `ft/docker` branch contains complete Docker and Kubernetes infrastructure fo
 | Grafana | 3002 | http://localhost:3002 |
 | pgAdmin | 5050 | http://localhost:5050 |
 | RedisInsight | 5540 | http://localhost:5540 |
+| Jaeger UI | 16686 | http://localhost:16686 |
+| OTEL Collector (zpages) | 55679 | http://localhost:55679 |
 | PostgreSQL | 5432 | localhost:5432 |
 | Redis | 6379 | localhost:6379 |
 
@@ -176,12 +202,6 @@ These items are **NOT BLOCKERS** for merging this branch. They can be added late
    - Nginx or Traefik for load balancing
    - Only needed when scaling beyond single instance
    - Can add when traffic increases
-
-3. **Advanced Monitoring** (Enhancement)
-   - Custom Grafana dashboards for backend metrics
-   - Prometheus alert rules
-   - Application Performance Monitoring (APM)
-   - Can add when monitoring needs mature
 
 ## ✅ Branch Readiness Checklist
 

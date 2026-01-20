@@ -215,9 +215,11 @@ After starting with `mise run dev` or `make dev`:
 - [ARCHITECTURE.md](ARCHITECTURE.md) - System architecture and design decisions
 - [QUICK_REFERENCE.md](QUICK_REFERENCE.md) - Quick command reference card
 - [docs/TESTING.md](docs/TESTING.md) - Comprehensive testing guide
+- [docs/ADVANCED_MONITORING.md](docs/ADVANCED_MONITORING.md) - Monitoring, alerts, and APM
 - [docs/BACKUP_AUTOMATION.md](docs/BACKUP_AUTOMATION.md) - Database backup and recovery
 - [docs/DATABASE_ADMIN_TOOLS.md](docs/DATABASE_ADMIN_TOOLS.md) - Database admin UI guide
 - [docs/docker.md](docs/docker.md) - Docker setup and configuration
+- [helm/README.md](helm/README.md) - Helm charts for Kubernetes deployment
 - [PROMPTS/](PROMPTS/) - Development prompts and phases
 
 ## 🔧 Development
@@ -358,9 +360,16 @@ See [.github/workflows/ci.yml](.github/workflows/ci.yml) for pipeline configurat
 ## 📊 Monitoring & Operations
 
 ### Metrics & Dashboards
-- **Prometheus**: Metrics collection (http://localhost:9090)
 - **Grafana**: Metrics visualization (http://localhost:3002)
+  - System Overview Dashboard
+  - Backend API Metrics Dashboard
+  - Database Metrics Dashboard
+- **Prometheus**: Metrics collection (http://localhost:9090)
+- **Jaeger**: Distributed tracing (http://localhost:16686)
+- **OTEL Collector**: APM and telemetry (http://localhost:55679)
 - Default credentials: admin/admin
+
+See [ADVANCED_MONITORING.md](docs/ADVANCED_MONITORING.md) for complete monitoring guide.
 
 ### Database Administration
 - **pgAdmin**: PostgreSQL management (http://localhost:5050)
