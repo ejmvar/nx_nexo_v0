@@ -1,49 +1,53 @@
 import { Controller, All, Body, Headers, Req } from '@nestjs/common';
-import { ProxyService } from './proxy.service';
+import { ProxyService } from './proxy.service.js';
 
 @Controller('api/v1')
 export class ProxyController {
   constructor(private readonly proxyService: ProxyService) {}
 
-  @All('auth/*')
+  @All('auth/*path')
   async proxyAuth(@Req() req: any, @Body() body: any, @Headers() headers: any) {
-    const path = req.url.replace('/api/v1/auth', '');
+    console.log('Proxying auth request:', req.method, req.url);
+    const path = req.url.replace('/api/v1', '');
+    console.log('Forwarding to path:', path);
     return this.proxyService.proxyRequest('auth', path, req.method, body, headers);
   }
 
-  @All('crm/*')
+  @All('crm/*path')
   async proxyCrm(@Req() req: any, @Body() body: any, @Headers() headers: any) {
-    const path = req.url.replace('/api/v1/crm', '');
+    console.log('Proxying crm request:', req.method, req.url);
+    const path = req.url.replace('/api/v1', '');
+    console.log('Forwarding to path:', path);
     return this.proxyService.proxyRequest('crm', path, req.method, body, headers);
   }
 
-  @All('stock/*')
+  @All('stock/*path')
   async proxyStock(@Req() req: any, @Body() body: any, @Headers() headers: any) {
-    const path = req.url.replace('/api/v1/stock', '');
+    const path = req.url.replace('/api/v1', '');
     return this.proxyService.proxyRequest('stock', path, req.method, body, headers);
   }
 
-  @All('sales/*')
+  @All('sales/*path')
   async proxySales(@Req() req: any, @Body() body: any, @Headers() headers: any) {
-    const path = req.url.replace('/api/v1/sales', '');
+    const path = req.url.replace('/api/v1', '');
     return this.proxyService.proxyRequest('sales', path, req.method, body, headers);
   }
 
-  @All('purchases/*')
+  @All('purchases/*path')
   async proxyPurchases(@Req() req: any, @Body() body: any, @Headers() headers: any) {
-    const path = req.url.replace('/api/v1/purchases', '');
+    const path = req.url.replace('/api/v1', '');
     return this.proxyService.proxyRequest('purchases', path, req.method, body, headers);
   }
 
-  @All('production/*')
+  @All('production/*path')
   async proxyProduction(@Req() req: any, @Body() body: any, @Headers() headers: any) {
-    const path = req.url.replace('/api/v1/production', '');
+    const path = req.url.replace('/api/v1', '');
     return this.proxyService.proxyRequest('production', path, req.method, body, headers);
   }
 
-  @All('notifications/*')
+  @All('notifications/*path')
   async proxyNotifications(@Req() req: any, @Body() body: any, @Headers() headers: any) {
-    const path = req.url.replace('/api/v1/notifications', '');
+    const path = req.url.replace('/api/v1', '');
     return this.proxyService.proxyRequest('notifications', path, req.method, body, headers);
   }
 }

@@ -6,31 +6,31 @@ let ProxyController = class ProxyController {
         this.proxyService = proxyService;
     }
     async proxyAuth(req, body, headers) {
-        const path = req.url.replace('/api/v1/auth', '');
+        const path = req.url.replace('/api/v1', '');
         return this.proxyService.proxyRequest('auth', path, req.method, body, headers);
     }
     async proxyCrm(req, body, headers) {
-        const path = req.url.replace('/api/v1/crm', '');
+        const path = req.url.replace('/api/v1', '');
         return this.proxyService.proxyRequest('crm', path, req.method, body, headers);
     }
     async proxyStock(req, body, headers) {
-        const path = req.url.replace('/api/v1/stock', '');
+        const path = req.url.replace('/api/v1', '');
         return this.proxyService.proxyRequest('stock', path, req.method, body, headers);
     }
     async proxySales(req, body, headers) {
-        const path = req.url.replace('/api/v1/sales', '');
+        const path = req.url.replace('/api/v1', '');
         return this.proxyService.proxyRequest('sales', path, req.method, body, headers);
     }
     async proxyPurchases(req, body, headers) {
-        const path = req.url.replace('/api/v1/purchases', '');
+        const path = req.url.replace('/api/v1', '');
         return this.proxyService.proxyRequest('purchases', path, req.method, body, headers);
     }
     async proxyProduction(req, body, headers) {
-        const path = req.url.replace('/api/v1/production', '');
+        const path = req.url.replace('/api/v1', '');
         return this.proxyService.proxyRequest('production', path, req.method, body, headers);
     }
     async proxyNotifications(req, body, headers) {
-        const path = req.url.replace('/api/v1/notifications', '');
+        const path = req.url.replace('/api/v1', '');
         return this.proxyService.proxyRequest('notifications', path, req.method, body, headers);
     }
 };

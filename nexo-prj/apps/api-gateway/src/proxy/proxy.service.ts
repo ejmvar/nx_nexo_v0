@@ -37,6 +37,21 @@ export class ProxyService {
       const response = await firstValueFrom(this.httpService.request(config));
       return response.data;
     } catch (error: any) {
+      console.error('Proxy error details:', {
+        status: error?.response?.status,
+        statusText: error?.response?.statusText,
+        data: error?.response?.data,
+        message: error?.message,
+        code: error?.code,
+        errno: error?.errno,
+        syscall: error?.syscall,
+        hostname: error?.hostname,
+        config: {
+          url: config.url,
+          method: config.method,
+          headers: config.headers
+        }
+      });
       throw new Error(`Service ${service} error: ${error?.message || 'Unknown error'}`);
     }
   }
