@@ -105,6 +105,8 @@ echo -e "\n${BLUE}🏗️  Testing Planned Service Endpoints (will fail until se
 
 # Test planned service endpoints (these will fail until services are created)
 test_endpoint "GET" "$API_GATEWAY/api/v1/crm/health" "" "CRM Service Health (planned)"
+test_endpoint "GET" "$API_GATEWAY/api/v1/crm/customers" "" "CRM Customers List"
+test_endpoint "GET" "$API_GATEWAY/api/v1/crm/leads" "" "CRM Leads List"
 test_endpoint "GET" "$API_GATEWAY/api/v1/stock/health" "" "Stock Service Health (planned)"
 test_endpoint "GET" "$API_GATEWAY/api/v1/sales/health" "" "Sales Service Health (planned)"
 test_endpoint "GET" "$API_GATEWAY/api/v1/purchases/health" "" "Purchases Service Health (planned)"
