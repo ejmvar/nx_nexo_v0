@@ -17,12 +17,11 @@ pnpm = "latest"
 
 # "nix:nx" = "latest" # Manages Nx via Nix
 
-
-
-# [tasks.100-nx-npm-install]
-# description = "Installs/Updates Nx CLI"
-# raw = true
-# run = "npx npm install -g nx"
+# ===============================
+# DEVELOPMENT CYCLE TESTING TASKS
+# ===============================
+# These tasks provide comprehensive testing for every step of the development cycle
+# Run with: mise run <task-name>
 
 [tasks.100-000-001-nx-pnpm-install]
 description = "Installs/Updates Nx CLI using PNPM"
@@ -35,52 +34,154 @@ run = ". ~/.bashrc && pnpm setup && . ~/.bashrc && pnpm install -g nx"
 # pnpm approve-builds nx -g
 # ------------------------------
 
-
-# [tasks.100-000-nx-init-this-project]
-# description = "Initialize NX in this EXISTING project"
-
-
 [tasks.100-000-002-nx-CREATE-pnpm-project-here]
 description = "Initialize NX in this EXISTING project"
 raw = true
 # run = "npx create-nx-workspace@latest your-workspace-name --package-manager=pnpm"
 run = "npx create-nx-workspace@latest {{vars.PROJECT_NAME}} --package-manager=pnpm"
 
+# ===============================
+# TESTING TASKS - DEVELOPMENT CYCLE
+# ===============================
 
-[tasks.build-nx]
- # Example of a task that uses Nx after installation
-# command = "nx build my-app"
-run = "nx build my-app"
-depends = ["nx-install"] # Runs nx-install first
-description = "Builds the Nx 'my-app' project"
-# Run it: mise run nx-install or mise run build-nx. 
-# Method 3: Using the Nix plugin (Most Integrated)
-# Install the plugin: mise plugin install nix https://github.com/jbadeau/mise-nix.git.
+[tasks.test-setup]
+description = "Setup testing environment and verify all tools"
+run = "echo '🔧 Setting up testing environment...' && mise doctor && echo '✅ MISE environment verified' && cd nexo-prj && pnpm install && echo '✅ Dependencies installed'"
 
+[tasks.test-install]
+description = "Install all project dependencies"
+run = "cd nexo-prj && pnpm install"
+depends = ["100-000-001-nx-pnpm-install"]
 
+[tasks.test-lint]
+description = "Run ESLint on all projects"
+run = "cd nexo-prj && npx nx run-many --target=lint --all"
+depends = ["test-install"]
 
-# https://mise.jdx.dev/tasks/monorepo.html
-# NOP # "npx:nx" = "latest"
+[tasks.test-typecheck]
+description = "Run TypeScript type checking on all projects"
+run = "cd nexo-prj && npx nx run-many --target=typecheck --all"
+depends = ["test-install"]
 
-# ### TASKS ### https://mise.jdx.dev/tasks/toml-tasks.html
-#[task.
-#mise tasks add nx-install --description "Installs/Updates Nx CLI" --raw -- npx npm install -g nx
+[tasks.test-unit]
+description = "Run unit tests for all projects"
+run = "cd nexo-prj && npx nx run-many --target=test --all"
+depends = ["test-install"]
 
-# ---------------
+[tasks.test-unit-watch]
+description = "Run unit tests in watch mode"
+run = "cd nexo-prj && npx nx run-many --target=test --all --watch"
+depends = ["test-install"]
 
-# # .mise.toml
-# [tasks]
-# nx-install = { command = "npx npm install -g nx", description = "Installs/Updates Nx CLI", raw = true }
+[tasks.test-unit-coverage]
+description = "Run unit tests with coverage report"
+run = "cd nexo-prj && npx nx run-many --target=test --all --coverage"
+depends = ["test-install"]
 
-# # Or, if you prefer using pnpm:
-# # nx-install = { command = "pnpm install -g nx", description = "Installs/Updates Nx CLI", raw = true }
+[tasks.test-e2e]
+description = "Run end-to-end tests"
+run = "cd nexo-prj && npx nx run-many --target=e2e --all"
+depends = ["test-install"]
 
-# [tasks.build-nx] # Example of a task that uses Nx after installation
-# command = "nx build my-app"
-# depends = ["nx-install"] # Runs nx-install first
-# description = "Builds the Nx 'my-app' project"
+[tasks.test-e2e-ui]
+description = "Run E2E tests with UI mode (Playwright)"
+run = "cd nexo-prj && npx nx e2e nexo-prj-e2e --ui"
+depends = ["test-install"]
 
+[tasks.test-build]
+description = "Build all projects and verify production readiness"
+run = "cd nexo-prj && npx nx run-many --target=build --all"
+depends = ["test-install"]
 
+[tasks.test-build-deps]
+description = "Build all project dependencies"
+run = "cd nexo-prj && npx nx run-many --target=build-deps --all"
+depends = ["test-install"]
 
-# ---------------
+[tasks.test-all]
+description = "Run complete test suite: lint → typecheck → unit → e2e → build"
+run = "mise run test-lint && mise run test-typecheck && mise run test-unit && mise run test-e2e && mise run test-build"
+depends = ["test-setup"]
+
+[tasks.test-ci]
+description = "Run CI pipeline simulation (all tests + coverage)"
+run = "mise run test-lint && mise run test-typecheck && mise run test-unit-coverage && mise run test-e2e && mise run test-build"
+depends = ["test-setup"]
+
+[tasks.test-dev]
+description = "Start development server with hot reload"
+run = "cd nexo-prj && npx nx serve nexo-prj"
+depends = ["test-install"]
+
+[tasks.test-dev-all]
+description = "Start all development servers"
+run = "cd nexo-prj && npx nx run-many --target=serve --all --parallel"
+depends = ["test-install"]
+
+[tasks.test-clean]
+description = "Clean all build artifacts and caches"
+run = "cd nexo-prj && npx nx reset && rm -rf .next node_modules/.cache"
+
+[tasks.test-reset]
+description = "Full reset: clean + reinstall + test"
+run = "mise run test-clean && mise run test-install && mise run test-all"
+
+# ===============================
+# QUICK DEVELOPMENT TASKS
+# ===============================
+
+[tasks.dev]
+description = "Quick development start (install + serve)"
+run = "mise run test-install && mise run test-dev"
+
+[tasks.check]
+description = "Quick health check (lint + typecheck + unit)"
+run = "mise run test-lint && mise run test-typecheck && mise run test-unit"
+
+[tasks.ci]
+description = "Simulate CI pipeline"
+run = "mise run test-ci"
+
+# ===============================
+# COMPONENT TESTING TASKS
+# ===============================
+
+[tasks.test-components]
+description = "Test shared UI components"
+run = "cd nexo-prj && npx nx test shared-ui --coverage"
+depends = ["test-install"]
+
+[tasks.test-app]
+description = "Test main application"
+run = "cd nexo-prj && npx nx test nexo-prj --coverage"
+depends = ["test-install"]
+
+[tasks.test-e2e-app]
+description = "Test main app E2E"
+run = "cd nexo-prj && npx nx e2e nexo-prj-e2e"
+depends = ["test-install"]
+
+# ===============================
+# DEBUGGING TASKS
+# ===============================
+
+[tasks.test-debug-unit]
+description = "Debug unit tests with inspector"
+run = "cd nexo-prj && npx nx test nexo-prj --inspect --inspect-brk"
+
+[tasks.test-debug-e2e]
+description = "Debug E2E tests with headed browser"
+run = "cd nexo-prj && npx nx e2e nexo-prj-e2e --headed --debug"
+
+# ===============================
+# PERFORMANCE TESTING
+# ===============================
+
+[tasks.test-perf-build]
+description = "Test build performance"
+run = "cd nexo-prj && time npx nx build nexo-prj"
+
+[tasks.test-perf-test]
+description = "Test test execution performance"
+run = "cd nexo-prj && time npx nx run-many --target=test --all"
 

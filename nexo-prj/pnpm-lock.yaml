@@ -201,6 +201,9 @@ importers:
       prettier:
         specifier: ~3.6.2
         version: 3.6.2
+      sass:
+        specifier: ^1.55.0
+        version: 1.97.2
       tailwindcss:
         specifier: 3.4.3
         version: 3.4.3(ts-node@10.9.1(@swc/core@1.5.29(@swc/helpers@0.5.15))(@types/node@20.19.9)(typescript@5.9.3))
@@ -299,17 +302,7 @@ importers:
 
   apps/nexo-suppliers-e2e: {}
 
-  shared-api: {}
-
-  shared-auth: {}
-
-  shared-types:
-    dependencies:
-      tslib:
-        specifier: ^2.3.0
-        version: 2.8.1
-
-  shared-ui: {}
+  libs: {}
 
 packages:
 
