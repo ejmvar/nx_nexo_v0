@@ -243,13 +243,35 @@ logs-redisinsight: ## View RedisInsight logs
 db-shell: ## Connect to PostgreSQL shell
 	@docker compose -f $(COMPOSE_FILE) exec postgres psql -U nexo_user -d nexo_crm
 
-db-backup: ## Backup PostgreSQL database
-	@docker compose -f $(COMPOSE_FILE) exec postgres pg_dump -U nexo_user nexo_crm > backup_$$(date +%Y%m%d_%H%M%S).sql
-	@echo '✓ Database backed up'
+db-backup: ## Create PostgreSQL backup
+	@bash scripts/backup-postgres.sh backup
 
-db-restore: ## Restore PostgreSQL database (requires BACKUP_FILE variable)
-	@docker compose -f $(COMPOSE_FILE) exec -T postgres psql -U nexo_user -d nexo_crm < $(BACKUP_FILE)
-	@echo '✓ Database restored'
+db-backup-list: ## List all PostgreSQL backups
+	@bash scripts/backup-postgres.sh list
+
+db-backup-verify: ## Verify latest backup integrity
+	@bash scripts/backup-postgres.sh verify $$(bash scripts/restore-postgres.sh latest)
+
+db-backup-cleanup: ## Clean old backups based on retention policy
+	@bash scripts/backup-postgres.sh cleanup
+
+db-backup-rotate: ## Apply backup rotation policies
+	@bash scripts/backup-rotation.sh rotate
+
+db-backup-stats: ## Show backup statistics
+	@bash scripts/backup-rotation.sh stats
+
+db-restore-test: ## Test restore in separate database
+	@bash scripts/restore-postgres.sh test
+
+db-restore: ## Restore from latest backup (DESTRUCTIVE)
+	@bash scripts/restore-postgres.sh restore
+
+db-restore-file: ## Restore from specific backup file (use BACKUP_FILE=path/to/file.sql.gz)
+	@bash scripts/restore-postgres.sh restore $(BACKUP_FILE)
+
+db-restore-latest: ## Show latest backup file
+	@bash scripts/restore-postgres.sh latest
 
 # ============================================================================
 # REDIS COMMANDS

@@ -213,7 +213,10 @@ After starting with `mise run dev` or `make dev`:
 ## 📚 Documentation
 
 - [ARCHITECTURE.md](ARCHITECTURE.md) - System architecture and design decisions
+- [QUICK_REFERENCE.md](QUICK_REFERENCE.md) - Quick command reference card
 - [docs/TESTING.md](docs/TESTING.md) - Comprehensive testing guide
+- [docs/BACKUP_AUTOMATION.md](docs/BACKUP_AUTOMATION.md) - Database backup and recovery
+- [docs/DATABASE_ADMIN_TOOLS.md](docs/DATABASE_ADMIN_TOOLS.md) - Database admin UI guide
 - [docs/docker.md](docs/docker.md) - Docker setup and configuration
 - [PROMPTS/](PROMPTS/) - Development prompts and phases
 
@@ -352,11 +355,34 @@ GitHub Actions workflow runs on every push:
 
 See [.github/workflows/ci.yml](.github/workflows/ci.yml) for pipeline configuration.
 
-## 📊 Monitoring
+## 📊 Monitoring & Operations
 
+### Metrics & Dashboards
 - **Prometheus**: Metrics collection (http://localhost:9090)
-- **Grafana**: Metrics visualization (http://localhost:3001)
+- **Grafana**: Metrics visualization (http://localhost:3002)
 - Default credentials: admin/admin
+
+### Database Administration
+- **pgAdmin**: PostgreSQL management (http://localhost:5050)
+- **RedisInsight**: Redis monitoring (http://localhost:5540)
+- See [DATABASE_ADMIN_TOOLS.md](docs/DATABASE_ADMIN_TOOLS.md)
+
+### Backup & Recovery
+```bash
+# Create backup
+mise run db:backup
+
+# Test restore
+mise run db:restore:test
+
+# Full restore (DESTRUCTIVE)
+mise run db:restore
+
+# View backup statistics
+mise run db:backup:stats
+```
+
+See [BACKUP_AUTOMATION.md](docs/BACKUP_AUTOMATION.md) for complete backup guide.
 
 ## 🐛 Troubleshooting
 

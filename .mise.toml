@@ -243,8 +243,36 @@ description = "Connect to PostgreSQL shell"
 run = "docker compose -f {{vars.DOCKER_COMPOSE_FILE}} exec postgres psql -U nexo_user -d nexo_crm"
 
 [tasks."db:backup"]
-description = "Backup PostgreSQL database"
-run = "docker compose -f {{vars.DOCKER_COMPOSE_FILE}} exec postgres pg_dump -U nexo_user nexo_crm > backup_$(date +%Y%m%d_%H%M%S).sql && echo '✓ Database backed up'"
+description = "Create PostgreSQL backup"
+run = "bash scripts/backup-postgres.sh backup"
+
+[tasks."db:backup:list"]
+description = "List all PostgreSQL backups"
+run = "bash scripts/backup-postgres.sh list"
+
+[tasks."db:backup:verify"]
+description = "Verify latest backup integrity"
+run = "bash scripts/backup-postgres.sh verify $(bash scripts/restore-postgres.sh latest)"
+
+[tasks."db:restore:test"]
+description = "Test restore in separate database"
+run = "bash scripts/restore-postgres.sh test"
+
+[tasks."db:restore"]
+description = "Restore from latest backup (DESTRUCTIVE)"
+run = "bash scripts/restore-postgres.sh restore"
+
+[tasks."db:restore:file"]
+description = "Restore from specific backup file"
+run = "bash scripts/restore-postgres.sh restore"
+
+[tasks."db:backup:rotate"]
+description = "Apply backup rotation policies"
+run = "bash scripts/backup-rotation.sh rotate"
+
+[tasks."db:backup:stats"]
+description = "Show backup statistics"
+run = "bash scripts/backup-rotation.sh stats"
 
 [tasks."redis:shell"]
 description = "Connect to Redis CLI"

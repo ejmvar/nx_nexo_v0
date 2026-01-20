@@ -70,7 +70,13 @@ make dev-stop              # Alternative
 | Action | MISE | Make |
 |--------|------|------|
 | PostgreSQL shell | `mise run db:shell` | `make db-shell` |
-| Backup database | `mise run db:backup` | `make db-backup` |
+| Create backup | `mise run db:backup` | `make db-backup` |
+| List backups | `mise run db:backup:list` | `make db-backup-list` |
+| Verify backup | `mise run db:backup:verify` | `make db-backup-verify` |
+| Test restore | `mise run db:restore:test` | `make db-restore-test` |
+| Full restore | `mise run db:restore` | `make db-restore` |
+| Backup rotation | `mise run db:backup:rotate` | `make db-backup-rotate` |
+| Backup stats | `mise run db:backup:stats` | `make db-backup-stats` |
 | Redis shell | `mise run redis:shell` | `make redis-shell` |
 
 ## 🛠️ Development Commands
