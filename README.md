@@ -35,14 +35,50 @@ mise run check
 
 ### 3. Start Development
 ```bash
-# Start development server
-mise run dev
+# Start development server - Choose your preferred tool:
+mise run dev       # MISE
+just dev          # Just
+make dev          # Make
+pnpm run dev      # npm scripts
 
-# Or use Makefile
-make dev
+# All commands do the same thing!
 ```
 
 **🎉 You're done!** Visit `http://localhost:4200` to see the portal selection page.
+
+---
+
+## 🛠️ Task Runners - Choose Your Favorite!
+
+This project supports **4 task runners** for maximum flexibility:
+
+| Tool | Best For | Quick Example |
+|------|----------|---------------|
+| **MISE** | Environment management & testing | `mise run test-all` |
+| **Just** | Modern syntax, powerful features | `just ci` |
+| **Make** | Universal compatibility, CI/CD | `make check` |
+| **pnpm** | IDE integration, simplicity | `pnpm run test` |
+
+**📖 See [TASKS.md](TASKS.md) for complete task runner guide**
+
+### Quick Command Reference
+
+```bash
+# Development
+mise run dev  |  just dev  |  make dev  |  pnpm run dev
+
+# Testing
+mise run test-unit  |  just test  |  make test  |  pnpm run test
+
+# Linting
+mise run test-lint  |  just lint  |  make lint  |  pnpm run lint
+
+# Health Check
+mise run check  |  just check  |  make check  |  pnpm run check
+
+# CI Pipeline
+mise run ci  |  just ci  |  make ci  |  pnpm run ci
+```
 
 ---
 
