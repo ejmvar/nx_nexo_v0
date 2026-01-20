@@ -1,0 +1,37 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Create PLAN directory",
+			"type": "shell",
+			"command": "mkdir -p PLAN",
+			"args": [],
+			"isBackground": false,
+			"group": "build"
+		},
+		{
+			"label": "Create plan.md file",
+			"type": "shell",
+			"command": "touch PLAN/plan.md",
+			"args": [],
+			"isBackground": false,
+			"group": "build"
+		},
+		{
+			"label": "Populate plan.md with phases and tasks",
+			"type": "shell",
+			"command": "cat > PLAN/plan.md << 'EOF'\n# NEXO CRM Development Plan\n\n## Phase 1: Architecture (Completed)\n- [x] Create ARCHITECTURE.md with high-level diagram, tech stack, microservices, DB design, auth/authz, deployment, scalability\n- [x] Commit to ft/architecture branch\n\n## Phase 2: Backend Implementation\n- [ ] Create feature branch: ft/backend\n- [ ] Create worktree: /W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend\n- [ ] Initialize NX workspace for backend\n- [ ] Set up NestJS services (Core CRM, Stock, Compras, Ventas, Produccion, Notificaciones, Auth)\n- [ ] Implement authentication and authorization (OAuth2 with Keycloak/Auth0, RBAC + ABAC, account/role/permission with context)\n- [ ] Design database schema based on ER diagram (PostgreSQL multi-tenant with RLS)\n- [ ] Create API endpoints for modules (CMS, CRM, Compras Ventas, Cuentas, Produccion, Articulos)\n- [ ] Implement permissions engine\n- [ ] Create database migrations\n- [ ] Build basic API with auth\n- [ ] Commit changes and merge back\n\n## Phase 3: Frontend Implementation\n- [ ] Create feature branch: ft/frontend\n- [ ] Create worktree: /W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_frontend\n- [ ] Initialize NX workspace\n- [ ] Create Next.js apps for each portal (employees, clients, suppliers, professionals)\n- [ ] Set up shared libs (UI components, auth, API client, types)\n- [ ] Implement basic routing and layout\n- [ ] Integrate authentication (NextAuth.js or similar)\n- [ ] Prepare for multi-actor UX\n- [ ] Build basic portal skeletons\n- [ ] Create shared UI library\n- [ ] Commit changes and merge back\n\n## Phase 4: Docker/Infrastructure Implementation\n- [ ] Create feature branch: ft/docker\n- [ ] Create worktree: /W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_docker\n- [ ] Create docker-compose.yml for local dev (frontend, backend, DB, Cache, Auth)\n- [ ] Create Dockerfile for each service\n- [ ] Set up K8s manifests for production\n- [ ] Implement infrastructure as code (Terraform if needed)\n- [ ] Setup for Raspberry Pi compatibility\n- [ ] Add monitoring (Prometheus, Grafana)\n- [ ] Configure CI/CD (GitHub Actions)\n- [ ] Create deployment scripts\n- [ ] Document scaling\n- [ ] Commit changes and merge back\n\n## Phase 5: Integration and Testing\n- [ ] Integrate frontend with backend APIs\n- [ ] Test multi-actor portals\n- [ ] Validate permissions and RLS\n- [ ] Run end-to-end tests\n- [ ] Update ARCHITECTURE.md with implementation details\n- [ ] Update README.md with setup instructions\n\n## Phase 6: Deployment and Launch\n- [ ] Deploy to on-premise (PC/Raspberry Pi)\n- [ ] Test cloud scalability (K8s)\n- [ ] Monitor and optimize performance\n- [ ] Final documentation\n\nEOF",
+			"args": [],
+			"isBackground": false,
+			"group": "build"
+		},
+		{
+			"label": "Update plan.md to mark completed backend tasks",
+			"type": "shell",
+			"command": "sed -i 's/- \\[ \\] Create feature branch: ft\\/backend/- [x] Create feature branch: ft\\/backend/' PLAN/plan.md && sed -i 's/- \\[ \\] Create worktree: \\/W\\/NEXO\\/nx_nexo_v0.info\\/NEXO\\/nx_nexo_v0.20260115_backend/- [x] Create worktree: \\/W\\/NEXO\\/nx_nexo_v0.info\\/NEXO\\/nx_nexo_v0.20260115_backend/' PLAN/plan.md && sed -i 's/- \\[ \\] Initialize NX workspace for backend/- [x] Initialize NX workspace for backend/' PLAN/plan.md && sed -i 's/- \\[ \\] Set up NestJS services (Core CRM, Stock, Compras, Ventas, Produccion, Notificaciones, Auth)/- [x] Set up NestJS services (Auth, Produccion, Stock, Ventas initialized; Core CRM, Compras, Notificaciones pending)/' PLAN/plan.md && sed -i 's/- \\[ \\] Implement authentication and authorization (OAuth2 with Keycloak\\/Auth0, RBAC + ABAC, account\\/role\\/permission with context)/- [x] Implement authentication (JWT initialized; OAuth2, RBAC+ABAC, permissions engine pending)/' PLAN/plan.md",
+			"args": [],
+			"isBackground": false,
+			"group": "build"
+		}
+	]
+}
