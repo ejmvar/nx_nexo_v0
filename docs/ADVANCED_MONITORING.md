@@ -204,12 +204,38 @@ Edit alert thresholds in `monitoring/prometheus/alerts.yml`:
 ### Alert Testing
 
 ```bash
+# Run comprehensive monitoring validation tests
+bash scripts/test-monitoring.sh
+
+# Or using MISE/Make
+mise run test:monitoring
+make test-monitoring
+
+# Manual testing commands
 # Test alert rules syntax
 promtool check rules monitoring/prometheus/alerts.yml
 
 # Force trigger test alert
 curl -X POST http://localhost:9090/-/reload
+
+# Check alert rules are loaded
+curl -s http://localhost:9090/api/v1/rules | jq '.data.groups[].rules[] | {alert: .name, state: .state}'
 ```
+
+### Monitoring Validation
+
+The monitoring test suite (`scripts/test-monitoring.sh`) validates:
+
+- **Configuration Files**: Checks all config files exist and are valid
+- **Prometheus Configuration**: Validates scrape configs and alert rules
+- **Alert Rules**: Verifies all critical alerts are defined
+- **OpenTelemetry Configuration**: Checks OTEL collector setup
+- **Grafana Dashboards**: Validates dashboard JSON syntax
+- **Docker Compose**: Confirms monitoring services are configured
+- **Service Health** (if running): Tests endpoints and connectivity
+- **Documentation**: Verifies comprehensive monitoring docs exist
+
+Run before deploying monitoring stack to catch configuration errors.
 
 ## 🔍 Application Performance Monitoring (APM)
 

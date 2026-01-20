@@ -166,6 +166,10 @@ run = "helm list"
 description = "Show Helm release status"
 run = "helm status nexo-crm"
 
+[tasks."test:helm:validate"]
+description = "Validate Helm chart configuration and templates"
+run = "bash scripts/test-helm-validate.sh"
+
 # ============================================================================
 # APPLICATION TESTING TASKS
 # ============================================================================
@@ -381,3 +385,27 @@ run = "docker compose -f {{vars.DOCKER_COMPOSE_FILE}} logs -f pgadmin"
 [tasks."logs:redisinsight"]
 description = "View RedisInsight logs"
 run = "docker compose -f {{vars.DOCKER_COMPOSE_FILE}} logs -f redisinsight"
+
+[tasks."logs:otel"]
+description = "View OpenTelemetry Collector logs"
+run = "docker compose -f {{vars.DOCKER_COMPOSE_FILE}} logs -f otel-collector"
+
+[tasks."logs:jaeger"]
+description = "View Jaeger logs"
+run = "docker compose -f {{vars.DOCKER_COMPOSE_FILE}} logs -f jaeger"
+
+[tasks."test:monitoring"]
+description = "Validate monitoring stack configuration and health"
+run = "bash scripts/test-monitoring.sh"
+
+[tasks."monitoring:start"]
+description = "Start monitoring services only"
+run = "docker compose -f {{vars.DOCKER_COMPOSE_FILE}} up -d prometheus grafana otel-collector jaeger"
+
+[tasks."monitoring:stop"]
+description = "Stop monitoring services"
+run = "docker compose -f {{vars.DOCKER_COMPOSE_FILE}} stop prometheus grafana otel-collector jaeger"
+
+[tasks."monitoring:restart"]
+description = "Restart monitoring services"
+run = "mise run monitoring:stop && mise run monitoring:start"

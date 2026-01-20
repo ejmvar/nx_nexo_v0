@@ -96,6 +96,26 @@ Runs:
 - ✅ Unit tests
 - ✅ Build verification
 
+### Infrastructure Tests
+
+```bash
+# Test Helm charts
+mise run test:helm:validate
+make test-helm-validate
+
+# Test monitoring stack
+mise run test:monitoring
+make test-monitoring
+
+# Test backend health
+mise run test:backend:health
+make test-backend-health
+
+# Test database connectivity
+mise run test:backend:database
+make test-backend-database
+```
+
 ### Continuous Testing
 
 ```bash

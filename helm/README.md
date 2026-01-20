@@ -128,6 +128,14 @@ helm uninstall nexo-crm && kubectl delete namespace nexo-crm
 ### Validation
 
 ```bash
+# Run comprehensive Helm validation tests
+bash scripts/test-helm-validate.sh
+
+# Or using MISE/Make
+mise run test:helm:validate
+make test-helm-validate
+
+# Manual validation commands
 # Dry-run to see what would be installed
 helm install nexo-crm ./helm/nexo-crm --dry-run --debug
 
@@ -136,7 +144,24 @@ helm template nexo-crm ./helm/nexo-crm
 
 # Lint chart
 helm lint ./helm/nexo-crm
+
+# Validate against Kubernetes (requires kubectl)
+helm template nexo-crm ./helm/nexo-crm | kubectl apply --dry-run=client -f -
 ```
+
+### Testing
+
+The Helm chart validation test suite (`scripts/test-helm-validate.sh`) includes:
+
+- **Chart Structure Tests**: Validates all required files exist
+- **Helm Lint Tests**: Lints chart with all environment value files
+- **Template Rendering Tests**: Ensures templates render without errors
+- **Kubernetes Validation**: Validates manifests against K8s API
+- **Chart Metadata Tests**: Verifies Chart.yaml completeness
+- **Values File Tests**: Confirms environment-specific configurations
+- **Advanced Tests**: Checks for expected Kubernetes resources
+
+Run the test suite before deploying to ensure chart validity.
 
 ## Configuration
 

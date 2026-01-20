@@ -217,6 +217,9 @@ helm-list: ## List Helm releases
 helm-status: ## Show Helm release status
 	@helm status nexo-crm
 
+test-helm-validate: ## Validate Helm chart configuration and templates
+	@bash scripts/test-helm-validate.sh
+
 # ============================================================================
 # UTILITY COMMANDS
 # ============================================================================
@@ -281,6 +284,25 @@ logs-pgadmin: ## View pgAdmin logs
 
 logs-redisinsight: ## View RedisInsight logs
 	@docker compose -f $(COMPOSE_FILE) logs -f redisinsight
+
+logs-otel: ## View OpenTelemetry Collector logs
+	@docker compose -f $(COMPOSE_FILE) logs -f otel-collector
+
+logs-jaeger: ## View Jaeger logs
+	@docker compose -f $(COMPOSE_FILE) logs -f jaeger
+
+test-monitoring: ## Validate monitoring stack configuration and health
+	@bash scripts/test-monitoring.sh
+
+monitoring-start: ## Start monitoring services only
+	@docker compose -f $(COMPOSE_FILE) up -d prometheus grafana otel-collector jaeger
+
+monitoring-stop: ## Stop monitoring services
+	@docker compose -f $(COMPOSE_FILE) stop prometheus grafana otel-collector jaeger
+
+monitoring-restart: ## Restart monitoring services
+	@$(MAKE) monitoring-stop
+	@$(MAKE) monitoring-start
 
 # ============================================================================
 # DATABASE COMMANDS
