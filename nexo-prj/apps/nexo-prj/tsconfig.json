@@ -33,8 +33,8 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@nexo-prj/shared-ui": ["../../libs/shared-ui/src/index.ts"],
-      "@nexo-prj/shared-ui/*": ["../../libs/shared-ui/src/*"]
+      "@nexo-prj/shared-ui": ["../../dist/libs/shared-ui/src/index.d.ts"],
+      "@nexo-prj/shared-ui/*": ["../../dist/libs/shared-ui/src/*"]
     },
     "types": ["jest", "node"],
     "outDir": "dist",
