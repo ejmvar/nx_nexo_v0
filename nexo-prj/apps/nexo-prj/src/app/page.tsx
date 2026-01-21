@@ -78,6 +78,12 @@ export default function PortalSelection() {
         </div>
 
         <div className="text-center mt-12">
+          <Link
+            href="/health"
+            className="inline-block mb-4 px-6 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors backdrop-blur-sm"
+          >
+            🔍 System Health Check
+          </Link>
           <p className="text-white/70 text-sm">
             © 2026 NEXO Business Solutions. All rights reserved.
           </p>
