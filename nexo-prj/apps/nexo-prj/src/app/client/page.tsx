@@ -32,6 +32,13 @@ import {
   DataTable,
 } from '@nexo-prj/shared-ui';
 
+interface DataTableColumn<T = any> {
+  id: string;
+  header: string;
+  accessorKey: keyof T;
+  cell?: (props: { row: { original: T } }) => React.ReactNode;
+}
+
 interface Project {
   id: string;
   name: string;
@@ -150,6 +157,8 @@ export default function ClientPortal() {
       <PortalHeader
         title="Client Portal"
         userName="ABC Corporation"
+        userAvatar="A"
+        onLogout={() => console.log('Logout clicked')}
         showBackButton={true}
         backHref="/"
       />
@@ -200,6 +209,7 @@ export default function ClientPortal() {
                 <KPICard
                   title="Active Projects"
                   value="4"
+                  subtitle="Currently in progress"
                   change={25}
                   icon={<Assignment />}
                 />
@@ -208,6 +218,7 @@ export default function ClientPortal() {
                 <KPICard
                   title="Total Investment"
                   value="$205K"
+                  subtitle="This quarter"
                   change={15.5}
                   icon={<TrendingUp />}
                 />
@@ -216,6 +227,7 @@ export default function ClientPortal() {
                 <KPICard
                   title="Completion Rate"
                   value="88%"
+                  subtitle="Average across projects"
                   change={3.2}
                   icon={<Dashboard />}
                 />
@@ -224,6 +236,7 @@ export default function ClientPortal() {
                 <KPICard
                   title="Unread Messages"
                   value="5"
+                  subtitle="Requires attention"
                   change={-12}
                   icon={<Message />}
                 />
@@ -238,15 +251,6 @@ export default function ClientPortal() {
                     <AreaChartComponent
                       data={revenueData}
                       title="Project Investment Over Time"
-                      xAxisKey="name"
-                      areas={[
-                        {
-                          dataKey: 'value',
-                          stroke: '#2196f3',
-                          fill: '#2196f3',
-                          name: 'Investment ($)',
-                        },
-                      ]}
                     />
                   </CardContent>
                 </Card>
@@ -257,8 +261,6 @@ export default function ClientPortal() {
                     <PieChartComponent
                       data={budgetData}
                       title="Budget Allocation"
-                      nameKey="name"
-                      dataKey="value"
                     />
                   </CardContent>
                 </Card>

@@ -18,7 +18,6 @@ import {
   Badge,
 } from '@mui/material';
 import {
-  Dashboard,
   School,
   Work,
   Code,
@@ -35,6 +34,13 @@ import {
   DataTable,
 
 } from '@nexo-prj/shared-ui';
+
+interface DataTableColumn<T = any> {
+  id: string;
+  header: string;
+  accessorKey: keyof T;
+  cell?: (props: { row: { original: T } }) => React.ReactNode;
+}
 
 interface Certification {
   id: string;
@@ -152,6 +158,8 @@ export default function ProfessionalPortal() {
       <PortalHeader
         title="Professional Portal"
         userName="Jane Developer"
+        userAvatar="/api/placeholder/32/32"
+        onLogout={() => console.log('Logout')}
         showBackButton={true}
         backHref="/"
       />
@@ -208,6 +216,7 @@ export default function ProfessionalPortal() {
                 <KPICard
                   title="Certifications"
                   value="8"
+                  subtitle=""
                   change={33.3}
                   icon={<School />}
                 />
@@ -216,6 +225,7 @@ export default function ProfessionalPortal() {
                 <KPICard
                   title="Skill Rating"
                   value="4.8/5"
+                  subtitle=""
                   change={5.2}
                   icon={<Star />}
                 />
@@ -224,6 +234,7 @@ export default function ProfessionalPortal() {
                 <KPICard
                   title="Projects Completed"
                   value="24"
+                  subtitle=""
                   change={14.3}
                   icon={<Work />}
                 />
@@ -232,6 +243,7 @@ export default function ProfessionalPortal() {
                 <KPICard
                   title="Network Connections"
                   value="342"
+                  subtitle=""
                   change={8.9}
                   icon={<People />}
                 />

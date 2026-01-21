@@ -43,7 +43,7 @@ export interface ChartProps {
   title?: string;
 }
 
-export const LineChartComponent: React.FC<ChartProps> = ({ title = 'Line Chart' }) => (
+export const LineChartComponent: React.FC<ChartProps> = ({ title = 'Line Chart', data }) => (
   <Card>
     <CardContent>
       <Typography variant="h6">{title}</Typography>
@@ -54,7 +54,7 @@ export const LineChartComponent: React.FC<ChartProps> = ({ title = 'Line Chart' 
   </Card>
 );
 
-export const BarChartComponent: React.FC<ChartProps> = ({ title = 'Bar Chart' }) => (
+export const BarChartComponent: React.FC<ChartProps> = ({ title = 'Bar Chart', data }) => (
   <Card>
     <CardContent>
       <Typography variant="h6">{title}</Typography>
@@ -65,7 +65,7 @@ export const BarChartComponent: React.FC<ChartProps> = ({ title = 'Bar Chart' })
   </Card>
 );
 
-export const PieChartComponent: React.FC<ChartProps> = ({ title = 'Pie Chart' }) => (
+export const PieChartComponent: React.FC<ChartProps> = ({ title = 'Pie Chart', data }) => (
   <Card>
     <CardContent>
       <Typography variant="h6">{title}</Typography>
@@ -76,7 +76,7 @@ export const PieChartComponent: React.FC<ChartProps> = ({ title = 'Pie Chart' })
   </Card>
 );
 
-export const AreaChartComponent: React.FC<ChartProps> = ({ title = 'Area Chart' }) => (
+export const AreaChartComponent: React.FC<ChartProps> = ({ title = 'Area Chart', data }) => (
   <Card>
     <CardContent>
       <Typography variant="h6">{title}</Typography>
@@ -104,9 +104,10 @@ export interface KPICardProps {
   value: string | number;
   subtitle?: string;
   icon?: React.ReactNode;
+  change?: number;
 }
 
-export const KPICard: React.FC<KPICardProps> = ({ title, value, subtitle, icon }) => (
+export const KPICard: React.FC<KPICardProps> = ({ title, value, subtitle, icon, change }) => (
   <Card>
     <CardContent>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -120,6 +121,17 @@ export const KPICard: React.FC<KPICardProps> = ({ title, value, subtitle, icon }
           {subtitle && (
             <Typography color="textSecondary" variant="body2">
               {subtitle}
+            </Typography>
+          )}
+          {change !== undefined && (
+            <Typography
+              variant="body2"
+              sx={{
+                color: change >= 0 ? 'success.main' : 'error.main',
+                fontWeight: 'bold'
+              }}
+            >
+              {change >= 0 ? '+' : ''}{change}%
             </Typography>
           )}
         </Box>
@@ -141,8 +153,8 @@ export interface DataTableColumn<T = any> {
   cell?: (props: { row: { original: T } }) => React.ReactNode;
 }
 
-// Export a dummy value for bundler compatibility
-export const DataTableColumnType = {} as DataTableColumn;
+// Export as type alias for better compatibility
+export type DataTableColumnType<T = any> = DataTableColumn<T>;
 
 export interface DataTableProps<T = any> {
   data: T[];

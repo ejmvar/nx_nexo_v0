@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import {
   Box,
   Container,
@@ -18,14 +17,11 @@ import {
   Button,
 } from '@mui/material';
 import {
-  Dashboard,
   Assignment,
   People,
   Business,
   Assessment,
-  Settings,
   TrendingUp,
-  TrendingDown,
 } from '@mui/icons-material';
 import {
   PortalHeader,
@@ -36,6 +32,13 @@ import {
   DataTable,
 
 } from '@nexo-prj/shared-ui';
+
+interface DataTableColumn<T = any> {
+  id: string;
+  header: string;
+  accessorKey: keyof T;
+  cell?: (props: { row: { original: T } }) => React.ReactNode;
+}
 
 interface Task {
   id: string;
@@ -171,6 +174,8 @@ export default function EmployeePortal() {
       <PortalHeader
         title="Employee Portal"
         userName="John Doe"
+        userAvatar="/api/placeholder/32/32"
+        onLogout={() => console.log('Logout')}
         showBackButton={true}
         backHref="/"
       />
@@ -220,6 +225,7 @@ export default function EmployeePortal() {
               <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                 <KPICard
                   title="Tasks Completed"
+                  subtitle="This month"
                   value="45"
                   change={12.5}
                   icon={<Assignment />}
@@ -228,6 +234,7 @@ export default function EmployeePortal() {
               <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                 <KPICard
                   title="Performance Score"
+                  subtitle="Average rating"
                   value="96%"
                   change={4.2}
                   icon={<TrendingUp />}
@@ -236,6 +243,7 @@ export default function EmployeePortal() {
               <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                 <KPICard
                   title="Active Projects"
+                  subtitle="Currently assigned"
                   value="8"
                   change={-2}
                   icon={<Business />}
@@ -244,6 +252,7 @@ export default function EmployeePortal() {
               <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                 <KPICard
                   title="Team Members"
+                  subtitle="In your department"
                   value="12"
                   change={8.3}
                   icon={<People />}
@@ -259,8 +268,6 @@ export default function EmployeePortal() {
                     <LineChartComponent
                       data={performanceData}
                       title="Performance Trend"
-                      xAxisKey="name"
-                      lines={[{ dataKey: 'value', stroke: '#2196f3', name: 'Score' }]}
                     />
                   </CardContent>
                 </Card>
@@ -271,8 +278,6 @@ export default function EmployeePortal() {
                     <BarChartComponent
                       data={tasksData}
                       title="Tasks Overview"
-                      xAxisKey="name"
-                      bars={[{ dataKey: 'value', fill: '#4caf50' }]}
                     />
                   </CardContent>
                 </Card>
