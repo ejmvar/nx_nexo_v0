@@ -1,6 +1,16 @@
 'use client';
 
 import React from 'react';
+import { 
+  LayoutDashboard, 
+  ClipboardList, 
+  Users, 
+  Building, 
+  TrendingUp, 
+  Settings,
+  Briefcase,
+  Package
+} from 'lucide-react';
 
 // Utility function for conditional classes
 function cn(...classes: (string | undefined | null | false)[]) {
@@ -293,34 +303,34 @@ export const PortalSidebar: React.FC<PortalSidebarProps> = ({
 
 // Default menu items for different portals - using emoji icons for simplicity
 export const getEmployeeMenuItems = (): MenuItem[] => [
-  { icon: <span>📊</span>, text: 'Dashboard', href: '/employee/dashboard' },
-  { icon: <span>📋</span>, text: 'My Tasks', href: '/employee/tasks' },
-  { icon: <span>👥</span>, text: 'Team', href: '/employee/team' },
-  { icon: <span>🏢</span>, text: 'Projects', href: '/employee/projects' },
-  { icon: <span>📈</span>, text: 'Reports', href: '/employee/reports' },
-  { icon: <span>⚙️</span>, text: 'Settings', href: '/employee/settings' },
+  { icon: <LayoutDashboard size={18} />, text: 'Dashboard', href: '/employee/dashboard' },
+  { icon: <ClipboardList size={18} />, text: 'My Tasks', href: '/employee/tasks' },
+  { icon: <Users size={18} />, text: 'Team', href: '/employee/team' },
+  { icon: <Briefcase size={18} />, text: 'Projects', href: '/employee/projects' },
+  { icon: <TrendingUp size={18} />, text: 'Reports', href: '/employee/reports' },
+  { icon: <Settings size={18} />, text: 'Settings', href: '/employee/settings' },
 ];
 
 export const getClientMenuItems = (): MenuItem[] => [
-  { icon: <span>📊</span>, text: 'Dashboard', href: '/client/dashboard' },
-  { icon: <span>📋</span>, text: 'My Projects', href: '/client/projects' },
-  { icon: <span>🏢</span>, text: 'Services', href: '/client/services' },
-  { icon: <span>📈</span>, text: 'Reports', href: '/client/reports' },
-  { icon: <span>⚙️</span>, text: 'Settings', href: '/client/settings' },
+  { icon: <LayoutDashboard size={18} />, text: 'Dashboard', href: '/client/dashboard' },
+  { icon: <ClipboardList size={18} />, text: 'My Projects', href: '/client/projects' },
+  { icon: <Building size={18} />, text: 'Services', href: '/client/services' },
+  { icon: <TrendingUp size={18} />, text: 'Reports', href: '/client/reports' },
+  { icon: <Settings size={18} />, text: 'Settings', href: '/client/settings' },
 ];
 
 export const getSupplierMenuItems = (): MenuItem[] => [
-  { icon: <span>📊</span>, text: 'Dashboard', href: '/supplier/dashboard' },
-  { icon: <span>📋</span>, text: 'Orders', href: '/supplier/orders' },
-  { icon: <span>🏢</span>, text: 'Products', href: '/supplier/products' },
-  { icon: <span>📈</span>, text: 'Analytics', href: '/supplier/analytics' },
-  { icon: <span>⚙️</span>, text: 'Settings', href: '/supplier/settings' },
+  { icon: <LayoutDashboard size={18} />, text: 'Dashboard', href: '/supplier/dashboard' },
+  { icon: <ClipboardList size={18} />, text: 'Orders', href: '/supplier/orders' },
+  { icon: <Package size={18} />, text: 'Products', href: '/supplier/products' },
+  { icon: <TrendingUp size={18} />, text: 'Analytics', href: '/supplier/analytics' },
+  { icon: <Settings size={18} />, text: 'Settings', href: '/supplier/settings' },
 ];
 
 export const getProfessionalMenuItems = (): MenuItem[] => [
-  { icon: <span>📊</span>, text: 'Dashboard', href: '/professional/dashboard' },
-  { icon: <span>📋</span>, text: 'Assignments', href: '/professional/assignments' },
-  { icon: <span>👥</span>, text: 'Clients', href: '/professional/clients' },
-  { icon: <span>📈</span>, text: 'Performance', href: '/professional/performance' },
-  { icon: <span>⚙️</span>, text: 'Settings', href: '/professional/settings' },
+  { icon: <LayoutDashboard size={18} />, text: 'Dashboard', href: '/professional/dashboard' },
+  { icon: <Briefcase size={18} />, text: 'Assignments', href: '/professional/assignments' },
+  { icon: <Users size={18} />, text: 'Clients', href: '/professional/clients' },
+  { icon: <TrendingUp size={18} />, text: 'Performance', href: '/professional/performance' },
+  { icon: <Settings size={18} />, text: 'Settings', href: '/professional/settings' },
 ];

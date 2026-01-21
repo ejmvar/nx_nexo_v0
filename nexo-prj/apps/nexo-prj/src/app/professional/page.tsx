@@ -10,7 +10,7 @@ import {
   KPICard,
   DataTable,
   DataTableColumn,
-} from '../../shared-ui/lib/portal-components';
+} from '@nexo-prj/shared-ui';
 export const dynamic = 'force-dynamic';
 interface Assignment {
   id: string;
