@@ -258,14 +258,6 @@ export default function ProfessionalPortal() {
                     <LineChartComponent
                       data={skillProgressData}
                       title="Skill Proficiency Levels"
-                      xAxisKey="name"
-                      lines={[
-                        {
-                          dataKey: 'value',
-                          stroke: '#9c27b0',
-                          name: 'Proficiency (%)',
-                        },
-                      ]}
                     />
                   </CardContent>
                 </Card>
@@ -276,8 +268,6 @@ export default function ProfessionalPortal() {
                     <PieChartComponent
                       data={certificationStatusData}
                       title="Certification Status"
-                      nameKey="name"
-                      dataKey="value"
                     />
                   </CardContent>
                 </Card>

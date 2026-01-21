@@ -4,16 +4,37 @@
   "include": [],
   "references": [
     {
-      "path": "./tsconfig.app.json"
-    },
-    {
-      "path": "./tsconfig.spec.json"
-    },
-    {
-      "path": "./e2e"
-    },
-    {
       "path": "./."
+    },
+    {
+      "path": "./apps/nexo-professionals-e2e"
+    },
+    {
+      "path": "./apps/nexo-employees-e2e"
+    },
+    {
+      "path": "./apps/nexo-professionals"
+    },
+    {
+      "path": "./apps/nexo-suppliers-e2e"
+    },
+    {
+      "path": "./apps/nexo-clients-e2e"
+    },
+    {
+      "path": "./apps/nexo-employees"
+    },
+    {
+      "path": "./apps/nexo-suppliers"
+    },
+    {
+      "path": "./apps/nexo-clients"
+    },
+    {
+      "path": "./apps/nexo-prj"
+    },
+    {
+      "path": "./libs"
     }
   ]
 }

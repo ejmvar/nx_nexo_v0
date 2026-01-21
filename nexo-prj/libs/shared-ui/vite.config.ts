@@ -9,16 +9,23 @@ export default defineConfig({
       entry: './src/index.ts',
       name: 'shared-ui',
       fileName: 'index',
-      formats: ['es', 'cjs'],
+      formats: ['es'],
     },
     rollupOptions: {
-      external: ['react', 'react-dom'],
+      external: (id: string) => {
+        // Externalize EVERYTHING except local files
+        return !id.startsWith('.') && !id.startsWith('/') && !id.startsWith('\0');
+      },
       output: {
+        preserveModules: true,  // Keep module structure instead of bundling
+        preserveModulesRoot: 'src',
         globals: {
           react: 'React',
           'react-dom': 'ReactDOM',
         },
       },
     },
+    minify: false,
+    sourcemap: false,
   },
 });
