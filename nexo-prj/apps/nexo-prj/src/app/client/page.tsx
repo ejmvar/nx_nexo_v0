@@ -12,6 +12,8 @@ import {
   DataTableColumn,
 } from '@nexo-prj/shared-ui';
 
+export const dynamic = 'force-dynamic';
+
 interface Project {
   id: string;
   name: string;

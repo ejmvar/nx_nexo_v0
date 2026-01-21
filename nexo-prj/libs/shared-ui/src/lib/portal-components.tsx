@@ -1,5 +1,6 @@
+'use client';
+
 import React from 'react';
-import Link from 'next/link';
 
 // Utility function for conditional classes
 function cn(...classes: (string | undefined | null | false)[]) {
@@ -202,7 +203,7 @@ export const PortalHeader: React.FC<PortalHeaderProps> = ({
     <header className="sticky top-0 z-50 w-full border-b bg-primary text-primary-foreground">
       <div className="flex h-16 items-center px-4 gap-4">
         {showBackButton && (
-          <Link
+          <a
             href={backHref}
             className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-primary/90 h-10 px-4 py-2"
           >
@@ -210,7 +211,7 @@ export const PortalHeader: React.FC<PortalHeaderProps> = ({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
             Back
-          </Link>
+          </a>
         )}
         <h1 className="text-xl font-semibold flex-1">{title}</h1>
         <div className="flex items-center gap-3">
@@ -271,7 +272,7 @@ export const PortalSidebar: React.FC<PortalSidebarProps> = ({
           <div className="border-t my-4" />
           <nav className="space-y-1">
             {menuItems.map((item, index) => (
-              <Link
+              <a
                 key={index}
                 href={item.href}
                 className="flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
@@ -281,7 +282,7 @@ export const PortalSidebar: React.FC<PortalSidebarProps> = ({
                   {item.icon}
                 </span>
                 <span>{item.text}</span>
-              </Link>
+              </a>
             ))}
           </nav>
         </div>

@@ -12,6 +12,8 @@ import {
   DataTableColumn,
 } from '@nexo-prj/shared-ui';
 
+export const dynamic = 'force-dynamic';
+
 interface Order {
   id: string;
   orderNumber: string;
@@ -147,7 +149,7 @@ export default function SupplierPortal() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           <BarChartComponent title="Monthly Sales" data={salesData} />
-          <DonutChartComponent title="Inventory Status" />
+          <DonutChartComponent title="Inventory Status" data={inventoryData} />
         </div>
 
         <div className="mb-8">
