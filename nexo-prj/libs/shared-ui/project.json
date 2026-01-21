@@ -1,0 +1,41 @@
+{
+  "name": "shared-ui",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/shared-ui/src",
+  "projectType": "library",
+  "tags": ["type:ui"],
+  "targets": {
+    "build": {
+      "executor": "@nx/rollup:rollup",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "main": "libs/shared-ui/src/index.ts",
+        "tsConfig": "libs/shared-ui/tsconfig.lib.json",
+        "outputPath": "libs/shared-ui/dist",
+        "format": ["esm", "cjs"],
+        "assets": []
+      },
+      "configurations": {
+        "development": {
+          "buildableProjectDepsInPackageJsonType": "dependencies",
+          "updateBuildableProjectDepsInPackageJson": true
+        },
+        "production": {
+          "buildableProjectDepsInPackageJsonType": "dependencies",
+          "updateBuildableProjectDepsInPackageJson": true,
+          "optimization": true,
+          "extractLicenses": true,
+          "sourceMap": false
+        }
+      }
+    },
+    "test": {
+      "executor": "@nx/vite:test",
+      "outputs": ["{options.reportsDirectory}"],
+      "options": {
+        "reportsDirectory": "{workspaceRoot}/test-output/libs/shared-ui"
+      }
+    }
+  }
+}

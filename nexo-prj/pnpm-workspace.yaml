@@ -18,5 +18,7 @@ packages:
   - 'ventas-service-e2e'
   - 'produccion-service'
   - 'produccion-service-e2e'
+  - 'libs'
+  - 'libs/*'
   - 'e2e'
 autoInstallPeers: true

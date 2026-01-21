@@ -83,8 +83,8 @@ services:
 
   frontend:
     build:
-      context: ../nexo-prj/apps/nexo-prj
-      dockerfile: Dockerfile
+      context: ../nexo-prj
+      dockerfile: apps/nexo-prj/Dockerfile
     container_name: nexo-frontend
     environment:
       NEXT_PUBLIC_API_URL: http://backend:3001/graphql
