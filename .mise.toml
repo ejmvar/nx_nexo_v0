@@ -475,30 +475,6 @@ run = "docker stats --no-stream --format 'table {{.Container}}\\t{{.CPUPerc}}\\t
 description = "Show all service logs"
 run = "docker compose -f docker-compose.full.yml logs -f --tail=100"
 
-[tasks."db:backup"]
-description = "Create PostgreSQL backup"
-run = "bash scripts/backup-postgres.sh backup"
-
-[tasks."db:backup:list"]
-description = "List all PostgreSQL backups"
-run = "bash scripts/backup-postgres.sh list"
-
-[tasks."db:backup:verify"]
-description = "Verify latest backup integrity"
-run = "bash scripts/backup-postgres.sh verify $(bash scripts/restore-postgres.sh latest)"
-
-[tasks."db:restore:test"]
-description = "Test restore in separate database"
-run = "bash scripts/restore-postgres.sh test"
-
-[tasks."db:restore"]
-description = "Restore from latest backup (DESTRUCTIVE)"
-run = "bash scripts/restore-postgres.sh restore"
-
-[tasks."db:restore:file"]
-description = "Restore from specific backup file"
-run = "bash scripts/restore-postgres.sh restore"
-
 [tasks."db:backup:rotate"]
 description = "Apply backup rotation policies"
 run = "bash scripts/backup-rotation.sh rotate"

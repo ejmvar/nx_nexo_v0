@@ -1,24 +1,28 @@
 packages:
-  - 'apps/*'
-  - 'apps'
-  - 'apps-e2e'
-  - 'back_auth'
-  - 'back_auth-e2e'
-  - 'auth-service'
-  - 'auth-service-e2e'
-  - 'api-gateway'
-  - 'api-gateway-e2e'
-  - 'core-crm-service'
-  - 'core-crm-service-e2e'
-  - 'stock-service'
-  - 'stock-service-e2e'
-  - 'compras-service'
-  - 'compras-service-e2e'
-  - 'ventas-service'
-  - 'ventas-service-e2e'
-  - 'produccion-service'
-  - 'produccion-service-e2e'
-  - 'libs'
-  - 'libs/*'
-  - 'e2e'
+  - apps/*
+  - apps
+  - apps-e2e
+  - back_auth
+  - back_auth-e2e
+  - auth-service
+  - auth-service-e2e
+  - api-gateway
+  - api-gateway-e2e
+  - core-crm-service
+  - core-crm-service-e2e
+  - stock-service
+  - stock-service-e2e
+  - compras-service
+  - compras-service-e2e
+  - ventas-service
+  - ventas-service-e2e
+  - produccion-service
+  - produccion-service-e2e
+  - libs
+  - libs/*
+  - e2e
+
 autoInstallPeers: true
+
+ignoredBuiltDependencies:
+  - bcrypt
