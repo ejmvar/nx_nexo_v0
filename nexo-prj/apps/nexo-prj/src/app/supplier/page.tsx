@@ -1,343 +1,210 @@
 'use client';
 
-import {
-  Box,
-  Container,
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Chip,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Button,
-  CardActions,
-} from '@mui/material';
-import {
-  Dashboard,
-  Assignment,
-  LocalShipping,
-  Inventory,
-  TrendingUp,
-  AttachMoney,
-} from '@mui/icons-material';
+import { useState } from 'react';
 import {
   PortalHeader,
+  PortalSidebar,
   getSupplierMenuItems,
   BarChartComponent,
   DonutChartComponent,
   KPICard,
   DataTable,
-
+  DataTableColumn,
 } from '@nexo-prj/shared-ui';
 
 interface Order {
   id: string;
-  client: string;
+  orderNumber: string;
+  customer: string;
   status: 'pending' | 'processing' | 'shipped' | 'delivered';
   amount: string;
   date: string;
 }
 
 export default function SupplierPortal() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const menuItems = getSupplierMenuItems();
 
-  // Sample data for charts
-  const orderStatusData = [
-    { name: 'Delivered', value: 45, fill: '#4caf50' },
-    { name: 'Shipped', value: 28, fill: '#2196f3' },
-    { name: 'Processing', value: 18, fill: '#ff9800' },
-    { name: 'Pending', value: 9, fill: '#f44336' },
-  ];
-
-  const monthlyRevenueData = [
-    { name: 'Jan', value: 45000 },
-    { name: 'Feb', value: 52000 },
-    { name: 'Mar', value: 48000 },
-    { name: 'Apr', value: 61000 },
+  const salesData = [
+    { name: 'Jan', value: 42000 },
+    { name: 'Feb', value: 48000 },
+    { name: 'Mar', value: 51000 },
+    { name: 'Apr', value: 46000 },
     { name: 'May', value: 55000 },
-    { name: 'Jun', value: 67000 },
+    { name: 'Jun', value: 58000 },
   ];
 
-  // Sample orders for table
+  const inventoryData = [
+    { name: 'In Stock', value: 1250, fill: '#10b981' },
+    { name: 'Low Stock', value: 180, fill: '#f59e0b' },
+    { name: 'Out of Stock', value: 45, fill: '#ef4444' },
+    { name: 'On Order', value: 320, fill: '#3b82f6' },
+  ];
+
   const orders: Order[] = [
-    {
-      id: 'ORD-2026-001',
-      client: 'Acme Corp',
-      status: 'processing',
-      amount: '$12,500',
-      date: '2026-01-15',
-    },
-    {
-      id: 'ORD-2026-002',
-      client: 'TechStart Inc',
-      status: 'shipped',
-      amount: '$8,750',
-      date: '2026-01-12',
-    },
-    {
-      id: 'ORD-2026-003',
-      client: 'Global Solutions',
-      status: 'delivered',
-      amount: '$15,200',
-      date: '2026-01-10',
-    },
-    {
-      id: 'ORD-2026-004',
-      client: 'Innovate Ltd',
-      status: 'pending',
-      amount: '$9,800',
-      date: '2026-01-18',
-    },
+    { id: '1', orderNumber: 'ORD-001', customer: 'Tech Solutions Inc', status: 'processing', amount: '$12,500', date: '2026-01-20' },
+    { id: '2', orderNumber: 'ORD-002', customer: 'Global Enterprises', status: 'shipped', amount: '$8,750', date: '2026-01-19' },
+    { id: '3', orderNumber: 'ORD-003', customer: 'StartUp Co', status: 'pending', amount: '$15,200', date: '2026-01-21' },
+    { id: '4', orderNumber: 'ORD-004', customer: 'Retail Partners', status: 'delivered', amount: '$9,800', date: '2026-01-15' },
   ];
 
-  const columns: DataTableColumn<Order>[] = [
-    {
-      id: 'id',
-      header: 'Order ID',
-      accessorKey: 'id',
-    },
-    {
-      id: 'client',
-      header: 'Client',
-      accessorKey: 'client',
-    },
+  const orderColumns: DataTableColumn<Order>[] = [
+    { id: 'orderNumber', header: 'Order #', accessorKey: 'orderNumber' },
+    { id: 'customer', header: 'Customer', accessorKey: 'customer' },
     {
       id: 'status',
       header: 'Status',
       accessorKey: 'status',
-      cell: ({ row }) => {
-        const status = row.original.status;
-        const colorMap = {
-          delivered: 'success' as const,
-          shipped: 'info' as const,
-          processing: 'warning' as const,
-          pending: 'error' as const,
-        };
-        return <Chip label={status} color={colorMap[status]} size="small" />;
-      },
+      cell: ({ row }) => (
+        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+          row.original.status === 'delivered' ? 'bg-green-100 text-green-800' :
+          row.original.status === 'shipped' ? 'bg-blue-100 text-blue-800' :
+          row.original.status === 'processing' ? 'bg-purple-100 text-purple-800' :
+          'bg-yellow-100 text-yellow-800'
+        }`}>
+          {row.original.status}
+        </span>
+      )
     },
-    {
-      id: 'amount',
-      header: 'Amount',
-      accessorKey: 'amount',
-    },
-    {
-      id: 'date',
-      header: 'Date',
-      accessorKey: 'date',
-    },
+    { id: 'amount', header: 'Amount', accessorKey: 'amount' },
+    { id: 'date', header: 'Date', accessorKey: 'date' },
+  ];
+
+  const topProducts = [
+    { name: 'Premium Widget A', sold: 245, revenue: '$24,500', trend: 'up', icon: '📦' },
+    { name: 'Standard Component B', sold: 189, revenue: '$18,900', trend: 'up', icon: '🔧' },
+    { name: 'Deluxe Module C', sold: 156, revenue: '$31,200', trend: 'down', icon: '⚙️' },
+  ];
+
+  const recentActivity = [
+    { message: 'New order received from Tech Solutions', time: '5 minutes ago', icon: '🛒' },
+    { message: 'Shipment ORD-002 dispatched', time: '2 hours ago', icon: '🚚' },
+    { message: 'Inventory updated for 15 products', time: '4 hours ago', icon: '📊' },
+    { message: 'Payment received: $12,500', time: '1 day ago', icon: '💰' },
   ];
 
   return (
-    <Box sx={{ flexGrow: 1, bgcolor: 'grey.50', minHeight: '100vh' }}>
+    <div className="min-h-screen bg-gray-50">
       <PortalHeader
         title="Supplier Portal"
-        userName="Global Supplies Co."
+        userName="Supply Manager"
+        onLogout={() => console.log('Logout')}
         showBackButton={true}
         backHref="/"
       />
 
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-        <Grid container spacing={3}>
-          {/* Sidebar Menu */}
-          <Grid size={{ xs: 12, md: 3 }}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Navigation
-                </Typography>
-                <List>
-                  {menuItems.map((item, index) => (
-                    <ListItem key={index} sx={{ cursor: 'pointer' }}>
-                      <ListItemIcon>{item.icon}</ListItemIcon>
-                      <ListItemText primary={item.text} />
-                    </ListItem>
-                  ))}
-                </List>
-              </CardContent>
-            </Card>
-          </Grid>
+      <PortalSidebar
+        menuItems={menuItems}
+        isOpen={sidebarOpen}
+        onToggle={() => setSidebarOpen(!sidebarOpen)}
+      />
 
-          {/* Main Content */}
-          <Grid size={{ xs: 12, md: 9 }}>
-            {/* Welcome Section */}
-            <Card sx={{ mb: 3 }}>
-              <CardContent>
-                <Typography variant="h4" gutterBottom>
-                  Welcome, Global Supplies Co.
-                </Typography>
-                <Typography variant="body1" color="text.secondary" gutterBottom>
-                  Manage your orders and track deliveries
-                </Typography>
-                <Box sx={{ mt: 2 }}>
-                  <Chip label="Verified Supplier" color="success" sx={{ mr: 1 }} />
-                  <Chip label="100+ Orders" variant="outlined" sx={{ mr: 1 }} />
-                  <Chip label="Premium Partner" variant="outlined" />
-                </Box>
-              </CardContent>
-            </Card>
+      <button
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        className="fixed left-4 top-20 z-30 bg-primary text-white p-2 rounded-md shadow-lg hover:bg-primary/90"
+      >
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
 
-            {/* KPI Cards */}
-            <Grid container spacing={2} sx={{ mb: 3 }}>
-              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                <KPICard
-                  title="Total Orders"
-                  value="128"
-                  change={18.5}
-                  icon={<Assignment />}
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                <KPICard
-                  title="Monthly Revenue"
-                  value="$67K"
-                  change={12.3}
-                  icon={<AttachMoney />}
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                <KPICard
-                  title="On-Time Delivery"
-                  value="94%"
-                  change={2.8}
-                  icon={<LocalShipping />}
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                <KPICard
-                  title="Stock Items"
-                  value="1,247"
-                  change={-3.2}
-                  icon={<Inventory />}
-                />
-              </Grid>
-            </Grid>
+      <main className="p-6 max-w-7xl mx-auto">
+        <div className="mb-6">
+          <h2 className="text-3xl font-bold text-gray-900">Supplier Dashboard</h2>
+          <p className="text-gray-600">Manage orders, inventory, and supplier operations.</p>
+        </div>
 
-            {/* Charts */}
-            <Grid container spacing={2} sx={{ mb: 3 }}>
-              <Grid size={{ xs: 12, md: 7 }}>
-                <Card>
-                  <CardContent>
-                    <BarChartComponent
-                      data={monthlyRevenueData}
-                      title="Monthly Revenue Trend"
-                      xAxisKey="name"
-                      bars={[
-                        {
-                          dataKey: 'value',
-                          fill: '#2196f3',
-                          name: 'Revenue ($)',
-                        },
-                      ]}
-                    />
-                  </CardContent>
-                </Card>
-              </Grid>
-              <Grid size={{ xs: 12, md: 5 }}>
-                <Card>
-                  <CardContent>
-                    <DonutChartComponent
-                      data={orderStatusData}
-                      title="Order Status Distribution"
-                      nameKey="name"
-                      dataKey="value"
-                    />
-                  </CardContent>
-                </Card>
-              </Grid>
-            </Grid>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <KPICard
+            title="Total Orders"
+            value="156"
+            subtitle="This month"
+            icon={<span className="text-4xl">📦</span>}
+            change={18}
+          />
+          <KPICard
+            title="Revenue"
+            value="$58K"
+            subtitle="Monthly total"
+            icon={<span className="text-4xl">💰</span>}
+            change={12}
+          />
+          <KPICard
+            title="Active Products"
+            value="342"
+            subtitle="In catalog"
+            icon={<span className="text-4xl">🛍️</span>}
+            change={5}
+          />
+          <KPICard
+            title="Fulfillment Rate"
+            value="94%"
+            subtitle="On-time delivery"
+            icon={<span className="text-4xl">🚚</span>}
+            change={3}
+          />
+        </div>
 
-            {/* Orders Table */}
-            <Card sx={{ mb: 3 }}>
-              <DataTable
-                data={orders}
-                columns={columns}
-                title="Recent Orders"
-                enableRowSelection
-                enableSorting
-                enableFiltering
-              />
-            </Card>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <BarChartComponent title="Monthly Sales" data={salesData} />
+          <DonutChartComponent title="Inventory Status" />
+        </div>
 
-            {/* Quick Actions */}
-            <Card sx={{ mb: 3 }}>
-              <CardContent>
-                <Typography variant="h5" gutterBottom>
-                  Quick Actions
-                </Typography>
-                <Grid container spacing={2}>
-                  <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                    <Button variant="contained" fullWidth>
-                      New Order
-                    </Button>
-                  </Grid>
-                  <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                    <Button variant="outlined" fullWidth>
-                      Track Shipment
-                    </Button>
-                  </Grid>
-                  <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                    <Button variant="outlined" fullWidth>
-                      Update Inventory
-                    </Button>
-                  </Grid>
-                  <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                    <Button variant="outlined" fullWidth>
-                      View Reports
-                    </Button>
-                  </Grid>
-                </Grid>
-              </CardContent>
-            </Card>
+        <div className="mb-8">
+          <DataTable
+            title="Recent Orders"
+            data={orders}
+            columns={orderColumns}
+            enableRowSelection={true}
+          />
+        </div>
 
-            {/* Recent Activity */}
-            <Card>
-              <CardContent>
-                <Typography variant="h5" gutterBottom>
-                  Recent Activity
-                </Typography>
-                <List>
-                  <ListItem>
-                    <ListItemIcon>
-                      <LocalShipping />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary="Order ORD-2026-002 shipped to TechStart Inc"
-                      secondary="2 hours ago"
-                    />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemIcon>
-                      <Inventory />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary="Inventory updated: 45 new items added"
-                      secondary="5 hours ago"
-                    />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemIcon>
-                      <Assignment />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary="New order received from Innovate Ltd"
-                      secondary="1 day ago"
-                    />
-                  </ListItem>
-                </List>
-              </CardContent>
-              <CardActions>
-                <Button size="small" color="primary">
-                  View All Activity
-                </Button>
-              </CardActions>
-            </Card>
-          </Grid>
-        </Grid>
-      </Container>
-    </Box>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-white rounded-lg border shadow-sm p-6">
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <span>🏆</span>
+              Top Products
+            </h3>
+            <div className="space-y-4">
+              {topProducts.map((product, index) => (
+                <div key={index} className="flex items-start gap-3 p-3 rounded-lg border hover:border-primary transition-colors">
+                  <span className="text-2xl">{product.icon}</span>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-sm">{product.name}</h4>
+                    <div className="flex justify-between items-center mt-2">
+                      <span className="text-xs text-gray-600">{product.sold} units sold</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-green-600">{product.revenue}</span>
+                        <span className={product.trend === 'up' ? 'text-green-500' : 'text-red-500'}>
+                          {product.trend === 'up' ? '↗' : '↘'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg border shadow-sm p-6">
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <span>📢</span>
+              Recent Activity
+            </h3>
+            <div className="space-y-4">
+              {recentActivity.map((activity, index) => (
+                <div key={index} className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                  <span className="text-2xl">{activity.icon}</span>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">{activity.message}</p>
+                    <p className="text-xs text-gray-500">{activity.time}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
   );
 }

@@ -19,8 +19,8 @@
     "target": "es2022",
     "customConditions": ["@nexo-prj/source"],
     "paths": {
-      "@nexo-prj/shared-ui": ["libs/shared-ui/src/index.ts"],
-      "@nexo-prj/shared-ui/*": ["libs/shared-ui/src/*"]
+      "@nexo-prj/shared-ui": ["dist/libs/shared-ui/src/index.d.ts"],
+      "@nexo-prj/shared-ui/*": ["dist/libs/shared-ui/src/*"]
     }
   }
 }

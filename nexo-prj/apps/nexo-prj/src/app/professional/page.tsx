@@ -1,394 +1,218 @@
 'use client';
 
-import {
-  Box,
-  Container,
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Chip,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  LinearProgress,
-  Button,
-  CardActions,
-  Badge,
-} from '@mui/material';
-import {
-  School,
-  Work,
-  Code,
-  Star,
-  TrendingUp,
-  People,
-} from '@mui/icons-material';
+import { useState } from 'react';
 import {
   PortalHeader,
+  PortalSidebar,
   getProfessionalMenuItems,
   LineChartComponent,
   PieChartComponent,
   KPICard,
   DataTable,
-
+  DataTableColumn,
 } from '@nexo-prj/shared-ui';
 
-interface DataTableColumn<T = any> {
+interface Assignment {
   id: string;
-  header: string;
-  accessorKey: keyof T;
-  cell?: (props: { row: { original: T } }) => React.ReactNode;
-}
-
-interface Certification {
-  id: string;
-  name: string;
-  status: 'certified' | 'in-progress' | 'planned';
-  progress: number;
-  expiry: string;
-  provider: string;
+  client: string;
+  project: string;
+  status: 'active' | 'pending' | 'completed';
+  hours: number;
+  rate: string;
 }
 
 export default function ProfessionalPortal() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const menuItems = getProfessionalMenuItems();
 
-  // Sample data for charts
-  const skillProgressData = [
-    { name: 'React', value: 95 },
-    { name: 'Node.js', value: 88 },
-    { name: 'Python', value: 82 },
-    { name: 'AWS', value: 78 },
-    { name: 'Docker', value: 85 },
-    { name: 'TypeScript', value: 92 },
+  const earningsData = [
+    { name: 'Jan', value: 5200 },
+    { name: 'Feb', value: 6100 },
+    { name: 'Mar', value: 5800 },
+    { name: 'Apr', value: 7200 },
+    { name: 'May', value: 6900 },
+    { name: 'Jun', value: 8100 },
   ];
 
-  const certificationStatusData = [
-    { name: 'Certified', value: 8, fill: '#4caf50' },
-    { name: 'In Progress', value: 3, fill: '#2196f3' },
-    { name: 'Planned', value: 2, fill: '#ff9800' },
+  const projectTypeData = [
+    { name: 'Development', value: 45, fill: '#3b82f6' },
+    { name: 'Consulting', value: 30, fill: '#10b981' },
+    { name: 'Design', value: 15, fill: '#f59e0b' },
+    { name: 'Other', value: 10, fill: '#6366f1' },
   ];
 
-  // Sample certifications for table
-  const certifications: Certification[] = [
-    {
-      id: '1',
-      name: 'AWS Certified Solutions Architect',
-      status: 'certified',
-      progress: 100,
-      expiry: '2028-01-15',
-      provider: 'AWS',
-    },
-    {
-      id: '2',
-      name: 'Google Cloud Professional Developer',
-      status: 'in-progress',
-      progress: 75,
-      expiry: 'N/A',
-      provider: 'Google Cloud',
-    },
-    {
-      id: '3',
-      name: 'Certified Kubernetes Administrator',
-      status: 'certified',
-      progress: 100,
-      expiry: '2027-06-20',
-      provider: 'CNCF',
-    },
-    {
-      id: '4',
-      name: 'Professional Scrum Master',
-      status: 'planned',
-      progress: 0,
-      expiry: 'N/A',
-      provider: 'Scrum.org',
-    },
+  const assignments: Assignment[] = [
+    { id: '1', client: 'Acme Corp', project: 'Web Development', status: 'active', hours: 120, rate: '$85/hr' },
+    { id: '2', client: 'TechStart', project: 'Mobile App', status: 'active', hours: 80, rate: '$95/hr' },
+    { id: '3', client: 'Enterprise Co', project: 'Consulting', status: 'pending', hours: 40, rate: '$120/hr' },
+    { id: '4', client: 'StartupXYZ', project: 'UI/UX Design', status: 'completed', hours: 60, rate: '$80/hr' },
   ];
 
-  const columns: DataTableColumn<Certification>[] = [
-    {
-      id: 'name',
-      header: 'Certification',
-      accessorKey: 'name',
-    },
-    {
-      id: 'provider',
-      header: 'Provider',
-      accessorKey: 'provider',
-    },
+  const assignmentColumns: DataTableColumn<Assignment>[] = [
+    { id: 'client', header: 'Client', accessorKey: 'client' },
+    { id: 'project', header: 'Project', accessorKey: 'project' },
     {
       id: 'status',
       header: 'Status',
       accessorKey: 'status',
-      cell: ({ row }) => {
-        const status = row.original.status;
-        const colorMap = {
-          certified: 'success' as const,
-          'in-progress': 'primary' as const,
-          planned: 'warning' as const,
-        };
-        return <Chip label={status} color={colorMap[status]} size="small" />;
-      },
-    },
-    {
-      id: 'progress',
-      header: 'Progress',
-      accessorKey: 'progress',
       cell: ({ row }) => (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <LinearProgress
-            variant="determinate"
-            value={row.original.progress}
-            sx={{ width: 100 }}
-          />
-          <Typography variant="body2">{row.original.progress}%</Typography>
-        </Box>
-      ),
+        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+          row.original.status === 'completed' ? 'bg-green-100 text-green-800' :
+          row.original.status === 'active' ? 'bg-blue-100 text-blue-800' :
+          'bg-yellow-100 text-yellow-800'
+        }`}>
+          {row.original.status}
+        </span>
+      )
     },
     {
-      id: 'expiry',
-      header: 'Expiry',
-      accessorKey: 'expiry',
+      id: 'hours',
+      header: 'Hours',
+      accessorKey: 'hours',
+      cell: ({ row }) => `${row.original.hours}h`
     },
+    { id: 'rate', header: 'Rate', accessorKey: 'rate' },
+  ];
+
+  const certifications = [
+    { name: 'AWS Certified Solutions Architect', status: 'Active', expiry: '2026-12-31', icon: '🏆' },
+    { name: 'Project Management Professional', status: 'Active', expiry: '2027-06-30', icon: '📜' },
+    { name: 'Certified Scrum Master', status: 'Expiring Soon', expiry: '2026-02-28', icon: '⚠️' },
+  ];
+
+  const recentClients = [
+    { name: 'Acme Corporation', projects: 5, rating: 4.9, icon: '🏢' },
+    { name: 'TechStart Inc', projects: 3, rating: 5.0, icon: '💼' },
+    { name: 'Enterprise Solutions', projects: 7, rating: 4.8, icon: '🏭' },
   ];
 
   return (
-    <Box sx={{ flexGrow: 1, bgcolor: 'grey.50', minHeight: '100vh' }}>
+    <div className="min-h-screen bg-gray-50">
       <PortalHeader
         title="Professional Portal"
-        userName="Jane Developer"
-        userAvatar="/api/placeholder/32/32"
+        userName="Alex Professional"
         onLogout={() => console.log('Logout')}
         showBackButton={true}
         backHref="/"
       />
 
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-        <Grid container spacing={3}>
-          {/* Sidebar Menu */}
-          <Grid size={{ xs: 12, md: 3 }}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Navigation
-                </Typography>
-                <List>
-                  {menuItems.map((item, index) => (
-                    <ListItem key={index} sx={{ cursor: 'pointer' }}>
-                      <ListItemIcon>{item.icon}</ListItemIcon>
-                      <ListItemText primary={item.text} />
-                    </ListItem>
-                  ))}
-                </List>
-              </CardContent>
-            </Card>
-          </Grid>
+      <PortalSidebar
+        menuItems={menuItems}
+        isOpen={sidebarOpen}
+        onToggle={() => setSidebarOpen(!sidebarOpen)}
+      />
 
-          {/* Main Content */}
-          <Grid size={{ xs: 12, md: 9 }}>
-            {/* Welcome Section */}
-            <Card sx={{ mb: 3 }}>
-              <CardContent>
-                <Typography variant="h4" gutterBottom>
-                  Welcome, Jane Developer
-                </Typography>
-                <Typography variant="body1" color="text.secondary" gutterBottom>
-                  Track your professional development and certifications
-                </Typography>
-                <Box sx={{ mt: 2 }}>
-                  <Badge badgeContent={8} color="success" sx={{ mr: 3 }}>
-                    <Chip label="Certifications" icon={<School />} />
-                  </Badge>
-                  <Chip label="Senior Developer" variant="outlined" sx={{ mr: 1 }} />
-                  <Chip
-                    label="5 Years Experience"
-                    variant="outlined"
-                    icon={<Star />}
-                  />
-                </Box>
-              </CardContent>
-            </Card>
+      <button
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        className="fixed left-4 top-20 z-30 bg-primary text-white p-2 rounded-md shadow-lg hover:bg-primary/90"
+      >
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
 
-            {/* KPI Cards */}
-            <Grid container spacing={2} sx={{ mb: 3 }}>
-              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                <KPICard
-                  title="Certifications"
-                  value="8"
-                  subtitle=""
-                  change={33.3}
-                  icon={<School />}
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                <KPICard
-                  title="Skill Rating"
-                  value="4.8/5"
-                  subtitle=""
-                  change={5.2}
-                  icon={<Star />}
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                <KPICard
-                  title="Projects Completed"
-                  value="24"
-                  subtitle=""
-                  change={14.3}
-                  icon={<Work />}
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                <KPICard
-                  title="Network Connections"
-                  value="342"
-                  subtitle=""
-                  change={8.9}
-                  icon={<People />}
-                />
-              </Grid>
-            </Grid>
+      <main className="p-6 max-w-7xl mx-auto">
+        <div className="mb-6">
+          <h2 className="text-3xl font-bold text-gray-900">Professional Dashboard</h2>
+          <p className="text-gray-600">Manage your assignments, clients, and professional growth.</p>
+        </div>
 
-            {/* Charts */}
-            <Grid container spacing={2} sx={{ mb: 3 }}>
-              <Grid size={{ xs: 12, md: 7 }}>
-                <Card>
-                  <CardContent>
-                    <LineChartComponent
-                      data={skillProgressData}
-                      title="Skill Proficiency Levels"
-                    />
-                  </CardContent>
-                </Card>
-              </Grid>
-              <Grid size={{ xs: 12, md: 5 }}>
-                <Card>
-                  <CardContent>
-                    <PieChartComponent
-                      data={certificationStatusData}
-                      title="Certification Status"
-                    />
-                  </CardContent>
-                </Card>
-              </Grid>
-            </Grid>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <KPICard
+            title="Active Assignments"
+            value="5"
+            subtitle="2 starting soon"
+            icon={<span className="text-4xl">💼</span>}
+            change={20}
+          />
+          <KPICard
+            title="Monthly Earnings"
+            value="$8,100"
+            subtitle="This month"
+            icon={<span className="text-4xl">💰</span>}
+            change={15}
+          />
+          <KPICard
+            title="Total Clients"
+            value="18"
+            subtitle="Active relationships"
+            icon={<span className="text-4xl">👥</span>}
+            change={12}
+          />
+          <KPICard
+            title="Avg Rating"
+            value="4.9"
+            subtitle="Client satisfaction"
+            icon={<span className="text-4xl">⭐</span>}
+            change={3}
+          />
+        </div>
 
-            {/* Certifications Table */}
-            <Card sx={{ mb: 3 }}>
-              <DataTable
-                data={certifications}
-                columns={columns}
-                title="My Certifications"
-                enableRowSelection
-                enableSorting
-                enableFiltering
-              />
-            </Card>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <LineChartComponent title="Earnings Trend" data={earningsData} />
+          <PieChartComponent title="Project Types" data={projectTypeData} />
+        </div>
 
-            {/* Active Learning Paths */}
-            <Card sx={{ mb: 3 }}>
-              <CardContent>
-                <Typography variant="h5" gutterBottom>
-                  Active Learning Paths
-                </Typography>
-                <List>
-                  <ListItem>
-                    <ListItemIcon>
-                      <Code />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary="Advanced React Patterns"
-                      secondary="75% complete - 12 lessons remaining"
-                    />
-                    <LinearProgress
-                      variant="determinate"
-                      value={75}
-                      sx={{ width: 100, ml: 2 }}
-                    />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemIcon>
-                      <School />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary="Cloud Architecture Fundamentals"
-                      secondary="45% complete - 22 lessons remaining"
-                    />
-                    <LinearProgress
-                      variant="determinate"
-                      value={45}
-                      sx={{ width: 100, ml: 2 }}
-                    />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemIcon>
-                      <TrendingUp />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary="DevOps Best Practices"
-                      secondary="30% complete - 35 lessons remaining"
-                    />
-                    <LinearProgress
-                      variant="determinate"
-                      value={30}
-                      sx={{ width: 100, ml: 2 }}
-                    />
-                  </ListItem>
-                </List>
-              </CardContent>
-              <CardActions>
-                <Button size="small" color="primary">
-                  View All Courses
-                </Button>
-              </CardActions>
-            </Card>
+        <div className="mb-8">
+          <DataTable
+            title="Current Assignments"
+            data={assignments}
+            columns={assignmentColumns}
+            enableRowSelection={true}
+          />
+        </div>
 
-            {/* Recent Achievements */}
-            <Card>
-              <CardContent>
-                <Typography variant="h5" gutterBottom>
-                  Recent Achievements
-                </Typography>
-                <List>
-                  <ListItem>
-                    <ListItemIcon>
-                      <Star sx={{ color: '#ffd700' }} />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary="Earned AWS Solutions Architect Certification"
-                      secondary="2 weeks ago"
-                    />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemIcon>
-                      <Work />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary="Completed E-commerce Platform Project"
-                      secondary="3 weeks ago"
-                    />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemIcon>
-                      <People />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary="Joined Advanced React Developer Community"
-                      secondary="1 month ago"
-                    />
-                  </ListItem>
-                </List>
-              </CardContent>
-              <CardActions>
-                <Button size="small" color="primary">
-                  View Portfolio
-                </Button>
-              </CardActions>
-            </Card>
-          </Grid>
-        </Grid>
-      </Container>
-    </Box>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-white rounded-lg border shadow-sm p-6">
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <span>🏆</span>
+              Certifications
+            </h3>
+            <div className="space-y-4">
+              {certifications.map((cert, index) => (
+                <div key={index} className="flex items-start gap-3 p-3 rounded-lg border hover:border-primary transition-colors">
+                  <span className="text-2xl">{cert.icon}</span>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-sm">{cert.name}</h4>
+                    <div className="flex justify-between items-center mt-1">
+                      <span className={`text-xs px-2 py-0.5 rounded ${
+                        cert.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'
+                      }`}>
+                        {cert.status}
+                      </span>
+                      <span className="text-xs text-gray-500">Expires: {cert.expiry}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg border shadow-sm p-6">
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <span>🌟</span>
+              Recent Clients
+            </h3>
+            <div className="space-y-4">
+              {recentClients.map((client, index) => (
+                <div key={index} className="flex items-start gap-3 p-3 rounded-lg border hover:border-primary transition-colors">
+                  <span className="text-2xl">{client.icon}</span>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-sm">{client.name}</h4>
+                    <div className="flex justify-between items-center mt-1">
+                      <span className="text-xs text-gray-600">{client.projects} projects</span>
+                      <div className="flex items-center gap-1">
+                        <span className="text-yellow-500">⭐</span>
+                        <span className="text-xs font-medium">{client.rating}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
   );
 }
