@@ -1,81 +1,3 @@
-<<<<<<< HEAD
-# NEXO Frontend - CI/CD Pipeline
-# ===============================
-# Automated testing and deployment
-
-name: NEXO Frontend CI/CD
-
-on:
-  push:
-    branches:
-      - main
-      - dev
-      - 'ft/**'
-  pull_request:
-    branches:
-      - main
-      - dev
-
-env:
-  NODE_VERSION: '20'
-  PNPM_VERSION: '10'
-
-jobs:
-  # =============================
-  # Code Quality & Linting
-  # =============================
-  lint:
-    name: Code Quality Check
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Install dependencies
-        run: |
-          cd nexo-prj
-          pnpm install --frozen-lockfile
-
-      - name: Run ESLint
-        run: |
-          cd nexo-prj
-          npx nx run-many --target=lint --all
-
-  # =============================
-  # TypeScript Type Checking
-  # =============================
-  typecheck:
-    name: TypeScript Type Check
-    runs-on: ubuntu-latest
-    
-=======
 name: NEXO CRM - CI/CD Pipeline
 
 on:
@@ -91,54 +13,10 @@ jobs:
   validate:
     name: Validate Configuration
     runs-on: ubuntu-latest
->>>>>>> ft/docker
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-<<<<<<< HEAD
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Install dependencies
-        run: |
-          cd nexo-prj
-          pnpm install --frozen-lockfile
-
-      - name: Run TypeScript Check
-        run: |
-          cd nexo-prj
-          npx nx run-many --target=typecheck --all
-
-  # =============================
-  # Unit Tests
-  # =============================
-  test:
-    name: Unit Tests
-    runs-on: ubuntu-latest
-    
-=======
       - name: Validate Docker Compose
         run: docker compose -f docker/docker-compose.yml config > /dev/null
 
@@ -156,61 +34,10 @@ jobs:
     name: Docker Infrastructure Tests
     runs-on: ubuntu-latest
     needs: validate
->>>>>>> ft/docker
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-<<<<<<< HEAD
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Install dependencies
-        run: |
-          cd nexo-prj
-          pnpm install --frozen-lockfile
-
-      - name: Run Unit Tests
-        run: |
-          cd nexo-prj
-          npx nx run-many --target=test --all --coverage --watch=false
-
-      - name: Upload coverage reports
-        uses: codecov/codecov-action@v4
-        if: always()
-        with:
-          directory: ./nexo-prj/coverage
-          fail_ci_if_error: false
-
-  # =============================
-  # E2E Tests
-  # =============================
-  e2e:
-    name: E2E Tests
-    runs-on: ubuntu-latest
-    
-=======
       - name: Start Docker services
         run: docker compose -f docker/docker-compose.yml up -d
 
@@ -238,7 +65,6 @@ jobs:
     defaults:
       run:
         working-directory: nexo-prj
->>>>>>> ft/docker
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -248,95 +74,6 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-<<<<<<< HEAD
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Install dependencies
-        run: |
-          cd nexo-prj
-          pnpm install --frozen-lockfile
-
-      - name: Install Playwright browsers
-        run: |
-          cd nexo-prj
-          npx playwright install --with-deps
-
-      - name: Run E2E Tests
-        run: |
-          cd nexo-prj
-          npx nx run-many --target=e2e --all
-
-      - name: Upload Playwright Report
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: playwright-report
-          path: nexo-prj/apps/nexo-prj-e2e/playwright-report/
-          retention-days: 30
-
-  # =============================
-  # Build
-  # =============================
-  build:
-    name: Production Build
-    runs-on: ubuntu-latest
-    needs: [lint, typecheck, test]
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Install dependencies
-        run: |
-          cd nexo-prj
-          pnpm install --frozen-lockfile
-
-      - name: Build Application
-        run: |
-          cd nexo-prj
-          npx nx build nexo-prj --prod
-=======
       - name: Install pnpm
         uses: pnpm/action-setup@v2
         with:
@@ -353,26 +90,11 @@ jobs:
 
       - name: Build all projects
         run: npx nx run-many --target=build --all
->>>>>>> ft/docker
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: build-artifacts
-<<<<<<< HEAD
-          path: nexo-prj/dist/apps/nexo-prj/
-          retention-days: 7
-
-  # =============================
-  # Docker Build (optional)
-  # =============================
-  docker:
-    name: Docker Build
-    runs-on: ubuntu-latest
-    needs: [build]
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev'
-    
-=======
           path: nexo-prj/dist/
           retention-days: 7
 
@@ -380,76 +102,10 @@ jobs:
     name: Integration Tests
     runs-on: ubuntu-latest
     needs: [docker-tests, application-tests]
->>>>>>> ft/docker
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-<<<<<<< HEAD
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Log in to Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ghcr.io/${{ github.repository }}/nexo-frontend
-          tags: |
-            type=ref,event=branch
-            type=sha,prefix={{branch}}-
-            type=semver,pattern={{version}}
-            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
-
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./Dockerfile
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-  # =============================
-  # Performance Check
-  # =============================
-  performance:
-    name: Performance Check
-    runs-on: ubuntu-latest
-    needs: [build]
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-artifacts
-          path: ./build
-
-      - name: Analyze bundle size
-        run: |
-          echo "Bundle size analysis"
-          du -sh ./build
-          find ./build -name "*.js" -type f -exec ls -lh {} \; | sort -k5 -hr | head -20
-
-  # =============================
-  # Security Scan
-  # =============================
-  security:
-    name: Security Scan
-    runs-on: ubuntu-latest
-    
-=======
       - name: Setup MISE
         uses: jdx/mise-action@v2
 
@@ -460,7 +116,6 @@ jobs:
     name: Security Scan
     runs-on: ubuntu-latest
     needs: validate
->>>>>>> ft/docker
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -478,8 +133,6 @@ jobs:
         if: always()
         with:
           sarif_file: 'trivy-results.sarif'
-<<<<<<< HEAD
-=======
 
   build-docker-images:
     name: Build Docker Images
@@ -557,4 +210,3 @@ jobs:
             echo "❌ Tests failed!"
             exit 1
           fi
->>>>>>> ft/docker
