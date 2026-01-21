@@ -2,8 +2,7 @@
 # ==================================
 # Complete multi-container orchestration for development
 # Includes: Frontend, API Gateway, Auth, CRM, and PostgreSQL
-
-version: '3.8'
+# Optimized for Raspberry Pi compatibility
 
 services:
   # PostgreSQL Database
