@@ -13,16 +13,16 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 # Copy the app's package.json
 COPY apps/nexo-prj/package.json ./apps/nexo-prj/
 
-# Install dependencies
+# Copy source code first
+COPY apps ./apps
+COPY libs ./libs
+COPY nx.json tsconfig.base.json ./
+COPY .nx ./.nx
+
+# Install dependencies (this will build the shared-ui library as part of the workspace)
 RUN pnpm install --frozen-lockfile
 
-# Copy source code
-COPY . .
-
-# Build shared libraries
-RUN pnpm nx build shared-ui
-
-# Build the application
+# Build the application (shared-ui is already built)
 RUN cd apps/nexo-prj && pnpm build
 
 # Expose port

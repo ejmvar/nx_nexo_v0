@@ -92,3 +92,6 @@ tmp/
 *.njsproj
 *.sln
 *.sw?
+
+.nx/installation
+.nx/workspace-data

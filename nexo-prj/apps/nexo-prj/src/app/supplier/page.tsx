@@ -30,7 +30,7 @@ import {
   DonutChartComponent,
   KPICard,
   DataTable,
-  type DataTableColumn,
+
 } from '@nexo-prj/shared-ui';
 
 interface Order {

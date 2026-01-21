@@ -13,6 +13,16 @@ import {
   ListItemIcon,
   ListItemText,
   Divider,
+  Card,
+  CardContent,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Checkbox,
 } from '@mui/material';
 import {
   Menu,
@@ -26,6 +36,173 @@ import {
   ArrowBack,
 } from '@mui/icons-material';
 import Link from 'next/link';
+
+// Placeholder chart components - to be implemented with actual charting library
+export interface ChartProps {
+  data?: any[];
+  title?: string;
+}
+
+export const LineChartComponent: React.FC<ChartProps> = ({ title = 'Line Chart' }) => (
+  <Card>
+    <CardContent>
+      <Typography variant="h6">{title}</Typography>
+      <Box sx={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: '#f5f5f5' }}>
+        <Typography color="textSecondary">Line Chart Component - To be implemented</Typography>
+      </Box>
+    </CardContent>
+  </Card>
+);
+
+export const BarChartComponent: React.FC<ChartProps> = ({ title = 'Bar Chart' }) => (
+  <Card>
+    <CardContent>
+      <Typography variant="h6">{title}</Typography>
+      <Box sx={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: '#f5f5f5' }}>
+        <Typography color="textSecondary">Bar Chart Component - To be implemented</Typography>
+      </Box>
+    </CardContent>
+  </Card>
+);
+
+export const PieChartComponent: React.FC<ChartProps> = ({ title = 'Pie Chart' }) => (
+  <Card>
+    <CardContent>
+      <Typography variant="h6">{title}</Typography>
+      <Box sx={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: '#f5f5f5' }}>
+        <Typography color="textSecondary">Pie Chart Component - To be implemented</Typography>
+      </Box>
+    </CardContent>
+  </Card>
+);
+
+export const AreaChartComponent: React.FC<ChartProps> = ({ title = 'Area Chart' }) => (
+  <Card>
+    <CardContent>
+      <Typography variant="h6">{title}</Typography>
+      <Box sx={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: '#f5f5f5' }}>
+        <Typography color="textSecondary">Area Chart Component - To be implemented</Typography>
+      </Box>
+    </CardContent>
+  </Card>
+);
+
+export const DonutChartComponent: React.FC<ChartProps> = ({ title = 'Donut Chart' }) => (
+  <Card>
+    <CardContent>
+      <Typography variant="h6">{title}</Typography>
+      <Box sx={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: '#f5f5f5' }}>
+        <Typography color="textSecondary">Donut Chart Component - To be implemented</Typography>
+      </Box>
+    </CardContent>
+  </Card>
+);
+
+// KPI Card component
+export interface KPICardProps {
+  title: string;
+  value: string | number;
+  subtitle?: string;
+  icon?: React.ReactNode;
+}
+
+export const KPICard: React.FC<KPICardProps> = ({ title, value, subtitle, icon }) => (
+  <Card>
+    <CardContent>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Box>
+          <Typography color="textSecondary" gutterBottom>
+            {title}
+          </Typography>
+          <Typography variant="h4">
+            {value}
+          </Typography>
+          {subtitle && (
+            <Typography color="textSecondary" variant="body2">
+              {subtitle}
+            </Typography>
+          )}
+        </Box>
+        {icon && (
+          <Box sx={{ color: 'primary.main' }}>
+            {icon}
+          </Box>
+        )}
+      </Box>
+    </CardContent>
+  </Card>
+);
+
+// Data Table component
+export interface DataTableColumn<T = any> {
+  id: string;
+  header: string;
+  accessorKey: keyof T;
+  cell?: (props: { row: { original: T } }) => React.ReactNode;
+}
+
+// Export a dummy value for bundler compatibility
+export const DataTableColumnType = {} as DataTableColumn;
+
+export interface DataTableProps<T = any> {
+  data: T[];
+  columns: DataTableColumn<T>[];
+  title?: string;
+  enableRowSelection?: boolean;
+  enableSorting?: boolean;
+  enableFiltering?: boolean;
+}
+
+export const DataTable = <T,>({
+  data,
+  columns,
+  title,
+  enableRowSelection,
+  enableSorting,
+  enableFiltering,
+}: DataTableProps<T>) => (
+  <Card>
+    {title && (
+      <CardContent>
+        <Typography variant="h6">{title}</Typography>
+      </CardContent>
+    )}
+    <TableContainer component={Paper}>
+      <Table>
+        <TableHead>
+          <TableRow>
+            {enableRowSelection && (
+              <TableCell padding="checkbox">
+                <Checkbox />
+              </TableCell>
+            )}
+            {columns.map((column) => (
+              <TableCell key={column.id}>{column.header}</TableCell>
+            ))}
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {data.map((row, index) => (
+            <TableRow key={index}>
+              {enableRowSelection && (
+                <TableCell padding="checkbox">
+                  <Checkbox />
+                </TableCell>
+              )}
+              {columns.map((column) => (
+                <TableCell key={column.id}>
+                  {column.cell
+                    ? column.cell({ row: { original: row } })
+                    : (row[column.accessorKey] as React.ReactNode)}
+                </TableCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  </Card>
+);
 
 export interface PortalHeaderProps {
   title: string;
