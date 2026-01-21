@@ -445,7 +445,35 @@ echo '============================================'
 
 [tasks."db:shell"]
 description = "Connect to PostgreSQL shell"
-run = "docker compose -f {{vars.DOCKER_COMPOSE_FILE}} exec postgres psql -U nexo_user -d nexo_crm"
+run = "docker exec -it nexo-postgres psql -U nexo_admin -d nexo_crm"
+
+[tasks."db:backup"]
+description = "Create PostgreSQL backup"
+run = "mkdir -p backups && docker exec nexo-postgres pg_dump -U nexo_admin nexo_crm > backups/nexo_crm_$(date +%Y%m%d_%H%M%S).sql && echo '✅ Backup created'"
+
+[tasks."db:restore"]
+description = "Restore from latest backup"
+run = "cat $(ls -t backups/*.sql | head -1) | docker exec -i nexo-postgres psql -U nexo_admin -d nexo_crm && echo '✅ Database restored'"
+
+[tasks."db:seed"]
+description = "Seed database with sample data"
+run = "docker exec nexo-postgres psql -U nexo_admin -d nexo_crm -f /docker-entrypoint-initdb.d/init.sql"
+
+# ============================================================================
+# HEALTH & MONITORING
+# ============================================================================
+
+[tasks."health"]
+description = "Check all services health status"
+run = "docker compose -f docker-compose.full.yml ps && echo '\\nTesting endpoints...' && curl -s http://localhost:3000/health > /dev/null && echo '✅ Frontend: OK' || echo '❌ Frontend: DOWN'"
+
+[tasks."stats"]
+description = "Show Docker resource usage"
+run = "docker stats --no-stream --format 'table {{.Container}}\\t{{.CPUPerc}}\\t{{.MemUsage}}\\t{{.MemPerc}}'"
+
+[tasks."logs:all"]
+description = "Show all service logs"
+run = "docker compose -f docker-compose.full.yml logs -f --tail=100"
 
 [tasks."db:backup"]
 description = "Create PostgreSQL backup"
