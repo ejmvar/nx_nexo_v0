@@ -308,6 +308,10 @@ export class UpdateProfessionalDto {
   @IsOptional()
   @IsBoolean()
   available?: boolean;
+
+  @IsOptional()
+  @IsEnum(['active', 'inactive', 'suspended'])
+  status?: string;
 }
 
 // Project DTOs

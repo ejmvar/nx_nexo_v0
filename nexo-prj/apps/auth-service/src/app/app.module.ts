@@ -5,9 +5,6 @@ import { AppService } from './app.service.js';
 import { AuthModule } from '../auth/auth.module.js';
 import { DatabaseModule } from '../database/database.module.js';
 import { RedisModule } from '../redis/redis.module.js';
-import { LoggerModule } from '@nexo-prj/shared/logger';
-import { HealthModule } from '@nexo-prj/shared/health';
-import { MetricsModule } from '@nexo-prj/shared/metrics';
 
 @Module({
   imports: [
@@ -15,9 +12,6 @@ import { MetricsModule } from '@nexo-prj/shared/metrics';
       isGlobal: true,
       envFilePath: ['.env.local', '.env'],
     }),
-    LoggerModule,
-    HealthModule,
-    MetricsModule,
     DatabaseModule,
     RedisModule,
     AuthModule,

@@ -7,9 +7,6 @@ import { AppService } from './app.service.js';
 import { CrmModule } from '../crm/crm.module.js';
 import { DatabaseModule } from '../database/database.module.js';
 import { JwtStrategy } from '../auth/jwt.strategy.js';
-import { LoggerModule } from '@nexo-prj/shared/logger';
-import { HealthModule } from '@nexo-prj/shared/health';
-import { MetricsModule } from '@nexo-prj/shared/metrics';
 
 @Module({
   imports: [
@@ -23,9 +20,6 @@ import { MetricsModule } from '@nexo-prj/shared/metrics';
       secret: process.env.JWT_SECRET || 'your-secret-key-change-in-production',
       signOptions: { expiresIn: '15m' },
     }),
-    LoggerModule,
-    HealthModule,
-    MetricsModule,
     DatabaseModule,
     CrmModule,
   ],

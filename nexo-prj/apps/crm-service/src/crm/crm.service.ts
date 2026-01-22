@@ -448,41 +448,40 @@ export class CrmService {
   }
 
   async createSupplier(supplierData: CreateSupplierDto) {
-    const client = await this.db.connect();
     try {
-      await client.query('BEGIN');
-
-      const userResult = await client.query(
+      // Insert user first
+      const userResult = await this.db.query(
         `INSERT INTO users (full_name, username, email, password_hash, role)
          VALUES ($1, $2, $3, $4, 'supplier')
          RETURNING id`,
-        [supplierData.name, supplierData.email, supplierData.email, 'placeholder_hash']
+        [supplierData.full_name, supplierData.username, supplierData.email, 'placeholder_hash']
       );
 
       const userId = userResult.rows[0].id;
 
-      const supplierResult = await client.query(
-        `INSERT INTO suppliers (user_id, company, phone, address, services, status)
-         VALUES ($1, $2, $3, $4, $5, $6)
+      // Insert supplier with all fields
+      const supplierResult = await this.db.query(
+        `INSERT INTO suppliers (
+          user_id, supplier_code, company_name, tax_id, 
+          business_address, payment_terms, rating, status
+        )
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
          RETURNING id`,
         [
           userId,
-          supplierData.company || null,
-          supplierData.phone || null,
-          supplierData.address || null,
-          supplierData.services || null,
-          supplierData.status || 'active',
+          supplierData.supplier_code,
+          supplierData.company_name,
+          supplierData.tax_id || null,
+          supplierData.business_address || null,
+          supplierData.payment_terms || null,
+          supplierData.rating || null,
+          'active',
         ]
       );
 
-      await client.query('COMMIT');
-
       return this.getSupplier(supplierResult.rows[0].id);
     } catch (error) {
-      await client.query('ROLLBACK');
       throw new BadRequestException(`Failed to create supplier: ${error.message}`);
-    } finally {
-      client.release();
     }
   }
 
@@ -492,33 +491,14 @@ export class CrmService {
       throw new NotFoundException('Supplier not found');
     }
 
-    const client = await this.db.connect();
+    const client = await this.db.getClient();
     try {
       await client.query('BEGIN');
 
-      if (supplierData.name || supplierData.email) {
-        const updateFields = [];
-        const params = [];
-        let paramCount = 0;
-
-        if (supplierData.name) {
-          paramCount++;
-          updateFields.push(`full_name = $${paramCount}`);
-          params.push(supplierData.name);
-        }
-
-        if (supplierData.email) {
-          paramCount++;
-          updateFields.push(`email = $${paramCount}`);
-          params.push(supplierData.email);
-        }
-
-        paramCount++;
-        params.push(result.rows[0].user_id);
-
+      if (supplierData.full_name) {
         await client.query(
-          `UPDATE users SET ${updateFields.join(', ')}, updated_at = NOW() WHERE id = $${paramCount}`,
-          params
+          `UPDATE users SET full_name = $1, updated_at = NOW() WHERE id = $2`,
+          [supplierData.full_name, result.rows[0].user_id]
         );
       }
 
@@ -526,10 +506,10 @@ export class CrmService {
       const supplierParams = [];
       let supplierParamCount = 0;
 
-      if (supplierData.company !== undefined) {
+      if (supplierData.company_name !== undefined) {
         supplierParamCount++;
-        supplierFields.push(`company = $${supplierParamCount}`);
-        supplierParams.push(supplierData.company);
+        supplierFields.push(`company_name = $${supplierParamCount}`);
+        supplierParams.push(supplierData.company_name);
       }
 
       if (supplierData.phone !== undefined) {
@@ -538,22 +518,28 @@ export class CrmService {
         supplierParams.push(supplierData.phone);
       }
 
-      if (supplierData.address !== undefined) {
+      if (supplierData.business_address !== undefined) {
         supplierParamCount++;
-        supplierFields.push(`address = $${supplierParamCount}`);
-        supplierParams.push(supplierData.address);
+        supplierFields.push(`business_address = $${supplierParamCount}`);
+        supplierParams.push(supplierData.business_address);
       }
 
-      if (supplierData.services !== undefined) {
+      if (supplierData.tax_id !== undefined) {
         supplierParamCount++;
-        supplierFields.push(`services = $${supplierParamCount}`);
-        supplierParams.push(supplierData.services);
+        supplierFields.push(`tax_id = $${supplierParamCount}`);
+        supplierParams.push(supplierData.tax_id);
       }
 
-      if (supplierData.status !== undefined) {
+      if (supplierData.payment_terms !== undefined) {
         supplierParamCount++;
-        supplierFields.push(`status = $${supplierParamCount}`);
-        supplierParams.push(supplierData.status);
+        supplierFields.push(`payment_terms = $${supplierParamCount}`);
+        supplierParams.push(supplierData.payment_terms);
+      }
+
+      if (supplierData.rating !== undefined) {
+        supplierParamCount++;
+        supplierFields.push(`rating = $${supplierParamCount}`);
+        supplierParams.push(supplierData.rating);
       }
 
       if (supplierFields.length > 0) {
@@ -653,7 +639,7 @@ export class CrmService {
   }
 
   async createProfessional(professionalData: CreateProfessionalDto) {
-    const client = await this.db.connect();
+    const client = await this.db.getClient();
     try {
       await client.query('BEGIN');
 
@@ -661,22 +647,30 @@ export class CrmService {
         `INSERT INTO users (full_name, username, email, password_hash, role)
          VALUES ($1, $2, $3, $4, 'professional')
          RETURNING id`,
-        [professionalData.name, professionalData.email, professionalData.email, 'placeholder_hash']
+        [professionalData.full_name, professionalData.username, professionalData.email, 'placeholder_hash']
       );
 
       const userId = userResult.rows[0].id;
 
       const professionalResult = await client.query(
-        `INSERT INTO professionals (user_id, specialty, phone, address, hourly_rate, status)
-         VALUES ($1, $2, $3, $4, $5, $6)
+        `INSERT INTO professionals (
+          user_id, professional_code, specialty, phone, 
+          hourly_rate, rating, years_experience, 
+          certifications, available, status
+        )
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
          RETURNING id`,
         [
           userId,
+          professionalData.professional_code,
           professionalData.specialty || null,
           professionalData.phone || null,
-          professionalData.address || null,
           professionalData.hourly_rate || null,
-          professionalData.status || 'active',
+          professionalData.rating || null,
+          professionalData.years_experience || null,
+          professionalData.certifications ? JSON.stringify(professionalData.certifications) : null,
+          professionalData.available !== undefined ? professionalData.available : true,
+          'active',
         ]
       );
 
@@ -697,25 +691,19 @@ export class CrmService {
       throw new NotFoundException('Professional not found');
     }
 
-    const client = await this.db.connect();
+    const client = await this.db.getClient();
     try {
       await client.query('BEGIN');
 
-      if (professionalData.name || professionalData.email) {
+      if (professionalData.full_name) {
         const updateFields = [];
         const params = [];
         let paramCount = 0;
 
-        if (professionalData.name) {
+        if (professionalData.full_name) {
           paramCount++;
           updateFields.push(`full_name = $${paramCount}`);
-          params.push(professionalData.name);
-        }
-
-        if (professionalData.email) {
-          paramCount++;
-          updateFields.push(`email = $${paramCount}`);
-          params.push(professionalData.email);
+          params.push(professionalData.full_name);
         }
 
         paramCount++;
@@ -741,12 +729,6 @@ export class CrmService {
         professionalParamCount++;
         professionalFields.push(`phone = $${professionalParamCount}`);
         professionalParams.push(professionalData.phone);
-      }
-
-      if (professionalData.address !== undefined) {
-        professionalParamCount++;
-        professionalFields.push(`address = $${professionalParamCount}`);
-        professionalParams.push(professionalData.address);
       }
 
       if (professionalData.hourly_rate !== undefined) {

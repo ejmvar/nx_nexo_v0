@@ -2,6 +2,31 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtService } from '@nestjs/jwt';
+import { DatabaseService } from '../database/database.service';
+import { RedisService } from '../redis/redis.service';
+import * as bcrypt from 'bcryptjs';
+
+// Mock bcrypt
+jest.mock('bcryptjs', () => ({
+  compare: jest.fn(),
+  hash: jest.fn(),
+}));
+
+// Mock services
+const mockDb = {
+  query: jest.fn(),
+};
+
+const mockRedis = {
+  getJson: jest.fn(),
+  setJson: jest.fn(),
+  del: jest.fn(),
+};
+
+const mockJwt = {
+  sign: jest.fn().mockReturnValue('mock-jwt-token'),
+  verify: jest.fn(),
+};
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -14,9 +39,15 @@ describe('AuthController', () => {
         AuthService,
         {
           provide: JwtService,
-          useValue: {
-            sign: jest.fn().mockReturnValue('mock-jwt-token'),
-          },
+          useValue: mockJwt,
+        },
+        {
+          provide: DatabaseService,
+          useValue: mockDb,
+        },
+        {
+          provide: RedisService,
+          useValue: mockRedis,
         },
       ],
     }).compile();
@@ -30,8 +61,29 @@ describe('AuthController', () => {
   });
 
   describe('login', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
     it('should return access token for valid credentials', async () => {
-      const loginDto = { username: 'admin', password: 'password' };
+      const loginDto = { email: 'admin@example.com', password: 'password' };
+      
+      // Mock database response for user lookup
+      const mockUser = {
+        id: '123',
+        email: 'admin@example.com',
+        password_hash: '$2a$10$somehashedpassword',
+        username: 'admin',
+        full_name: 'Admin User',
+        role: 'admin',
+        status: 'active',
+      };
+      mockDb.query.mockResolvedValueOnce({ rows: [mockUser] });
+      // Mock bcrypt to return true (password matches)
+      (bcrypt.compare as jest.Mock).mockResolvedValueOnce(true);
+      // Mock database update for last_login
+      mockDb.query.mockResolvedValueOnce({ rows: [] });
+      
       const result = await controller.login(loginDto);
 
       expect(result).toHaveProperty('access_token');
@@ -39,7 +91,8 @@ describe('AuthController', () => {
     });
 
     it('should throw error for invalid credentials', async () => {
-      const loginDto = { username: 'invalid', password: 'invalid' };
+      const loginDto = { email: 'invalid@example.com', password: 'invalid' };
+      mockDb.query.mockResolvedValueOnce({ rows: [] });
 
       await expect(controller.login(loginDto)).rejects.toThrow();
     });
@@ -60,14 +113,22 @@ describe('AuthService', () => {
   let service: AuthService;
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+    
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
         {
           provide: JwtService,
-          useValue: {
-            sign: jest.fn().mockReturnValue('mock-jwt-token'),
-          },
+          useValue: mockJwt,
+        },
+        {
+          provide: DatabaseService,
+          useValue: mockDb,
+        },
+        {
+          provide: RedisService,
+          useValue: mockRedis,
         },
       ],
     }).compile();
@@ -80,23 +141,65 @@ describe('AuthService', () => {
   });
 
   describe('validateUser', () => {
-    it('should return user data for valid credentials', async () => {
-      const result = await service.validateUser('admin', 'password');
-
-      expect(result).toHaveProperty('userId', 1);
-      expect(result).toHaveProperty('username', 'admin');
+    beforeEach(() => {
+      jest.clearAllMocks();
     });
 
-    it('should return null for invalid credentials', async () => {
-      const result = await service.validateUser('invalid', 'invalid');
+    it('should return user data for valid userId', async () => {
+      const mockUser = {
+        id: '123',
+        email: 'admin@example.com',
+        username: 'admin',
+        full_name: 'Admin User',
+        role: 'admin',
+        status: 'active',
+        created_at: new Date(),
+        last_login: new Date(),
+      };
+
+      mockRedis.getJson.mockResolvedValueOnce(null); // Not in cache
+      mockDb.query.mockResolvedValueOnce({ rows: [mockUser] });
+      mockRedis.setJson.mockResolvedValueOnce('OK');
+
+      const result = await service.validateUser('123');
+
+      expect(result).toEqual(mockUser);
+    });
+
+    it('should return null for invalid userId', async () => {
+      mockRedis.getJson.mockResolvedValueOnce(null);
+      mockDb.query.mockResolvedValueOnce({ rows: [] });
+
+      const result = await service.validateUser('invalid-id');
 
       expect(result).toBeNull();
     });
   });
 
   describe('login', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
     it('should return access token for valid user', async () => {
-      const result = await service.login('admin', 'password');
+      const mockUser = {
+        id: '123',
+        email: 'admin@example.com',
+        password_hash: '$2a$10$somehashedpassword',
+        username: 'admin',
+        full_name: 'Admin User',
+        role: 'admin',
+        status: 'active',
+        created_at: new Date(),
+        last_login: new Date(),
+      };
+      mockDb.query.mockResolvedValueOnce({ rows: [mockUser] });
+      // Mock bcrypt to return true
+      (bcrypt.compare as jest.Mock).mockResolvedValueOnce(true);
+      // Mock update last_login
+      mockDb.query.mockResolvedValueOnce({ rows: [] });
+      
+      const result = await service.login({ email: 'admin@example.com', password: 'password' });
 
       expect(result).toHaveProperty('access_token');
       expect(typeof result.access_token).toBe('string');

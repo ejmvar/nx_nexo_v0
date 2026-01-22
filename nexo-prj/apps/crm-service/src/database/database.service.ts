@@ -2,11 +2,12 @@ import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import pg from 'pg';
 
-const { Pool } = pg;
+// Handle both ESM and CommonJS imports
+const Pool = pg?.Pool || (pg as any)?.default?.Pool || pg;
 
 @Injectable()
 export class DatabaseService implements OnModuleInit, OnModuleDestroy {
-  private pool: pg.Pool;
+  private pool: any;
 
   constructor(private configService: ConfigService) {
     this.pool = new Pool({
