@@ -1,70 +1,193 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query } from '@nestjs/common';
-import { CrmService } from './crm.service';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, HttpCode, HttpStatus } from '@nestjs/common';
+import { CrmService } from './crm.service.js';
+import {
+  CreateClientDto,
+  UpdateClientDto,
+  CreateEmployeeDto,
+  UpdateEmployeeDto,
+  CreateSupplierDto,
+  UpdateSupplierDto,
+  CreateProfessionalDto,
+  UpdateProfessionalDto,
+  CreateProjectDto,
+  UpdateProjectDto,
+  CreateTaskDto,
+  UpdateTaskDto,
+} from './dto/crm.dto.js';
 
-@Controller('crm')
+@Controller()
 export class CrmController {
   constructor(private crmService: CrmService) {}
 
-  // Customer endpoints
-  @Get('customers')
-  async getCustomers(@Query() query: any) {
-    return this.crmService.getCustomers(query);
+  // Health check
+  @Get('health')
+  async health() {
+    return {
+      status: 'ok',
+      service: 'crm-service',
+      timestamp: new Date().toISOString(),
+    };
   }
 
-  @Get('customers/:id')
-  async getCustomer(@Param('id') id: string) {
-    return this.crmService.getCustomer(id);
+  // ==================== CLIENTS ====================
+  @Get('clients')
+  async getClients(@Query() query: any) {
+    return this.crmService.getClients(query);
   }
 
-  @Post('customers')
-  async createCustomer(@Body() customerData: any) {
-    return this.crmService.createCustomer(customerData);
+  @Get('clients/:id')
+  async getClient(@Param('id') id: string) {
+    return this.crmService.getClient(id);
   }
 
-  @Put('customers/:id')
-  async updateCustomer(@Param('id') id: string, @Body() customerData: any) {
-    return this.crmService.updateCustomer(id, customerData);
+  @Post('clients')
+  async createClient(@Body() clientData: CreateClientDto) {
+    return this.crmService.createClient(clientData);
   }
 
-  @Delete('customers/:id')
-  async deleteCustomer(@Param('id') id: string) {
-    return this.crmService.deleteCustomer(id);
+  @Put('clients/:id')
+  async updateClient(@Param('id') id: string, @Body() clientData: UpdateClientDto) {
+    return this.crmService.updateClient(id, clientData);
   }
 
-  // Customer contacts endpoints
-  @Get('customers/:customerId/contacts')
-  async getCustomerContacts(@Param('customerId') customerId: string) {
-    return this.crmService.getCustomerContacts(customerId);
+  @Delete('clients/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteClient(@Param('id') id: string) {
+    await this.crmService.deleteClient(id);
   }
 
-  @Post('customers/:customerId/contacts')
-  async createCustomerContact(@Param('customerId') customerId: string, @Body() contactData: any) {
-    return this.crmService.createCustomerContact(customerId, contactData);
+  // ==================== EMPLOYEES ====================
+  @Get('employees')
+  async getEmployees(@Query() query: any) {
+    return this.crmService.getEmployees(query);
   }
 
-  // Leads endpoints
-  @Get('leads')
-  async getLeads(@Query() query: any) {
-    return this.crmService.getLeads(query);
+  @Get('employees/:id')
+  async getEmployee(@Param('id') id: string) {
+    return this.crmService.getEmployee(id);
   }
 
-  @Get('leads/:id')
-  async getLead(@Param('id') id: string) {
-    return this.crmService.getLead(id);
+  @Post('employees')
+  async createEmployee(@Body() employeeData: CreateEmployeeDto) {
+    return this.crmService.createEmployee(employeeData);
   }
 
-  @Post('leads')
-  async createLead(@Body() leadData: any) {
-    return this.crmService.createLead(leadData);
+  @Put('employees/:id')
+  async updateEmployee(@Param('id') id: string, @Body() employeeData: UpdateEmployeeDto) {
+    return this.crmService.updateEmployee(id, employeeData);
   }
 
-  @Put('leads/:id')
-  async updateLead(@Param('id') id: string, @Body() leadData: any) {
-    return this.crmService.updateLead(id, leadData);
+  @Delete('employees/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteEmployee(@Param('id') id: string) {
+    await this.crmService.deleteEmployee(id);
   }
 
-  @Delete('leads/:id')
-  async deleteLead(@Param('id') id: string) {
-    return this.crmService.deleteLead(id);
+  // ==================== SUPPLIERS ====================
+  @Get('suppliers')
+  async getSuppliers(@Query() query: any) {
+    return this.crmService.getSuppliers(query);
+  }
+
+  @Get('suppliers/:id')
+  async getSupplier(@Param('id') id: string) {
+    return this.crmService.getSupplier(id);
+  }
+
+  @Post('suppliers')
+  async createSupplier(@Body() supplierData: CreateSupplierDto) {
+    return this.crmService.createSupplier(supplierData);
+  }
+
+  @Put('suppliers/:id')
+  async updateSupplier(@Param('id') id: string, @Body() supplierData: UpdateSupplierDto) {
+    return this.crmService.updateSupplier(id, supplierData);
+  }
+
+  @Delete('suppliers/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteSupplier(@Param('id') id: string) {
+    await this.crmService.deleteSupplier(id);
+  }
+
+  // ==================== PROFESSIONALS ====================
+  @Get('professionals')
+  async getProfessionals(@Query() query: any) {
+    return this.crmService.getProfessionals(query);
+  }
+
+  @Get('professionals/:id')
+  async getProfessional(@Param('id') id: string) {
+    return this.crmService.getProfessional(id);
+  }
+
+  @Post('professionals')
+  async createProfessional(@Body() professionalData: CreateProfessionalDto) {
+    return this.crmService.createProfessional(professionalData);
+  }
+
+  @Put('professionals/:id')
+  async updateProfessional(@Param('id') id: string, @Body() professionalData: UpdateProfessionalDto) {
+    return this.crmService.updateProfessional(id, professionalData);
+  }
+
+  @Delete('professionals/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteProfessional(@Param('id') id: string) {
+    await this.crmService.deleteProfessional(id);
+  }
+
+  // ==================== PROJECTS ====================
+  @Get('projects')
+  async getProjects(@Query() query: any) {
+    return this.crmService.getProjects(query);
+  }
+
+  @Get('projects/:id')
+  async getProject(@Param('id') id: string) {
+    return this.crmService.getProject(id);
+  }
+
+  @Post('projects')
+  async createProject(@Body() projectData: CreateProjectDto) {
+    return this.crmService.createProject(projectData);
+  }
+
+  @Put('projects/:id')
+  async updateProject(@Param('id') id: string, @Body() projectData: UpdateProjectDto) {
+    return this.crmService.updateProject(id, projectData);
+  }
+
+  @Delete('projects/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteProject(@Param('id') id: string) {
+    await this.crmService.deleteProject(id);
+  }
+
+  // ==================== TASKS ====================
+  @Get('tasks')
+  async getTasks(@Query() query: any) {
+    return this.crmService.getTasks(query);
+  }
+
+  @Get('tasks/:id')
+  async getTask(@Param('id') id: string) {
+    return this.crmService.getTask(id);
+  }
+
+  @Post('tasks')
+  async createTask(@Body() taskData: CreateTaskDto) {
+    return this.crmService.createTask(taskData);
+  }
+
+  @Put('tasks/:id')
+  async updateTask(@Param('id') id: string, @Body() taskData: UpdateTaskDto) {
+    return this.crmService.updateTask(id, taskData);
+  }
+
+  @Delete('tasks/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteTask(@Param('id') id: string) {
+    await this.crmService.deleteTask(id);
   }
 }
