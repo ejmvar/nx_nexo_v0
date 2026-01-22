@@ -1,5 +1,16 @@
 # CRITICAL DIRECTIVES - ALWAYS FOLLOW
 
+## Docker Issues
+
+⚠️ **DOCKER HOST CONFLICT**: Docker may fail due to old Postman setup.
+
+**Solution**: Before using Docker commands, execute:
+```bash
+unset DOCKER_HOST
+```
+
+This clears any conflicting Docker host configurations that may interfere with normal Docker operations.
+
 ## NX Workspace Awareness
 ⚠️ **ALWAYS REMEMBER**: This is an NX monorepo workspace
 - Use NX commands: `nx run`, `nx test`, `nx build`, `nx serve`, `nx run-many`, `nx affected`

@@ -68,6 +68,110 @@ services:
       timeout: 5s
       retries: 5
 
+  # Auth Service
+  auth-service:
+    build:
+      context: ./nexo-prj
+      dockerfile: apps/auth-service/Dockerfile
+    container_name: nexo-auth-service
+    restart: unless-stopped
+    ports:
+      - "${AUTH_SERVICE_PORT:-3001}:3000"
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - PORT=3000
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=${POSTGRES_DB:-nexo}
+      - DB_USER=${POSTGRES_USER:-nexo_user}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-nexo_password}
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-1h}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-nexo_redis_password}
+    networks:
+      - nexo-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # API Gateway
+  api-gateway:
+    build:
+      context: ./nexo-prj
+      dockerfile: apps/api-gateway/Dockerfile
+    container_name: nexo-api-gateway
+    restart: unless-stopped
+    ports:
+      - "${API_GATEWAY_PORT:-3002}:3000"
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - PORT=3000
+      - AUTH_SERVICE_URL=http://auth-service:3000
+      - CRM_SERVICE_URL=http://crm-service:3000
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-nexo_redis_password}
+    networks:
+      - nexo-network
+    depends_on:
+      auth-service:
+        condition: service_healthy
+      crm-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # CRM Service
+  crm-service:
+    build:
+      context: ./nexo-prj
+      dockerfile: apps/crm-service/Dockerfile
+    container_name: nexo-crm-service
+    restart: unless-stopped
+    ports:
+      - "${CRM_SERVICE_PORT:-3003}:3000"
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - PORT=3000
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=${POSTGRES_DB:-nexo}
+      - DB_USER=${POSTGRES_USER:-nexo_user}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-nexo_password}
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER:-nexo_user}:${RABBITMQ_PASSWORD:-nexo_password}@rabbitmq:5672
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-nexo_redis_password}
+    networks:
+      - nexo-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
   # Frontend development server
   frontend:
     build:
@@ -85,6 +189,9 @@ services:
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3002}
     networks:
       - nexo-network
+    depends_on:
+      api-gateway:
+        condition: service_healthy
     command: pnpm exec nx serve nexo-prj --host 0.0.0.0 --port 3000
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000"]
