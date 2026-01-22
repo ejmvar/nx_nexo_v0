@@ -52,6 +52,7 @@ cd nexo-prj
 # Kill existing services if running
 pkill -f "nx serve auth-service" 2>/dev/null || true
 pkill -f "nx serve api-gateway" 2>/dev/null || true
+pkill -f "nx serve crm-service" 2>/dev/null || true
 
 # Start auth service in background
 cd apps/auth-service
@@ -97,6 +98,30 @@ else
 fi
 
 echo ""
+
+# Step 4: Start CRM Service
+echo -e "${BLUE}4️⃣  Starting CRM Service (port 3003)...${NC}"
+
+# Start CRM Service in background
+cd apps/crm-service
+set -a && source .env.local && set +a
+cd ../..
+nx serve crm-service > /tmp/crm-service.log 2>&1 &
+CRM_PID=$!
+echo "CRM Service PID: $CRM_PID"
+
+# Wait for CRM service to start
+echo "Waiting for CRM Service to start..."
+sleep 8
+
+# Test CRM service
+if curl -s http://localhost:3003/api/health > /dev/null; then
+    echo -e "${GREEN}✅ CRM Service is running on http://localhost:3003/api${NC}"
+else
+    echo -e "${YELLOW}⚠️  CRM Service might not be ready yet${NC}"
+fi
+
+echo ""
 echo -e "${GREEN}✅ All services started!${NC}"
 echo ""
 echo "Service URLs:"
@@ -104,16 +129,19 @@ echo "  PostgreSQL:  localhost:5432"
 echo "  Redis:       localhost:6379"
 echo "  Auth API:    http://localhost:3001/api"
 echo "  API Gateway: http://localhost:3002/api (⭐ Use this for frontend)"
+echo "  CRM API:     http://localhost:3003/api"
 echo ""
 echo "Logs:"
 echo "  Auth Service: tail -f /tmp/auth-service.log"
 echo "  API Gateway:  tail -f /tmp/api-gateway.log"
+echo "  CRM Service:  tail -f /tmp/crm-service.log"
 echo "  PostgreSQL:   docker logs -f nexo-postgres"
 echo "  Redis:        docker logs -f nexo-redis"
 echo ""
 echo "Tests:"
 echo "  ./test-auth.sh     # Test auth service directly"
 echo "  ./test-gateway.sh  # Test API Gateway routing"
+echo "  ./test-crm.sh      # Test CRM service endpoints"
 echo ""
 echo "To stop services:"
 echo "  pkill -f 'nx serve'"
