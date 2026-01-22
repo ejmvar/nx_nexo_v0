@@ -77,10 +77,24 @@ export default function PortalSelection() {
           ))}
         </div>
 
-        <div className="text-center mt-12">
+        <div className="text-center mt-12 space-y-4">
+          <div className="flex justify-center gap-4">
+            <Link
+              href="/login"
+              className="px-8 py-3 bg-white text-indigo-600 rounded-lg font-semibold hover:bg-white/90 transition-colors shadow-lg"
+            >
+              Sign In
+            </Link>
+            <Link
+              href="/register"
+              className="px-8 py-3 bg-white/20 hover:bg-white/30 text-white rounded-lg font-semibold transition-colors backdrop-blur-sm border-2 border-white/30"
+            >
+              Sign Up
+            </Link>
+          </div>
           <Link
             href="/health"
-            className="inline-block mb-4 px-6 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors backdrop-blur-sm"
+            className="inline-block mb-4 px-6 py-2 bg-white/10 hover:bg-white/20 text-white/80 rounded-lg transition-colors backdrop-blur-sm text-sm"
           >
             🔍 System Health Check
           </Link>
