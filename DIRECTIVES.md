@@ -1,5 +1,33 @@
 # CRITICAL DIRECTIVES - ALWAYS FOLLOW
 
+## NX Workspace Awareness
+⚠️ **ALWAYS REMEMBER**: This is an NX monorepo workspace
+- Use NX commands: `nx run`, `nx test`, `nx build`, `nx serve`, `nx run-many`, `nx affected`
+- Respect NX project structure: `apps/` for applications, `libs/` for shared libraries
+- Use NX project references and path mappings from `tsconfig.base.json`
+- Leverage NX cache for faster builds and tests
+- Follow NX naming conventions for projects and libraries
+
+## Test Runner Strategy
+🧪 **REVIEW TEST RUNNERS** before adding tests:
+- **Backend (NestJS)**: Use Jest (NestJS default, full ecosystem support)
+- **Frontend (React/Next.js)**: Use Vitest (faster, modern, ESM-native)
+- **Libraries**: Match the test runner of primary consumer
+  - Backend libs → Jest
+  - Frontend libs → Vitest
+  - Shared libs → Vitest (universal, faster)
+
+⚠️ **BEFORE ADDING TESTS**:
+1. Check existing test runner in project.json
+2. Don't mix Jest and Vitest in same project
+3. If multiple runners exist, justify or consolidate
+4. Document runner choice in project README
+
+🎯 **Current Strategy**:
+- `auth-service`, `api-gateway`, `crm-service` → Jest
+- `shared-ui` → Vitest
+- `nexo-prj` app → Jest (Next.js default)
+
 ## Configuration Management
 ❌ **NEVER HARDCODE**:
 - Port numbers

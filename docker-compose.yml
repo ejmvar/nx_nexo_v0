@@ -1,10 +1,73 @@
-# NEXO Frontend - Docker Compose
-# ===============================
-# Multi-container orchestration for development
+# NEXO CRM System - Docker Compose
+# ==================================
+# Complete multi-service orchestration for development/production
 
 version: '3.8'
 
 services:
+  # PostgreSQL Database with Multi-tenant support
+  postgres:
+    image: postgres:16-alpine
+    container_name: nexo-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-nexo}
+      POSTGRES_USER: ${POSTGRES_USER:-nexo_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-nexo_password}
+      POSTGRES_HOST_AUTH_METHOD: ${POSTGRES_HOST_AUTH_METHOD:-scram-sha-256}
+      POSTGRES_INITDB_ARGS: '--auth-host=scram-sha-256'
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - nexo-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-nexo_user} -d ${POSTGRES_DB:-nexo}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: nexo-redis
+    restart: unless-stopped
+    command: redis-server --requirepass ${REDIS_PASSWORD:-nexo_redis_password}
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - nexo-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # RabbitMQ Message Queue
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: nexo-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-nexo_user}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-nexo_password}
+    ports:
+      - "${RABBITMQ_PORT:-5672}:5672"
+      - "${RABBITMQ_MANAGEMENT_PORT:-15672}:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - nexo-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   # Frontend development server
   frontend:
     build:
@@ -12,19 +75,19 @@ services:
       dockerfile: Dockerfile.dev
     container_name: nexo-frontend-dev
     ports:
-      - "4200:4200"
+      - "${FRONTEND_PORT:-3000}:3000"
     volumes:
       - ./nexo-prj:/app
       - /app/node_modules
       - /app/.next
     environment:
-      - NODE_ENV=development
-      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NODE_ENV=${NODE_ENV:-development}
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3002}
     networks:
       - nexo-network
-    command: pnpm exec nx serve nexo-prj --host 0.0.0.0
+    command: pnpm exec nx serve nexo-prj --host 0.0.0.0 --port 3000
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:4200"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -35,5 +98,12 @@ networks:
     driver: bridge
 
 volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  rabbitmq_data:
+    driver: local
   node_modules:
   next_cache:
+

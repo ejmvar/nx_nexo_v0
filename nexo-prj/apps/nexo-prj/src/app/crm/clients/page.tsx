@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../../../contexts/AuthContext';
 import { apiClient } from '../../../lib/auth';
-import { useRouter } from 'next/navigation';
 
 interface Client {
   id: string;
@@ -19,7 +18,6 @@ interface Client {
 
 export default function ClientsPage() {
   const { logout } = useAuth();
-  const router = useRouter();
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
