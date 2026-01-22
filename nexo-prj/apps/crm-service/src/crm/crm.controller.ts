@@ -1,5 +1,6 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
 import { CrmService } from './crm.service.js';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import {
   CreateClientDto,
   UpdateClientDto,
@@ -16,10 +17,11 @@ import {
 } from './dto/crm.dto.js';
 
 @Controller()
+@UseGuards(JwtAuthGuard) // Protect all CRM routes
 export class CrmController {
   constructor(private crmService: CrmService) {}
 
-  // Health check
+  // Health check (public - override guard)
   @Get('health')
   async health() {
     return {

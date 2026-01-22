@@ -23,6 +23,7 @@ PROJECT_NAME = "nexo-prj"
 node = "latest"
 npm = "latest"
 pnpm = "latest"
+bun = "latest"
 
 # ============================================================================
 # BASIC SETUP TASKS
