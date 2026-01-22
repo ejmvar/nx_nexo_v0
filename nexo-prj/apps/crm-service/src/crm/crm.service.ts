@@ -87,15 +87,21 @@ export class CrmService {
     try {
       await client.query('BEGIN');
 
-      // Create user first
+      // Auto-generate username if not provided
+      const username = clientData.username || clientData.email.split('@')[0];
+      
+      // Auto-generate client_code if not provided
+      const client_code = clientData.client_code || `CL${Date.now().toString().slice(-8)}`;
+
+      // Create user first (password should be set through auth service or hashed here)
       const userResult = await client.query(
         `INSERT INTO users (email, username, password_hash, full_name, phone, role, status)
          VALUES ($1, $2, $3, $4, $5, $6, $7)
          RETURNING id`,
         [
           clientData.email,
-          clientData.username,
-          'temporary_hash', // Password should be set through auth service
+          username,
+          clientData.password ? `temp_${clientData.password}` : 'temporary_hash', // Simplified for now
           clientData.full_name,
           clientData.phone || null,
           'client',
@@ -112,7 +118,7 @@ export class CrmService {
          RETURNING id`,
         [
           userId,
-          clientData.client_code,
+          client_code,
           clientData.company_name || null,
           clientData.tax_id || null,
           clientData.billing_address || null,
@@ -302,14 +308,23 @@ export class CrmService {
     try {
       await client.query('BEGIN');
 
+      // Auto-generate username if not provided
+      const username = employeeData.username || employeeData.email.split('@')[0];
+      
+      // Auto-generate employee_code if not provided
+      const employee_code = employeeData.employee_code || `EMP${Date.now().toString().slice(-8)}`;
+      
+      // Auto-set hire_date if not provided
+      const hire_date = employeeData.hire_date || new Date().toISOString().split('T')[0];
+
       const userResult = await client.query(
         `INSERT INTO users (email, username, password_hash, full_name, phone, role, status)
          VALUES ($1, $2, $3, $4, $5, $6, $7)
          RETURNING id`,
         [
           employeeData.email,
-          employeeData.username,
-          'temporary_hash',
+          username,
+          employeeData.password ? `temp_${employeeData.password}` : 'temporary_hash',
           employeeData.full_name,
           employeeData.phone || null,
           'employee',
@@ -325,10 +340,10 @@ export class CrmService {
          RETURNING id`,
         [
           userId,
-          employeeData.employee_code,
+          employee_code,
           employeeData.department || null,
           employeeData.position || null,
-          employeeData.hire_date,
+          hire_date,
           employeeData.salary_level || null,
           employeeData.manager_id || null,
         ]
