@@ -15,7 +15,7 @@ export class AuthService {
   ) {}
 
   async register(registerDto: RegisterDto): Promise<AuthResponse> {
-    const { email, password, username, full_name, role = 'user' } = registerDto;
+    const { email, password, username, full_name, role = 'employee' } = registerDto;
 
     // Check if user already exists
     const existingUser = await this.database.query(
