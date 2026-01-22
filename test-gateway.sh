@@ -55,13 +55,14 @@ echo ""
 echo -e "${YELLOW}Test 4: Register User (via Gateway)${NC}"
 TIMESTAMP=$(date +%s)
 EMAIL="test-gateway-${TIMESTAMP}@example.com"
+USERNAME="gateway${TIMESTAMP}"
 RESPONSE=$(curl -s -X POST "${API_GATEWAY}/api/auth/register" \
   -H "Content-Type: application/json" \
   -d "{
     \"email\": \"${EMAIL}\",
-    \"password\": \"Test1234!\",
-    \"firstName\": \"Gateway\",
-    \"lastName\": \"Test\"
+    \"password\": \"Password123\",
+    \"username\": \"${USERNAME}\",
+    \"full_name\": \"Gateway Test User\"
   }")
 
 if echo "$RESPONSE" | jq -e '.user.email' > /dev/null; then
@@ -81,13 +82,13 @@ RESPONSE=$(curl -s -X POST "${API_GATEWAY}/api/auth/login" \
   -H "Content-Type: application/json" \
   -d "{
     \"email\": \"${EMAIL}\",
-    \"password\": \"Test1234!\"
+    \"password\": \"Password123\"
   }")
 
-if echo "$RESPONSE" | jq -e '.accessToken' > /dev/null; then
+if echo "$RESPONSE" | jq -e '.access_token' > /dev/null; then
     echo -e "${GREEN}✅ Login via gateway works${NC}"
-    ACCESS_TOKEN=$(echo "$RESPONSE" | jq -r '.accessToken')
-    REFRESH_TOKEN=$(echo "$RESPONSE" | jq -r '.refreshToken')
+    ACCESS_TOKEN=$(echo "$RESPONSE" | jq -r '.access_token')
+    REFRESH_TOKEN=$(echo "$RESPONSE" | jq -r '.refresh_token')
     echo "   Access Token: ${ACCESS_TOKEN:0:20}..."
 else
     echo -e "${RED}❌ Login failed${NC}"
@@ -116,11 +117,11 @@ echo ""
 echo -e "${YELLOW}Test 7: Refresh Token (via Gateway)${NC}"
 RESPONSE=$(curl -s -X POST "${API_GATEWAY}/api/auth/refresh" \
   -H "Content-Type: application/json" \
-  -d "{\"refreshToken\": \"${REFRESH_TOKEN}\"}")
+  -d "{\"refresh_token\": \"${REFRESH_TOKEN}\"}")
 
-if echo "$RESPONSE" | jq -e '.accessToken' > /dev/null; then
+if echo "$RESPONSE" | jq -e '.access_token' > /dev/null; then
     echo -e "${GREEN}✅ Token refresh via gateway works${NC}"
-    NEW_ACCESS_TOKEN=$(echo "$RESPONSE" | jq -r '.accessToken')
+    NEW_ACCESS_TOKEN=$(echo "$RESPONSE" | jq -r '.access_token')
     echo "   New Token: ${NEW_ACCESS_TOKEN:0:20}..."
 else
     echo -e "${RED}❌ Token refresh failed${NC}"
@@ -131,14 +132,14 @@ echo ""
 
 # Test 8: Logout via Gateway
 echo -e "${YELLOW}Test 8: Logout (via Gateway)${NC}"
-RESPONSE=$(curl -s -X POST "${API_GATEWAY}/api/auth/logout" \
+HTTP_CODE=$(curl -s -w "%{http_code}" -o /tmp/logout_response.json -X POST "${API_GATEWAY}/api/auth/logout" \
   -H "Authorization: Bearer ${ACCESS_TOKEN}")
 
-if echo "$RESPONSE" | jq -e '.message' > /dev/null; then
+if [ "$HTTP_CODE" = "204" ] || [ "$HTTP_CODE" = "200" ]; then
     echo -e "${GREEN}✅ Logout via gateway works${NC}"
 else
-    echo -e "${RED}❌ Logout failed${NC}"
-    echo "$RESPONSE" | jq .
+    echo -e "${RED}❌ Logout failed (HTTP $HTTP_CODE)${NC}"
+    cat /tmp/logout_response.json | jq . 2>/dev/null || cat /tmp/logout_response.json
     exit 1
 fi
 echo ""

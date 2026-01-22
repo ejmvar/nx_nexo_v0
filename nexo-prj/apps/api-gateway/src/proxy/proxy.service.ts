@@ -18,14 +18,21 @@ export class ProxyService {
     }
 
     const url = `${baseUrl}${path}`;
+    
+    // Filter out problematic headers
+    const cleanHeaders = { ...headers };
+    delete cleanHeaders['host'];
+    delete cleanHeaders['content-length'];
+    
     const config = {
       method,
       url,
       data,
       headers: {
         'Content-Type': 'application/json',
-        ...headers,
+        ...cleanHeaders,
       },
+      timeout: 30000, // 30 second timeout
     };
 
     try {
@@ -47,6 +54,12 @@ export class ProxyService {
           headers: config.headers
         }
       });
+      
+      // If there's a response from the service, return it
+      if (error?.response) {
+        throw error.response.data;
+      }
+      
       throw new Error(`Service ${service} error: ${error?.message || 'Unknown error'}`);
     }
   }
