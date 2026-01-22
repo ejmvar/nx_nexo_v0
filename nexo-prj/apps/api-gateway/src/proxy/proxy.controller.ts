@@ -23,7 +23,8 @@ export class ProxyController {
 
   @All('crm/*')
   async proxyCrm(@Req() req: any, @Body() body: any, @Headers() headers: any) {
-    const path = req.url.replace('/api/crm', '/api/crm');
+    // Strip /api/crm prefix and forward the rest to CRM service at /api
+    const path = req.url.replace('/api/crm', '/api');
     return this.proxyService.proxyRequest('crm', path, req.method, body, headers);
   }
 }
