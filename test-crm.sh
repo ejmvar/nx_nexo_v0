@@ -48,15 +48,19 @@ echo ""
 
 # Test 3: Create Client (need to create user first)
 echo -e "${BLUE}Test 3: Create Client (with user)${NC}"
-CLIENT_DATA='{
+TIMESTAMP=$(date +%s%N | cut -b1-13)
+CLIENT_DATA=$(cat <<EOF
+{
   "full_name": "John Doe",
-  "email": "john.doe@example.com",
+  "email": "john.doe.$TIMESTAMP@example.com",
   "password": "SecurePass123",
   "company_name": "Doe Industries",
   "tax_id": "12345678A",
   "industry": "Technology",
   "rating": 5
-}'
+}
+EOF
+)
 RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "$BASE_URL/clients" \
   -H "Content-Type: application/json" \
   -d "$CLIENT_DATA")
@@ -114,14 +118,18 @@ echo ""
 
 # Test 6: Create Employee
 echo -e "${BLUE}Test 6: Create Employee${NC}"
-EMPLOYEE_DATA='{
+TIMESTAMP=$(date +%s%N | cut -b1-13)
+EMPLOYEE_DATA=$(cat <<EOF
+{
   "full_name": "Jane Smith",
-  "email": "jane.smith@nexo.com",
+  "email": "jane.smith.$TIMESTAMP@nexo.com",
   "password": "SecurePass123",
   "position": "Senior Developer",
   "department": "Engineering",
   "hourly_rate": 75.50
-}'
+}
+EOF
+)
 RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "$BASE_URL/employees" \
   -H "Content-Type: application/json" \
   -d "$EMPLOYEE_DATA")
@@ -166,9 +174,9 @@ if [ -n "$CLIENT_ID" ]; then
       "description": "Complete website overhaul",
       "client_id": "'$CLIENT_ID'",
       "start_date": "2026-02-01",
-      "end_date": "2026-05-01",
+      "deadline": "2026-05-01",
       "budget": 50000.00,
-      "status": "planned"
+      "status": "planning"
     }'
     RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "$BASE_URL/projects" \
       -H "Content-Type: application/json" \
@@ -212,7 +220,7 @@ if [ -n "$CLIENT_ID" ]; then
     echo -e "${BLUE}Test 10: Update Client${NC}"
     UPDATE_DATA='{
       "company_name": "Doe Industries Inc.",
-      "rating": 4
+      "credit_limit": 100000
     }'
     RESPONSE=$(curl -s -w "\n%{http_code}" -X PUT "$BASE_URL/clients/$CLIENT_ID" \
       -H "Content-Type: application/json" \
