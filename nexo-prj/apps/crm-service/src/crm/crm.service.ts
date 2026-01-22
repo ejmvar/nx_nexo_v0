@@ -380,45 +380,415 @@ export class CrmService {
     await this.db.query('DELETE FROM users WHERE id = $1', [result.rows[0].user_id]);
   }
 
-  // ==================== SUPPLIERS (abbreviated) ====================
+  // ==================== SUPPLIERS ====================
   async getSuppliers(query: any) {
-    // Similar to getClients
-    return { data: [], total: 0, page: 1, limit: 10 };
+    const page = parseInt(query.page) || 1;
+    const limit = parseInt(query.limit) || 10;
+    const offset = (page - 1) * limit;
+
+    let whereClause = 'WHERE 1=1';
+    const params: any[] = [];
+    let paramCount = 0;
+
+    if (query.status) {
+      paramCount++;
+      whereClause += ` AND s.status = $${paramCount}`;
+      params.push(query.status);
+    }
+
+    if (query.search) {
+      paramCount++;
+      whereClause += ` AND (u.full_name ILIKE $${paramCount} OR s.company ILIKE $${paramCount} OR u.email ILIKE $${paramCount})`;
+      params.push(`%${query.search}%`);
+    }
+
+    const countResult = await this.db.query(
+      `SELECT COUNT(*) as total FROM suppliers s JOIN users u ON s.user_id = u.id ${whereClause}`,
+      params
+    );
+    const total = parseInt(countResult.rows[0].total);
+
+    paramCount++;
+    params.push(limit);
+    paramCount++;
+    params.push(offset);
+
+    const result = await this.db.query(
+      `SELECT s.*, u.full_name as name, u.email, u.username
+       FROM suppliers s
+       JOIN users u ON s.user_id = u.id
+       ${whereClause}
+       ORDER BY u.created_at DESC
+       LIMIT $${paramCount - 1} OFFSET $${paramCount}`,
+      params
+    );
+
+    return {
+      data: result.rows,
+      total,
+      page,
+      limit,
+    };
   }
 
   async getSupplier(id: string) {
-    throw new NotFoundException('Supplier not found');
+    const result = await this.db.query(
+      `SELECT s.*, u.full_name as name, u.email, u.username
+       FROM suppliers s
+       JOIN users u ON s.user_id = u.id
+       WHERE s.id = $1`,
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      throw new NotFoundException('Supplier not found');
+    }
+
+    return result.rows[0];
   }
 
   async createSupplier(supplierData: CreateSupplierDto) {
-    // Similar to createClient
-    return {};
+    const client = await this.db.connect();
+    try {
+      await client.query('BEGIN');
+
+      const userResult = await client.query(
+        `INSERT INTO users (full_name, username, email, password_hash, role)
+         VALUES ($1, $2, $3, $4, 'supplier')
+         RETURNING id`,
+        [supplierData.name, supplierData.email, supplierData.email, 'placeholder_hash']
+      );
+
+      const userId = userResult.rows[0].id;
+
+      const supplierResult = await client.query(
+        `INSERT INTO suppliers (user_id, company, phone, address, services, status)
+         VALUES ($1, $2, $3, $4, $5, $6)
+         RETURNING id`,
+        [
+          userId,
+          supplierData.company || null,
+          supplierData.phone || null,
+          supplierData.address || null,
+          supplierData.services || null,
+          supplierData.status || 'active',
+        ]
+      );
+
+      await client.query('COMMIT');
+
+      return this.getSupplier(supplierResult.rows[0].id);
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw new BadRequestException(`Failed to create supplier: ${error.message}`);
+    } finally {
+      client.release();
+    }
   }
 
   async updateSupplier(id: string, supplierData: UpdateSupplierDto) {
-    return {};
+    const result = await this.db.query('SELECT user_id FROM suppliers WHERE id = $1', [id]);
+    if (result.rows.length === 0) {
+      throw new NotFoundException('Supplier not found');
+    }
+
+    const client = await this.db.connect();
+    try {
+      await client.query('BEGIN');
+
+      if (supplierData.name || supplierData.email) {
+        const updateFields = [];
+        const params = [];
+        let paramCount = 0;
+
+        if (supplierData.name) {
+          paramCount++;
+          updateFields.push(`full_name = $${paramCount}`);
+          params.push(supplierData.name);
+        }
+
+        if (supplierData.email) {
+          paramCount++;
+          updateFields.push(`email = $${paramCount}`);
+          params.push(supplierData.email);
+        }
+
+        paramCount++;
+        params.push(result.rows[0].user_id);
+
+        await client.query(
+          `UPDATE users SET ${updateFields.join(', ')}, updated_at = NOW() WHERE id = $${paramCount}`,
+          params
+        );
+      }
+
+      const supplierFields = [];
+      const supplierParams = [];
+      let supplierParamCount = 0;
+
+      if (supplierData.company !== undefined) {
+        supplierParamCount++;
+        supplierFields.push(`company = $${supplierParamCount}`);
+        supplierParams.push(supplierData.company);
+      }
+
+      if (supplierData.phone !== undefined) {
+        supplierParamCount++;
+        supplierFields.push(`phone = $${supplierParamCount}`);
+        supplierParams.push(supplierData.phone);
+      }
+
+      if (supplierData.address !== undefined) {
+        supplierParamCount++;
+        supplierFields.push(`address = $${supplierParamCount}`);
+        supplierParams.push(supplierData.address);
+      }
+
+      if (supplierData.services !== undefined) {
+        supplierParamCount++;
+        supplierFields.push(`services = $${supplierParamCount}`);
+        supplierParams.push(supplierData.services);
+      }
+
+      if (supplierData.status !== undefined) {
+        supplierParamCount++;
+        supplierFields.push(`status = $${supplierParamCount}`);
+        supplierParams.push(supplierData.status);
+      }
+
+      if (supplierFields.length > 0) {
+        supplierParamCount++;
+        supplierParams.push(id);
+        await client.query(
+          `UPDATE suppliers SET ${supplierFields.join(', ')}, updated_at = NOW() WHERE id = $${supplierParamCount}`,
+          supplierParams
+        );
+      }
+
+      await client.query('COMMIT');
+
+      return this.getSupplier(id);
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw new BadRequestException(`Failed to update supplier: ${error.message}`);
+    } finally {
+      client.release();
+    }
   }
 
-  async deleteSupplier(id: string) {}
+  async deleteSupplier(id: string) {
+    const result = await this.db.query('SELECT user_id FROM suppliers WHERE id = $1', [id]);
+    if (result.rows.length === 0) {
+      throw new NotFoundException('Supplier not found');
+    }
 
-  // ==================== PROFESSIONALS (abbreviated) ====================
+    await this.db.query('DELETE FROM users WHERE id = $1', [result.rows[0].user_id]);
+  }
+
+  // ==================== PROFESSIONALS ====================
   async getProfessionals(query: any) {
-    return { data: [], total: 0, page: 1, limit: 10 };
+    const page = parseInt(query.page) || 1;
+    const limit = parseInt(query.limit) || 10;
+    const offset = (page - 1) * limit;
+
+    let whereClause = 'WHERE 1=1';
+    const params: any[] = [];
+    let paramCount = 0;
+
+    if (query.status) {
+      paramCount++;
+      whereClause += ` AND p.status = $${paramCount}`;
+      params.push(query.status);
+    }
+
+    if (query.search) {
+      paramCount++;
+      whereClause += ` AND (u.full_name ILIKE $${paramCount} OR p.specialty ILIKE $${paramCount} OR u.email ILIKE $${paramCount})`;
+      params.push(`%${query.search}%`);
+    }
+
+    const countResult = await this.db.query(
+      `SELECT COUNT(*) as total FROM professionals p JOIN users u ON p.user_id = u.id ${whereClause}`,
+      params
+    );
+    const total = parseInt(countResult.rows[0].total);
+
+    paramCount++;
+    params.push(limit);
+    paramCount++;
+    params.push(offset);
+
+    const result = await this.db.query(
+      `SELECT p.*, u.full_name as name, u.email, u.username
+       FROM professionals p
+       JOIN users u ON p.user_id = u.id
+       ${whereClause}
+       ORDER BY u.created_at DESC
+       LIMIT $${paramCount - 1} OFFSET $${paramCount}`,
+      params
+    );
+
+    return {
+      data: result.rows,
+      total,
+      page,
+      limit,
+    };
   }
 
   async getProfessional(id: string) {
-    throw new NotFoundException('Professional not found');
+    const result = await this.db.query(
+      `SELECT p.*, u.full_name as name, u.email, u.username
+       FROM professionals p
+       JOIN users u ON p.user_id = u.id
+       WHERE p.id = $1`,
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      throw new NotFoundException('Professional not found');
+    }
+
+    return result.rows[0];
   }
 
   async createProfessional(professionalData: CreateProfessionalDto) {
-    return {};
+    const client = await this.db.connect();
+    try {
+      await client.query('BEGIN');
+
+      const userResult = await client.query(
+        `INSERT INTO users (full_name, username, email, password_hash, role)
+         VALUES ($1, $2, $3, $4, 'professional')
+         RETURNING id`,
+        [professionalData.name, professionalData.email, professionalData.email, 'placeholder_hash']
+      );
+
+      const userId = userResult.rows[0].id;
+
+      const professionalResult = await client.query(
+        `INSERT INTO professionals (user_id, specialty, phone, address, hourly_rate, status)
+         VALUES ($1, $2, $3, $4, $5, $6)
+         RETURNING id`,
+        [
+          userId,
+          professionalData.specialty || null,
+          professionalData.phone || null,
+          professionalData.address || null,
+          professionalData.hourly_rate || null,
+          professionalData.status || 'active',
+        ]
+      );
+
+      await client.query('COMMIT');
+
+      return this.getProfessional(professionalResult.rows[0].id);
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw new BadRequestException(`Failed to create professional: ${error.message}`);
+    } finally {
+      client.release();
+    }
   }
 
   async updateProfessional(id: string, professionalData: UpdateProfessionalDto) {
-    return {};
+    const result = await this.db.query('SELECT user_id FROM professionals WHERE id = $1', [id]);
+    if (result.rows.length === 0) {
+      throw new NotFoundException('Professional not found');
+    }
+
+    const client = await this.db.connect();
+    try {
+      await client.query('BEGIN');
+
+      if (professionalData.name || professionalData.email) {
+        const updateFields = [];
+        const params = [];
+        let paramCount = 0;
+
+        if (professionalData.name) {
+          paramCount++;
+          updateFields.push(`full_name = $${paramCount}`);
+          params.push(professionalData.name);
+        }
+
+        if (professionalData.email) {
+          paramCount++;
+          updateFields.push(`email = $${paramCount}`);
+          params.push(professionalData.email);
+        }
+
+        paramCount++;
+        params.push(result.rows[0].user_id);
+
+        await client.query(
+          `UPDATE users SET ${updateFields.join(', ')}, updated_at = NOW() WHERE id = $${paramCount}`,
+          params
+        );
+      }
+
+      const professionalFields = [];
+      const professionalParams = [];
+      let professionalParamCount = 0;
+
+      if (professionalData.specialty !== undefined) {
+        professionalParamCount++;
+        professionalFields.push(`specialty = $${professionalParamCount}`);
+        professionalParams.push(professionalData.specialty);
+      }
+
+      if (professionalData.phone !== undefined) {
+        professionalParamCount++;
+        professionalFields.push(`phone = $${professionalParamCount}`);
+        professionalParams.push(professionalData.phone);
+      }
+
+      if (professionalData.address !== undefined) {
+        professionalParamCount++;
+        professionalFields.push(`address = $${professionalParamCount}`);
+        professionalParams.push(professionalData.address);
+      }
+
+      if (professionalData.hourly_rate !== undefined) {
+        professionalParamCount++;
+        professionalFields.push(`hourly_rate = $${professionalParamCount}`);
+        professionalParams.push(professionalData.hourly_rate);
+      }
+
+      if (professionalData.status !== undefined) {
+        professionalParamCount++;
+        professionalFields.push(`status = $${professionalParamCount}`);
+        professionalParams.push(professionalData.status);
+      }
+
+      if (professionalFields.length > 0) {
+        professionalParamCount++;
+        professionalParams.push(id);
+        await client.query(
+          `UPDATE professionals SET ${professionalFields.join(', ')}, updated_at = NOW() WHERE id = $${professionalParamCount}`,
+          professionalParams
+        );
+      }
+
+      await client.query('COMMIT');
+
+      return this.getProfessional(id);
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw new BadRequestException(`Failed to update professional: ${error.message}`);
+    } finally {
+      client.release();
+    }
   }
 
-  async deleteProfessional(id: string) {}
+  async deleteProfessional(id: string) {
+    const result = await this.db.query('SELECT user_id FROM professionals WHERE id = $1', [id]);
+    if (result.rows.length === 0) {
+      throw new NotFoundException('Professional not found');
+    }
+
+    await this.db.query('DELETE FROM users WHERE id = $1', [result.rows[0].user_id]);
+  }
 
   // ==================== PROJECTS ====================
   async getProjects(query: any) {
