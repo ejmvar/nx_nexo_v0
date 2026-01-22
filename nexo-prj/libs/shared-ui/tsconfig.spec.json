@@ -2,6 +2,8 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
+    "jsx": "react-jsx",
+    "lib": ["es2022", "dom"],
     "types": ["vitest/globals", "node", "@testing-library/jest-dom"]
   },
   "include": [
@@ -14,6 +16,8 @@
     "src/**/*.spec.js",
     "src/**/*.test.jsx",
     "src/**/*.spec.jsx",
-    "src/**/*.d.ts"
+    "src/**/*.d.ts",
+    "src/**/*.tsx",
+    "src/**/*.ts"
   ]
 }

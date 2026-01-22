@@ -45,11 +45,11 @@ export const authService = {
     });
 
     if (!response.ok) {
-      const error = await response.json();
+      const error = await response.json() as { message?: string };
       throw new Error(error.message || 'Registration failed');
     }
 
-    const tokens = await response.json();
+    const tokens = await response.json() as AuthTokens;
     this.setTokens(tokens);
     return tokens;
   },
@@ -65,11 +65,11 @@ export const authService = {
     });
 
     if (!response.ok) {
-      const error = await response.json();
+      const error = await response.json() as { message?: string };
       throw new Error(error.message || 'Login failed');
     }
 
-    const tokens = await response.json();
+    const tokens = await response.json() as AuthTokens;
     this.setTokens(tokens);
     return tokens;
   },
@@ -116,9 +116,9 @@ export const authService = {
         return null;
       }
 
-      const { access_token } = await response.json();
-      this.setAccessToken(access_token);
-      return access_token;
+      const data = await response.json() as { access_token: string };
+      this.setAccessToken(data.access_token);
+      return data.access_token;
     } catch (error) {
       console.error('Token refresh failed:', error);
       this.clearTokens();
@@ -213,9 +213,9 @@ export async function apiClient(
 ): Promise<Response> {
   const token = authService.getAccessToken();
   
-  const headers: HeadersInit = {
+  const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    ...options.headers,
+    ...(options.headers as Record<string, string>),
   };
 
   if (token) {
