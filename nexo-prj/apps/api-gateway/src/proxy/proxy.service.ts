@@ -5,13 +5,8 @@ import { firstValueFrom } from 'rxjs';
 @Injectable()
 export class ProxyService {
   private readonly serviceUrls = {
-    auth: 'http://localhost:3000',
-    crm: 'http://localhost:3002', // Placeholder for future services
-    stock: 'http://localhost:3003',
-    sales: 'http://localhost:3004',
-    purchases: 'http://localhost:3005',
-    production: 'http://localhost:3006',
-    notifications: 'http://localhost:3007',
+    auth: process.env.AUTH_SERVICE_URL || 'http://localhost:3001',
+    crm: process.env.CRM_SERVICE_URL || 'http://localhost:3003',
   };
 
   constructor(private readonly httpService: HttpService) {}
