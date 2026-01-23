@@ -11,3 +11,15 @@
 - If the user needs help with an Nx configuration or project graph error, use the `nx_workspace` tool to get any errors
 
 <!-- nx configuration end-->
+
+# Development Environment Directives
+
+## Database Configuration
+
+**CRITICAL: For POSTGRES, you must ALWAYS use DEVELOPMENT DOCKER SETUP.**
+
+- Never use system-installed PostgreSQL for development
+- Always use Docker/Podman containers for PostgreSQL
+- Ensures consistent development environment across all developers
+- Allows for easy cleanup and recreation of database state
+- Prevents conflicts with system-level PostgreSQL installations
