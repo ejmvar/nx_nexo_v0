@@ -39,57 +39,79 @@ export class AuthService {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create account, user, and admin role in a transaction
-    const result = await this.prisma.$transaction(async (tx) => {
-      // Create account
-      const account = await tx.account.create({
-        data: {
-          name: accountName,
-          slug: accountSlug,
-          active: true,
-        },
-      });
-
-      // Create admin role for this account
-      const adminRole = await tx.role.create({
-        data: {
-          accountId: account.id,
-          name: 'Admin',
-          permissions: ['*'], // Admin has all permissions
-        },
-      });
-
-      // Create user
-      const user = await tx.user.create({
-        data: {
-          accountId: account.id,
-          email,
-          username,
-          firstName,
-          lastName,
-          passwordHash: hashedPassword,
-          active: true,
-        },
-      });
-
-      // Assign admin role to user
-      await tx.userRole.create({
-        data: {
-          userId: user.id,
-          roleId: adminRole.id,
-        },
-      });
-
-      return { user, account, adminRole };
+    // For registration, we need to use a superuser connection to bypass RLS
+    // Create a temporary Prisma client with superuser credentials
+    const { PrismaClient } = await import('@prisma/client');
+    const { PrismaPg } = await import('@prisma/adapter-pg');
+    const pg = await import('pg');
+    
+    const superPool = new pg.Pool({
+      connectionString: process.env.DATABASE_URL_SUPERUSER,
     });
+    const superAdapter = new PrismaPg(superPool);
+    const superPrisma = new PrismaClient({ adapter: superAdapter });
 
-    // Generate tokens
-    return this.generateAuthResponse(
-      result.user.id,
-      result.user.email,
-      result.account.id,
-      [result.adminRole.id]
-    );
+    try {
+      // Create account, user, and admin role in a transaction using superuser connection
+      const result = await superPrisma.$transaction(async (tx: any) => {
+        // Create account
+        const account = await tx.account.create({
+          data: {
+            name: accountName,
+            slug: accountSlug,
+            active: true,
+          },
+        });
+
+        // Create admin role for this account
+        const adminRole = await tx.role.create({
+          data: {
+            accountId: account.id,
+            name: 'Admin',
+            permissions: ['*'], // Admin has all permissions
+          },
+        });
+
+        // Create user
+        const user = await tx.user.create({
+          data: {
+            accountId: account.id,
+            email,
+            username,
+            firstName,
+            lastName,
+            passwordHash: hashedPassword,
+            active: true,
+          },
+        });
+
+        // Assign admin role to user
+        await tx.userRole.create({
+          data: {
+            userId: user.id,
+            roleId: adminRole.id,
+          },
+        });
+
+        return { user, account, adminRole };
+      });
+
+      // Generate tokens
+      const authResponse = await this.generateAuthTokens(
+        result.user.id,
+        result.user.email,
+        result.account.id,
+        [result.adminRole.id],
+        result.user,
+        result.account
+      );
+      
+      return authResponse;
+    } finally {
+      // Clean up superuser connection
+      await superPrisma.$disconnect();
+      await superPool.end();
+    }
   }
 
   /**
@@ -242,6 +264,56 @@ export class AuthService {
         lastName: user.lastName,
         account: user.account,
         roles: user.roles.map((ur) => ur.role),
+      },
+    };
+  }
+
+  /**
+   * Generate tokens without database queries (for registration)
+   */
+  private async generateAuthTokens(
+    userId: string,
+    email: string,
+    accountId: string,
+    roleIds: string[],
+    user: any,
+    account: any
+  ): Promise<AuthResponse> {
+    const payload: JwtPayload = {
+      sub: userId,
+      email,
+      accountId,
+      roleIds,
+    };
+
+    const accessToken = this.jwtService.sign(payload, {
+      secret: process.env.JWT_SECRET,
+      expiresIn: (process.env.JWT_EXPIRES_IN || '15m') as any,
+    });
+
+    const refreshToken = this.jwtService.sign(payload, {
+      secret: process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET,
+      expiresIn: (process.env.JWT_REFRESH_EXPIRES_IN || '7d') as any,
+    });
+
+    return {
+      accessToken,
+      refreshToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        account: {
+          id: account.id,
+          name: account.name,
+          slug: account.slug,
+        },
+        roles: [{
+          id: roleIds[0],
+          name: 'Admin',
+          permissions: ['*'],
+        }],
       },
     };
   }
