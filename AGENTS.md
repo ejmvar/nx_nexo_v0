@@ -14,6 +14,14 @@
 
 # Development Environment Directives
 
+## Docker Configuration
+
+**CRITICAL: ALWAYS run `unset DOCKER_HOST` before ANY docker commands.**
+
+- The environment may have DOCKER_HOST set to podman socket
+- Docker commands will fail without unsetting this variable
+- Always prefix docker commands with: `unset DOCKER_HOST && docker ...`
+
 ## Database Configuration
 
 **CRITICAL: For POSTGRES, you must ALWAYS use DEVELOPMENT DOCKER SETUP.**

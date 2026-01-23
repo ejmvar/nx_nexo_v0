@@ -39,6 +39,7 @@
     "db:seed": "tsx database/scripts/seed.ts",
     "db:reset": "prisma migrate reset",
     "db:backup": "tsx database/scripts/backup.ts",
+    "db:test:rls": "dotenv -e .env -- tsx database/scripts/test-rls.ts",
     "db:backup:list": "tsx database/scripts/backup.ts list",
     "db:restore": "tsx database/scripts/restore.ts",
     "db:restore:list": "tsx database/scripts/restore.ts list",
