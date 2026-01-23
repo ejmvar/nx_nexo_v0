@@ -1,0 +1,98 @@
+### Multi-Tenant Isolation Test
+### This file tests that Account A cannot access Account B's data
+
+### Variables - Update these with real values after setup
+@authUrl = http://localhost:3000
+@crmUrl = http://localhost:3001
+@accountA_email = test-account-a@example.com
+@accountA_password = password123
+@accountB_email = test-account-b@example.com
+@accountB_password = password456
+
+### Step 1: Register Account A
+POST {{authUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "{{accountA_email}}",
+  "password": "{{accountA_password}}",
+  "username": "accounta",
+  "full_name": "Account A User"
+}
+
+### Step 2: Register Account B
+POST {{authUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "{{accountB_email}}",
+  "password": "{{accountB_password}}",
+  "username": "accountb",
+  "full_name": "Account B User"
+}
+
+### Step 3: Login as Account A
+POST {{authUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{accountA_email}}",
+  "password": "{{accountA_password}}"
+}
+
+# Copy the access_token from response to @accountA_token
+
+### Step 4: Login as Account B
+POST {{authUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{accountB_email}}",
+  "password": "{{accountB_password}}"
+}
+
+# Copy the access_token from response to @accountB_token
+
+### Step 5: Account A creates a client
+@accountA_token = YOUR_TOKEN_HERE
+POST {{crmUrl}}/clients
+Content-Type: application/json
+Authorization: Bearer {{accountA_token}}
+
+{
+  "email": "client-a@example.com",
+  "full_name": "Account A Client",
+  "company_name": "Company A"
+}
+
+# Note the client ID from response
+
+### Step 6: Account B creates a client
+@accountB_token = YOUR_TOKEN_HERE
+POST {{crmUrl}}/clients
+Content-Type: application/json
+Authorization: Bearer {{accountB_token}}
+
+{
+  "email": "client-b@example.com",
+  "full_name": "Account B Client",
+  "company_name": "Company B"
+}
+
+### Step 7: Account A lists clients (should only see their own)
+GET {{crmUrl}}/clients
+Authorization: Bearer {{accountA_token}}
+
+### Step 8: Account B lists clients (should only see their own)
+GET {{crmUrl}}/clients
+Authorization: Bearer {{accountB_token}}
+
+### Step 9: Account A tries to get Account B's client (should fail or return not found)
+@accountB_clientId = PASTE_CLIENT_B_ID_HERE
+GET {{crmUrl}}/clients/{{accountB_clientId}}
+Authorization: Bearer {{accountA_token}}
+
+### Expected Results:
+### - Step 7: Returns only Account A's clients
+### - Step 8: Returns only Account B's clients  
+### - Step 9: Returns 404 or empty (RLS prevents access to Account B's data)

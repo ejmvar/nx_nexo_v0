@@ -15,7 +15,19 @@ export class AuthService {
   ) {}
 
   async register(registerDto: RegisterDto): Promise<AuthResponse> {
-    const { email, password, username, full_name, role = 'employee' } = registerDto;
+    const { email, password, username, full_name, role = 'employee', account_id } = registerDto;
+
+    // If no account_id provided, create a new account for this user
+    let accountId = account_id;
+    if (!accountId) {
+      const accountResult = await this.database.query(
+        `INSERT INTO accounts (name, slug, active)
+         VALUES ($1, $2, true)
+         RETURNING id`,
+        [full_name || username, username.toLowerCase()]
+      );
+      accountId = accountResult.rows[0].id;
+    }
 
     // Check if user already exists
     const existingUser = await this.database.query(
@@ -30,12 +42,12 @@ export class AuthService {
     // Hash password
     const passwordHash = await bcrypt.hash(password, 10);
 
-    // Create user
+    // Create user with account_id
     const result = await this.database.query(
-      `INSERT INTO users (email, password_hash, username, full_name, role, status)
-       VALUES ($1, $2, $3, $4, $5, 'active')
-       RETURNING id, email, username, full_name, role, status, created_at`,
-      [email, passwordHash, username, full_name, role]
+      `INSERT INTO users (account_id, email, password_hash, username, first_name, last_name, active)
+       VALUES ($1, $2, $3, $4, $5, $6, true)
+       RETURNING id, account_id, email, username, first_name, last_name, active, created_at`,
+      [accountId, email, passwordHash, username, full_name?.split(' ')[0] || username, full_name?.split(' ').slice(1).join(' ') || '', ]
     );
 
     const user = result.rows[0];
@@ -45,9 +57,9 @@ export class AuthService {
   async login(loginDto: LoginDto): Promise<AuthResponse> {
     const { email, password } = loginDto;
 
-    // Get user from database
+    // Get user from database with account_id
     const result = await this.database.query(
-      `SELECT id, email, username, full_name, role, status, password_hash, created_at, last_login
+      `SELECT id, account_id, email, username, first_name, last_name, active, password_hash, created_at, last_login_at
        FROM users WHERE email = $1`,
       [email]
     );
@@ -59,7 +71,7 @@ export class AuthService {
     const user = result.rows[0];
 
     // Check if account is active
-    if (user.status !== 'active') {
+    if (!user.active) {
       throw new UnauthorizedException('Account is not active');
     }
 
@@ -71,7 +83,7 @@ export class AuthService {
 
     // Update last login
     await this.database.query(
-      'UPDATE users SET last_login = NOW() WHERE id = $1',
+      'UPDATE users SET last_login_at = NOW() WHERE id = $1',
       [user.id]
     );
 
@@ -86,10 +98,10 @@ export class AuthService {
       return cached;
     }
 
-    // Get from database
+    // Get from database with account_id
     const result = await this.database.query(
-      `SELECT id, email, username, full_name, role, status, created_at, last_login
-       FROM users WHERE id = $1 AND status = 'active'`,
+      `SELECT id, account_id, email, username, first_name, last_name, active, created_at, last_login_at
+       FROM users WHERE id = $1 AND active = true`,
       [userId]
     );
 
@@ -172,10 +184,10 @@ export class AuthService {
 
   private async generateAuthResponse(user: UserProfile): Promise<AuthResponse> {
     const payload = { 
-      sub: user.id, 
+      sub: user.id,
+      account_id: user.account_id,
       email: user.email,
-      username: user.username,
-      role: user.role 
+      username: user.username
     };
 
     const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
@@ -186,13 +198,14 @@ export class AuthService {
       refresh_token: refreshToken,
       user: {
         id: user.id,
+        account_id: user.account_id,
         email: user.email,
         username: user.username,
-        full_name: user.full_name,
-        role: user.role,
-        status: user.status,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        active: user.active,
         created_at: user.created_at,
-        last_login: user.last_login,
+        last_login_at: user.last_login_at,
       },
     };
   }

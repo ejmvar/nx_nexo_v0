@@ -50,6 +50,29 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
+  /**
+   * Execute a query with RLS context set for multi-tenancy
+   * @param accountId - The account ID to set in the session
+   * @param text - SQL query text
+   * @param params - Query parameters
+   */
+  async queryWithAccount(accountId: string, text: string, params?: any[]) {
+    const client = await this.pool.connect();
+    try {
+      // Set the account context for RLS
+      await client.query('SET LOCAL app.current_account_id = $1', [accountId]);
+      
+      // Execute the actual query
+      const result = await client.query(text, params);
+      
+      return result;
+    } finally {
+      // Reset the context and release client
+      await client.query('RESET app.current_account_id').catch(() => {});
+      client.release();
+    }
+  }
+
   getClient() {
     return this.pool.connect();
   }

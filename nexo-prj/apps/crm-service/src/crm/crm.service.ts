@@ -20,7 +20,7 @@ export class CrmService {
   constructor(private db: DatabaseService) {}
 
   // ==================== CLIENTS ====================
-  async getClients(query: any) {
+  async getClients(accountId: string, query: any) {
     const page = parseInt(query.page) || 1;
     const limit = parseInt(query.limit) || 10;
     const offset = (page - 1) * limit;
@@ -41,12 +41,14 @@ export class CrmService {
       params.push(query.status);
     }
 
-    const countResult = await this.db.query(
+    const countResult = await this.db.queryWithAccount(
+      accountId,
       `SELECT COUNT(*) FROM users u INNER JOIN clients c ON c.user_id = u.id ${whereClause}`,
       params
     );
 
-    const result = await this.db.query(
+    const result = await this.db.queryWithAccount(
+      accountId,
       `SELECT u.id as user_id, u.email, u.username, u.full_name, u.phone, u.status, u.created_at,
               c.id, c.client_code, c.company_name, c.tax_id, c.billing_address, c.credit_limit, c.account_manager_id
        FROM users u
@@ -65,8 +67,9 @@ export class CrmService {
     };
   }
 
-  async getClient(id: string) {
-    const result = await this.db.query(
+  async getClient(accountId: string, id: string) {
+    const result = await this.db.queryWithAccount(
+      accountId,
       `SELECT u.id as user_id, u.email, u.username, u.full_name, u.phone, u.status, u.created_at,
               c.id, c.client_code, c.company_name, c.tax_id, c.billing_address, c.credit_limit, c.account_manager_id
        FROM users u
@@ -82,7 +85,7 @@ export class CrmService {
     return result.rows[0];
   }
 
-  async createClient(clientData: CreateClientDto) {
+  async createClient(accountId: string, clientData: CreateClientDto) {
     const client = await this.db.getClient();
     try {
       await client.query('BEGIN');
@@ -95,10 +98,11 @@ export class CrmService {
 
       // Create user first (password should be set through auth service or hashed here)
       const userResult = await client.query(
-        `INSERT INTO users (email, username, password_hash, full_name, phone, role, status)
-         VALUES ($1, $2, $3, $4, $5, $6, $7)
+        `INSERT INTO users (account_id, email, username, password_hash, full_name, phone, role, status)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
          RETURNING id`,
         [
+          accountId,
           clientData.email,
           username,
           clientData.password ? `temp_${clientData.password}` : 'temporary_hash', // Simplified for now
@@ -129,7 +133,7 @@ export class CrmService {
 
       await client.query('COMMIT');
 
-      return this.getClient(clientResult.rows[0].id);
+      return this.getClient(accountId, clientResult.rows[0].id);
     } catch (error) {
       await client.query('ROLLBACK');
       throw new BadRequestException(`Failed to create client: ${error.message}`);
@@ -138,7 +142,7 @@ export class CrmService {
     }
   }
 
-  async updateClient(id: string, clientData: UpdateClientDto) {
+  async updateClient(accountId: string, id: string, clientData: UpdateClientDto) {
     const client = await this.db.getClient();
     try {
       await client.query('BEGIN');
@@ -208,7 +212,7 @@ export class CrmService {
 
       await client.query('COMMIT');
 
-      return this.getClient(id);
+      return this.getClient(accountId, id);
     } catch (error) {
       await client.query('ROLLBACK');
       throw new BadRequestException(`Failed to update client: ${error.message}`);
@@ -217,7 +221,7 @@ export class CrmService {
     }
   }
 
-  async deleteClient(id: string) {
+  async deleteClient(accountId: string, id: string) {
     const client = await this.db.getClient();
     try {
       await client.query('BEGIN');
@@ -241,7 +245,7 @@ export class CrmService {
   }
 
   // ==================== EMPLOYEES ====================
-  async getEmployees(query: any) {
+  async getEmployees(accountId: string, query: any) {
     const page = parseInt(query.page) || 1;
     const limit = parseInt(query.limit) || 10;
     const offset = (page - 1) * limit;
@@ -262,12 +266,14 @@ export class CrmService {
       params.push(query.department);
     }
 
-    const countResult = await this.db.query(
+    const countResult = await this.db.queryWithAccount(
+      accountId,
       `SELECT COUNT(*) FROM users u INNER JOIN employees e ON e.user_id = u.id ${whereClause}`,
       params
     );
 
-    const result = await this.db.query(
+    const result = await this.db.queryWithAccount(
+      accountId,
       `SELECT u.id as user_id, u.email, u.username, u.full_name, u.phone, u.status, u.created_at,
               e.id, e.employee_code, e.department, e.position, e.hire_date, e.salary_level, e.manager_id
        FROM users u
@@ -286,8 +292,9 @@ export class CrmService {
     };
   }
 
-  async getEmployee(id: string) {
-    const result = await this.db.query(
+  async getEmployee(accountId: string, id: string) {
+    const result = await this.db.queryWithAccount(
+      accountId,
       `SELECT u.id as user_id, u.email, u.username, u.full_name, u.phone, u.status, u.created_at,
               e.id, e.employee_code, e.department, e.position, e.hire_date, e.salary_level, e.manager_id
        FROM users u
@@ -303,7 +310,7 @@ export class CrmService {
     return result.rows[0];
   }
 
-  async createEmployee(employeeData: CreateEmployeeDto) {
+  async createEmployee(accountId: string, employeeData: CreateEmployeeDto) {
     const client = await this.db.getClient();
     try {
       await client.query('BEGIN');
@@ -318,10 +325,11 @@ export class CrmService {
       const hire_date = employeeData.hire_date || new Date().toISOString().split('T')[0];
 
       const userResult = await client.query(
-        `INSERT INTO users (email, username, password_hash, full_name, phone, role, status)
-         VALUES ($1, $2, $3, $4, $5, $6, $7)
+        `INSERT INTO users (account_id, email, username, password_hash, full_name, phone, role, status)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
          RETURNING id`,
         [
+          accountId,
           employeeData.email,
           username,
           employeeData.password ? `temp_${employeeData.password}` : 'temporary_hash',
@@ -351,7 +359,7 @@ export class CrmService {
 
       await client.query('COMMIT');
 
-      return this.getEmployee(employeeResult.rows[0].id);
+      return this.getEmployee(accountId, employeeResult.rows[0].id);
     } catch (error) {
       await client.query('ROLLBACK');
       throw new BadRequestException(`Failed to create employee: ${error.message}`);
@@ -360,7 +368,7 @@ export class CrmService {
     }
   }
 
-  async updateEmployee(id: string, employeeData: UpdateEmployeeDto) {
+  async updateEmployee(accountId: string, id: string, employeeData: UpdateEmployeeDto) {
     // Similar to updateClient - abbreviated for brevity
     const result = await this.db.query('SELECT user_id FROM employees WHERE id = $1', [id]);
     if (result.rows.length === 0) {
@@ -368,10 +376,10 @@ export class CrmService {
     }
 
     // Update logic similar to client...
-    return this.getEmployee(id);
+    return this.getEmployee(accountId, id);
   }
 
-  async deleteEmployee(id: string) {
+  async deleteEmployee(accountId: string, id: string) {
     const result = await this.db.query('SELECT user_id FROM employees WHERE id = $1', [id]);
     if (result.rows.length === 0) {
       throw new NotFoundException('Employee not found');
@@ -381,7 +389,7 @@ export class CrmService {
   }
 
   // ==================== SUPPLIERS ====================
-  async getSuppliers(query: any) {
+  async getSuppliers(accountId: string, query: any) {
     const page = parseInt(query.page) || 1;
     const limit = parseInt(query.limit) || 10;
     const offset = (page - 1) * limit;
@@ -402,7 +410,8 @@ export class CrmService {
       params.push(`%${query.search}%`);
     }
 
-    const countResult = await this.db.query(
+    const countResult = await this.db.queryWithAccount(
+      accountId,
       `SELECT COUNT(*) as total FROM suppliers s JOIN users u ON s.user_id = u.id ${whereClause}`,
       params
     );
@@ -413,7 +422,8 @@ export class CrmService {
     paramCount++;
     params.push(offset);
 
-    const result = await this.db.query(
+    const result = await this.db.queryWithAccount(
+      accountId,
       `SELECT s.*, u.full_name as name, u.email, u.username
        FROM suppliers s
        JOIN users u ON s.user_id = u.id
@@ -431,8 +441,9 @@ export class CrmService {
     };
   }
 
-  async getSupplier(id: string) {
-    const result = await this.db.query(
+  async getSupplier(accountId: string, id: string) {
+    const result = await this.db.queryWithAccount(
+      accountId,
       `SELECT s.*, u.full_name as name, u.email, u.username
        FROM suppliers s
        JOIN users u ON s.user_id = u.id
@@ -447,14 +458,14 @@ export class CrmService {
     return result.rows[0];
   }
 
-  async createSupplier(supplierData: CreateSupplierDto) {
+  async createSupplier(accountId: string, supplierData: CreateSupplierDto) {
     try {
       // Insert user first
       const userResult = await this.db.query(
-        `INSERT INTO users (full_name, username, email, password_hash, role)
-         VALUES ($1, $2, $3, $4, 'supplier')
+        `INSERT INTO users (account_id, full_name, username, email, password_hash, role)
+         VALUES ($1, $2, $3, $4, $5, 'supplier')
          RETURNING id`,
-        [supplierData.full_name, supplierData.username, supplierData.email, 'placeholder_hash']
+        [accountId, supplierData.full_name, supplierData.username, supplierData.email, 'placeholder_hash']
       );
 
       const userId = userResult.rows[0].id;
@@ -479,13 +490,13 @@ export class CrmService {
         ]
       );
 
-      return this.getSupplier(supplierResult.rows[0].id);
+      return this.getSupplier(accountId, supplierResult.rows[0].id);
     } catch (error) {
       throw new BadRequestException(`Failed to create supplier: ${error.message}`);
     }
   }
 
-  async updateSupplier(id: string, supplierData: UpdateSupplierDto) {
+  async updateSupplier(accountId: string, id: string, supplierData: UpdateSupplierDto) {
     const result = await this.db.query('SELECT user_id FROM suppliers WHERE id = $1', [id]);
     if (result.rows.length === 0) {
       throw new NotFoundException('Supplier not found');
@@ -553,7 +564,7 @@ export class CrmService {
 
       await client.query('COMMIT');
 
-      return this.getSupplier(id);
+      return this.getSupplier(accountId, id);
     } catch (error) {
       await client.query('ROLLBACK');
       throw new BadRequestException(`Failed to update supplier: ${error.message}`);
@@ -562,7 +573,7 @@ export class CrmService {
     }
   }
 
-  async deleteSupplier(id: string) {
+  async deleteSupplier(accountId: string, id: string) {
     const result = await this.db.query('SELECT user_id FROM suppliers WHERE id = $1', [id]);
     if (result.rows.length === 0) {
       throw new NotFoundException('Supplier not found');
@@ -572,7 +583,7 @@ export class CrmService {
   }
 
   // ==================== PROFESSIONALS ====================
-  async getProfessionals(query: any) {
+  async getProfessionals(accountId: string, query: any) {
     const page = parseInt(query.page) || 1;
     const limit = parseInt(query.limit) || 10;
     const offset = (page - 1) * limit;
@@ -593,7 +604,8 @@ export class CrmService {
       params.push(`%${query.search}%`);
     }
 
-    const countResult = await this.db.query(
+    const countResult = await this.db.queryWithAccount(
+      accountId,
       `SELECT COUNT(*) as total FROM professionals p JOIN users u ON p.user_id = u.id ${whereClause}`,
       params
     );
@@ -604,7 +616,8 @@ export class CrmService {
     paramCount++;
     params.push(offset);
 
-    const result = await this.db.query(
+    const result = await this.db.queryWithAccount(
+      accountId,
       `SELECT p.*, u.full_name as name, u.email, u.username
        FROM professionals p
        JOIN users u ON p.user_id = u.id
@@ -622,8 +635,9 @@ export class CrmService {
     };
   }
 
-  async getProfessional(id: string) {
-    const result = await this.db.query(
+  async getProfessional(accountId: string, id: string) {
+    const result = await this.db.queryWithAccount(
+      accountId,
       `SELECT p.*, u.full_name as name, u.email, u.username
        FROM professionals p
        JOIN users u ON p.user_id = u.id
@@ -638,16 +652,16 @@ export class CrmService {
     return result.rows[0];
   }
 
-  async createProfessional(professionalData: CreateProfessionalDto) {
+  async createProfessional(accountId: string, professionalData: CreateProfessionalDto) {
     const client = await this.db.getClient();
     try {
       await client.query('BEGIN');
 
       const userResult = await client.query(
-        `INSERT INTO users (full_name, username, email, password_hash, role)
-         VALUES ($1, $2, $3, $4, 'professional')
+        `INSERT INTO users (account_id, full_name, username, email, password_hash, role)
+         VALUES ($1, $2, $3, $4, $5, 'professional')
          RETURNING id`,
-        [professionalData.full_name, professionalData.username, professionalData.email, 'placeholder_hash']
+        [accountId, professionalData.full_name, professionalData.username, professionalData.email, 'placeholder_hash']
       );
 
       const userId = userResult.rows[0].id;
@@ -676,7 +690,7 @@ export class CrmService {
 
       await client.query('COMMIT');
 
-      return this.getProfessional(professionalResult.rows[0].id);
+      return this.getProfessional(accountId, professionalResult.rows[0].id);
     } catch (error) {
       await client.query('ROLLBACK');
       throw new BadRequestException(`Failed to create professional: ${error.message}`);
@@ -685,7 +699,7 @@ export class CrmService {
     }
   }
 
-  async updateProfessional(id: string, professionalData: UpdateProfessionalDto) {
+  async updateProfessional(accountId: string, id: string, professionalData: UpdateProfessionalDto) {
     const result = await this.db.query('SELECT user_id FROM professionals WHERE id = $1', [id]);
     if (result.rows.length === 0) {
       throw new NotFoundException('Professional not found');
@@ -754,7 +768,7 @@ export class CrmService {
 
       await client.query('COMMIT');
 
-      return this.getProfessional(id);
+      return this.getProfessional(accountId, id);
     } catch (error) {
       await client.query('ROLLBACK');
       throw new BadRequestException(`Failed to update professional: ${error.message}`);
@@ -763,7 +777,7 @@ export class CrmService {
     }
   }
 
-  async deleteProfessional(id: string) {
+  async deleteProfessional(accountId: string, id: string) {
     const result = await this.db.query('SELECT user_id FROM professionals WHERE id = $1', [id]);
     if (result.rows.length === 0) {
       throw new NotFoundException('Professional not found');
@@ -773,7 +787,7 @@ export class CrmService {
   }
 
   // ==================== PROJECTS ====================
-  async getProjects(query: any) {
+  async getProjects(accountId: string, query: any) {
     const page = parseInt(query.page) || 1;
     const limit = parseInt(query.limit) || 10;
     const offset = (page - 1) * limit;
@@ -794,9 +808,10 @@ export class CrmService {
       params.push(query.client_id);
     }
 
-    const countResult = await this.db.query(`SELECT COUNT(*) FROM projects ${whereClause}`, params);
+    const countResult = await this.db.queryWithAccount(accountId, `SELECT COUNT(*) FROM projects ${whereClause}`, params);
 
-    const result = await this.db.query(
+    const result = await this.db.queryWithAccount(
+      accountId,
       `SELECT * FROM projects ${whereClause} ORDER BY created_at DESC LIMIT $${paramCount + 1} OFFSET $${paramCount + 2}`,
       [...params, limit, offset]
     );
@@ -809,16 +824,17 @@ export class CrmService {
     };
   }
 
-  async getProject(id: string) {
-    const result = await this.db.query('SELECT * FROM projects WHERE id = $1', [id]);
+  async getProject(accountId: string, id: string) {
+    const result = await this.db.queryWithAccount(accountId, 'SELECT * FROM projects WHERE id = $1', [id]);
     if (result.rows.length === 0) {
       throw new NotFoundException('Project not found');
     }
     return result.rows[0];
   }
 
-  async createProject(projectData: CreateProjectDto) {
-    const result = await this.db.query(
+  async createProject(accountId: string, projectData: CreateProjectDto) {
+    const result = await this.db.queryWithAccount(
+      accountId,
       `INSERT INTO projects (name, description, status, client_id, budget, start_date, deadline, completion_percentage)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        RETURNING *`,
@@ -837,7 +853,7 @@ export class CrmService {
     return result.rows[0];
   }
 
-  async updateProject(id: string, projectData: UpdateProjectDto) {
+  async updateProject(accountId: string, id: string, projectData: UpdateProjectDto) {
     const updates: string[] = [];
     const params: any[] = [];
     let paramCount = 0;
@@ -850,27 +866,28 @@ export class CrmService {
     });
 
     if (updates.length === 0) {
-      return this.getProject(id);
+      return this.getProject(accountId, id);
     }
 
     params.push(id);
-    await this.db.query(
+    await this.db.queryWithAccount(
+      accountId,
       `UPDATE projects SET ${updates.join(', ')} WHERE id = $${++paramCount}`,
       params
     );
 
-    return this.getProject(id);
+    return this.getProject(accountId, id);
   }
 
-  async deleteProject(id: string) {
-    const result = await this.db.query('DELETE FROM projects WHERE id = $1 RETURNING id', [id]);
+  async deleteProject(accountId: string, id: string) {
+    const result = await this.db.queryWithAccount(accountId, 'DELETE FROM projects WHERE id = $1 RETURNING id', [id]);
     if (result.rows.length === 0) {
       throw new NotFoundException('Project not found');
     }
   }
 
   // ==================== TASKS ====================
-  async getTasks(query: any) {
+  async getTasks(accountId: string, query: any) {
     const page = parseInt(query.page) || 1;
     const limit = parseInt(query.limit) || 10;
     const offset = (page - 1) * limit;
@@ -897,9 +914,10 @@ export class CrmService {
       params.push(query.project_id);
     }
 
-    const countResult = await this.db.query(`SELECT COUNT(*) FROM tasks ${whereClause}`, params);
+    const countResult = await this.db.queryWithAccount(accountId, `SELECT COUNT(*) FROM tasks ${whereClause}`, params);
 
-    const result = await this.db.query(
+    const result = await this.db.queryWithAccount(
+      accountId,
       `SELECT * FROM tasks ${whereClause} ORDER BY created_at DESC LIMIT $${paramCount + 1} OFFSET $${paramCount + 2}`,
       [...params, limit, offset]
     );
@@ -912,16 +930,17 @@ export class CrmService {
     };
   }
 
-  async getTask(id: string) {
-    const result = await this.db.query('SELECT * FROM tasks WHERE id = $1', [id]);
+  async getTask(accountId: string, id: string) {
+    const result = await this.db.queryWithAccount(accountId, 'SELECT * FROM tasks WHERE id = $1', [id]);
     if (result.rows.length === 0) {
       throw new NotFoundException('Task not found');
     }
     return result.rows[0];
   }
 
-  async createTask(taskData: CreateTaskDto) {
-    const result = await this.db.query(
+  async createTask(accountId: string, taskData: CreateTaskDto) {
+    const result = await this.db.queryWithAccount(
+      accountId,
       `INSERT INTO tasks (title, description, status, priority, assigned_to, project_id, due_date)
        VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING *`,
@@ -939,7 +958,7 @@ export class CrmService {
     return result.rows[0];
   }
 
-  async updateTask(id: string, taskData: UpdateTaskDto) {
+  async updateTask(accountId: string, id: string, taskData: UpdateTaskDto) {
     const updates: string[] = [];
     const params: any[] = [];
     let paramCount = 0;
@@ -952,20 +971,21 @@ export class CrmService {
     });
 
     if (updates.length === 0) {
-      return this.getTask(id);
+      return this.getTask(accountId, id);
     }
 
     params.push(id);
-    await this.db.query(
+    await this.db.queryWithAccount(
+      accountId,
       `UPDATE tasks SET ${updates.join(', ')} WHERE id = $${++paramCount}`,
       params
     );
 
-    return this.getTask(id);
+    return this.getTask(accountId, id);
   }
 
-  async deleteTask(id: string) {
-    const result = await this.db.query('DELETE FROM tasks WHERE id = $1 RETURNING id', [id]);
+  async deleteTask(accountId: string, id: string) {
+    const result = await this.db.queryWithAccount(accountId, 'DELETE FROM tasks WHERE id = $1 RETURNING id', [id]);
     if (result.rows.length === 0) {
       throw new NotFoundException('Task not found');
     }

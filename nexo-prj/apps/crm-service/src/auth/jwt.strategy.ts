@@ -18,8 +18,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('Invalid token payload');
     }
 
+    if (!payload.account_id) {
+      throw new UnauthorizedException('Account ID missing from token');
+    }
+
     return {
       userId: payload.sub,
+      accountId: payload.account_id,
       email: payload.email,
       username: payload.username,
       role: payload.role,

@@ -1,4 +1,4 @@
-import { IsEmail, IsString, MinLength, IsNotEmpty } from 'class-validator';
+import { IsEmail, IsString, MinLength, IsNotEmpty, IsOptional, IsUUID } from 'class-validator';
 
 export class RegisterDto {
   @IsEmail()
@@ -18,7 +18,13 @@ export class RegisterDto {
   @IsNotEmpty()
   full_name: string;
 
+  @IsOptional()
+  @IsString()
   role?: string;
+
+  @IsOptional()
+  @IsUUID()
+  account_id?: string;
 }
 
 export class LoginDto {
@@ -44,13 +50,14 @@ export class ChangePasswordDto {
 
 export interface UserProfile {
   id: string;
+  account_id: string;
   email: string;
   username: string;
-  full_name: string;
-  role: string;
-  status: string;
+  first_name: string;
+  last_name: string;
+  active: boolean;
   created_at: Date;
-  last_login: Date | null;
+  last_login_at: Date | null;
 }
 
 export interface AuthResponse {
