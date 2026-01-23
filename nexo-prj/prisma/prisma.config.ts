@@ -3,7 +3,7 @@ import { defineConfig } from '@prisma/client';
 export default defineConfig({
   datasources: {
     db: {
-      url: process.env.DATABASE_URL || 'postgresql://nexo_user:nexo_password@localhost:5432/nexo_crm?schema=public',
+      url: process.env.DATABASE_URL,
     },
   },
   log: [
@@ -14,7 +14,7 @@ export default defineConfig({
   ],
   migrate: {
     datasource: {
-      url: process.env.DATABASE_URL || 'postgresql://nexo_user:nexo_password@localhost:5432/nexo_crm?schema=public',
+      url: process.env.DATABASE_URL,
     },
   },
 });
