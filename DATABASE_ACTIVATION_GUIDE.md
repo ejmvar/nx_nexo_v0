@@ -51,6 +51,18 @@ Before running migrations, ensure:
 
 ## 🚀 Activation Steps
 
+### Step 0: Install pg_dump/psql (if not installed)
+
+```bash
+# On Ubuntu/Debian
+sudo apt-get install postgresql-client
+
+# On macOS
+brew install postgresql
+
+# On Windows (included with PostgreSQL installation)
+```
+
 ### Step 1: Start PostgreSQL (if using Docker)
 
 ```bash
@@ -73,7 +85,14 @@ cd nexo-prj
 pnpm prisma db execute --stdin < /dev/null
 ```
 
-### Step 3: Create Prisma Migration (Schema)
+### Step 3: Create Initial Backup
+
+```bash
+# Create backup before first migration (good practice)
+pnpm db:backup initial-setup
+```
+
+### Step 4: Create Prisma Migration (Schema)
 
 ```bash
 # This creates the migration file from schema.prisma
@@ -85,10 +104,16 @@ This will:
 - Set up indexes
 - Create migration history
 
-### Step 4: Apply SQL Migration (RLS Policies)
+### Step 5: Apply SQL Migration (RLS Policies)
 
 ```bash
-# Apply RLS policies and triggers
+# Apply RLS policies and triggers (with automatic backup)
+pnpm db:migrate:safe
+```
+
+Or manually:
+```bash
+pnpm db:backup pre-rls-setup
 pnpm db:migrate
 ```
 
@@ -98,7 +123,7 @@ This will:
 - Add triggers for timestamps
 - Seed default data
 
-### Step 5: Verify Installation
+### Step 6: Verify Installation
 
 ```bash
 # Check all versions and RLS status
@@ -111,10 +136,17 @@ Expected output should show:
 - ✅ Row Level Security: Enabled
 - ✅ RLS Policies: 7+
 
-### Step 6: Generate Prisma Client
+### Step 7: Generate Prisma Client
 
 ```bash
 pnpm db:generate
+```
+
+### Step 8: Create Post-Setup Backup
+
+```bash
+# Create backup after successful setup
+pnpm db:backup post-initial-setup
 ```
 
 ---
