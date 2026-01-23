@@ -331,3 +331,159 @@ Quick links to all documentation:
 ---
 
 **Ready to begin? Start with:** `pnpm db:version` 🚀
+
+---
+
+## 🔄 Next Implementation Phases
+
+### Phase 2: Backend Services (auth + CRM)
+- [ ] **Auth Service**
+  - [ ] Connect to PostgreSQL with nexo_app user
+  - [ ] Implement JWT authentication
+  - [ ] Add login/register endpoints
+  - [ ] Generate JWT with account_id claim
+  - [ ] Set RLS context (`app.current_account_id`) from JWT
+  - [ ] Implement refresh token mechanism
+  - [ ] Add password hashing (bcrypt)
+  - [ ] Create auth middleware
+  - [ ] Test multi-tenant token isolation
+
+- [ ] **CRM Service**
+  - [ ] Connect to database with RLS
+  - [ ] Implement Client CRUD operations
+  - [ ] Implement Contact management
+  - [ ] Add filtering and pagination
+  - [ ] Verify RLS isolation through service
+  - [ ] Add validation and error handling
+  - [ ] Create DTOs for API contracts
+  - [ ] Add OpenAPI/Swagger documentation
+  - [ ] Test cross-account access prevention
+
+- [ ] **API Gateway**
+  - [ ] Setup routing to auth-service
+  - [ ] Setup routing to crm-service
+  - [ ] Extract JWT from Authorization header
+  - [ ] Set RLS context for downstream services
+  - [ ] Add rate limiting
+  - [ ] Add request logging
+  - [ ] Handle authentication middleware
+  - [ ] Implement health checks
+  - [ ] Add CORS configuration
+
+### Phase 3: Docker Orchestration
+- [ ] **Docker Compose Setup**
+  - [ ] Create docker-compose.yml for all services
+  - [ ] Configure PostgreSQL container (done ✅)
+  - [ ] Add Redis container for caching/sessions
+  - [ ] Add RabbitMQ container for message queue
+  - [ ] Configure service networking
+  - [ ] Add environment variable management
+  - [ ] Setup service dependencies
+  - [ ] Configure volume mounts
+  - [ ] Add health checks for all services
+
+- [ ] **Service Containerization**
+  - [ ] Create Dockerfile for auth-service
+  - [ ] Create Dockerfile for crm-service
+  - [ ] Create Dockerfile for api-gateway
+  - [ ] Create Dockerfile for Next.js apps
+  - [ ] Optimize image sizes
+  - [ ] Add multi-stage builds
+  - [ ] Configure non-root users
+  - [ ] Add .dockerignore files
+
+- [ ] **Orchestration**
+  - [ ] Test full stack startup
+  - [ ] Verify service communication
+  - [ ] Add development docker-compose.dev.yml
+  - [ ] Add production docker-compose.prod.yml
+  - [ ] Create startup scripts
+  - [ ] Add log aggregation
+  - [ ] Configure restart policies
+  - [ ] Document deployment procedures
+
+### Phase 4: Frontend Development
+- [ ] **Authentication UI**
+  - [ ] Build login page
+  - [ ] Build registration page
+  - [ ] Add password reset flow
+  - [ ] Implement JWT token storage
+  - [ ] Add auth context/provider
+  - [ ] Create protected route wrapper
+  - [ ] Add logout functionality
+  - [ ] Handle token refresh
+
+- [ ] **Dashboard Layout**
+  - [ ] Create main layout component
+  - [ ] Add navigation sidebar
+  - [ ] Add top header with user menu
+  - [ ] Implement breadcrumbs
+  - [ ] Add responsive design
+  - [ ] Create theme system
+  - [ ] Add loading states
+  - [ ] Implement error boundaries
+
+- [ ] **CRM Screens**
+  - [ ] **Clients Management**
+    - [ ] List view with pagination
+    - [ ] Create client form
+    - [ ] Edit client form
+    - [ ] Client detail view
+    - [ ] Search and filters
+    - [ ] Bulk actions
+  - [ ] **Contacts Management**
+    - [ ] Contact list
+    - [ ] Add/edit contact forms
+    - [ ] Link contacts to clients
+  - [ ] **Employees Management** (nexo-employees app)
+    - [ ] Employee directory
+    - [ ] Employee profiles
+    - [ ] Role assignment UI
+  - [ ] **Suppliers Management** (nexo-suppliers app)
+    - [ ] Supplier list
+    - [ ] Supplier forms
+    - [ ] Supplier relationships
+  - [ ] **Professionals Management** (nexo-professionals app)
+    - [ ] Professional directory
+    - [ ] Skill/service listings
+    - [ ] Availability management
+
+---
+
+## 📊 Overall Progress Tracking
+
+| Phase | Status | Progress |
+|-------|--------|----------|
+| Phase 1: Database Foundation | ✅ Complete | 100% |
+| Phase 2: Backend Services | ⏳ Not Started | 0% |
+| Phase 3: Docker Orchestration | ⏳ Not Started | 0% |
+| Phase 4: Frontend Development | ⏳ Not Started | 0% |
+
+---
+
+## 🎯 Milestone Targets
+
+### Milestone 1: Backend MVP (Estimated: 2-3 weeks)
+- Auth service operational
+- CRM service with basic CRUD
+- API Gateway routing requests
+- RLS verified through HTTP layer
+
+### Milestone 2: Full Stack Local (Estimated: 1-2 weeks)
+- Docker Compose running all services
+- Redis and RabbitMQ integrated
+- Local development environment complete
+- Documentation updated
+
+### Milestone 3: UI Foundation (Estimated: 2-3 weeks)
+- Login/logout working end-to-end
+- Main dashboard accessible
+- Client management screens complete
+- Multi-tenant isolation verified in UI
+
+### Milestone 4: Production Ready (Estimated: 2-4 weeks)
+- All modules implemented
+- CI/CD pipelines configured
+- Monitoring and logging setup
+- Documentation complete
+- Security audit passed

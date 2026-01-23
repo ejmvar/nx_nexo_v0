@@ -14,6 +14,14 @@ if (!process.env.DATABASE_URL) {
   process.exit(1);
 }
 
+// Use superuser for setup/teardown (bypasses RLS for account creation)
+const SUPERUSER_URL = process.env.DATABASE_URL.replace('nexo_app:nexo_app_password', 'nexo_user:nexo_password');
+
+const setupPool = new pg.Pool({ connectionString: SUPERUSER_URL });
+const setupAdapter = new PrismaPg(setupPool);
+const setupPrisma = new PrismaClient({ adapter: setupAdapter });
+
+// Use regular user for actual RLS tests
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
@@ -35,10 +43,10 @@ async function testSetup() {
   console.log('║       Multi-Tenant RLS Isolation Test                     ║');
   console.log('╚════════════════════════════════════════════════════════════╝\n');
 
-  // Create test accounts
-  log('📦 Setting up test accounts...');
+  // Create test accounts using SUPERUSER connection (bypasses RLS)
+  log('📦 Setting up test accounts (using superuser)...');
   
-  const accountA = await prisma.account.upsert({
+  const accountA = await setupPrisma.account.upsert({
     where: { slug: 'test-account-a' },
     create: {
       id: '11111111-1111-1111-1111-111111111111',
@@ -50,7 +58,7 @@ async function testSetup() {
     update: {},
   });
 
-  const accountB = await prisma.account.upsert({
+  const accountB = await setupPrisma.account.upsert({
     where: { slug: 'test-account-b' },
     create: {
       id: '22222222-2222-2222-2222-222222222222',
@@ -169,8 +177,8 @@ async function testCrossAccountAccess(accountAId: string, accountBId: string) {
   console.log('\n📋 Test 4: Cross-Account Data Verification');
   
   try {
-    // Create test clients for both accounts (bypassing RLS temporarily)
-    const clientA = await prisma.client.create({
+    // Create test clients for both accounts (using SUPERUSER to bypass RLS)
+    const clientA = await setupPrisma.client.create({
       data: {
         accountId: accountAId,
         name: 'Test Client A',
@@ -179,7 +187,7 @@ async function testCrossAccountAccess(accountAId: string, accountBId: string) {
       }
     });
 
-    const clientB = await prisma.client.create({
+    const clientB = await setupPrisma.client.create({
       data: {
         accountId: accountBId,
         name: 'Test Client B',
@@ -191,7 +199,7 @@ async function testCrossAccountAccess(accountAId: string, accountBId: string) {
     log(`  Created Client A: ${clientA.id}`);
     log(`  Created Client B: ${clientB.id}`);
 
-    // Now test with RLS using a transaction to ensure SET LOCAL persists
+    // Now test with RLS using REGULAR USER and transaction
     const result = await prisma.$transaction(async (tx) => {
       // Set RLS context for Account A
       await tx.$executeRawUnsafe(`SET LOCAL app.current_account_id = '${accountAId}'`);
@@ -238,9 +246,9 @@ async function testCrossAccountAccess(accountAId: string, accountBId: string) {
       log(`❌ FAIL: SECURITY BREACH - Account A can access Account B's client!`);
     }
 
-    // Cleanup
-    await prisma.client.delete({ where: { id: clientA.id } });
-    await prisma.client.delete({ where: { id: clientB.id } });
+    // Cleanup using SUPERUSER
+    await setupPrisma.client.delete({ where: { id: clientA.id } });
+    await setupPrisma.client.delete({ where: { id: clientB.id } });
 
   } catch (error) {
     results.push({
@@ -290,12 +298,16 @@ async function main() {
 
     const exitCode = results.some(r => r.status === 'FAIL') ? 1 : 0;
     await prisma.$disconnect();
+    await setupPrisma.$disconnect();
     await pool.end();
+    await setupPool.end();
     process.exit(exitCode);
   } catch (error) {
     console.error('❌ Test execution failed:', error);
     await prisma.$disconnect();
+    await setupPrisma.$disconnect();
     await pool.end();
+    await setupPool.end();
     process.exit(1);
   }
 }
