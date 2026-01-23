@@ -1,6 +1,10 @@
-import { defineConfig } from '@prisma/client';
+import type { PrismaClientOptions } from '@prisma/client/runtime/library';
 
-export default defineConfig({
+if (!process.env.DATABASE_URL) {
+  throw new Error('DATABASE_URL environment variable is not set');
+}
+
+const config: PrismaClientOptions = {
   datasources: {
     db: {
       url: process.env.DATABASE_URL,
@@ -12,9 +16,6 @@ export default defineConfig({
     { level: 'info', emit: 'stdout' },
     { level: 'warn', emit: 'stdout' },
   ],
-  migrate: {
-    datasource: {
-      url: process.env.DATABASE_URL,
-    },
-  },
-});
+};
+
+export default config;

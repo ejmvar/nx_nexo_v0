@@ -34,11 +34,37 @@ END;
 $$ language 'plpgsql';
 
 -- ============================================
--- STEP 3: Enable Row Level Security on Tables
+-- STEP 3: Seed Default Data (BEFORE RLS!)
 -- ============================================
+-- Important: Insert seed data BEFORE enabling RLS
 
--- Note: Tables should already exist from Prisma migration
--- This script only enables RLS and creates policies
+-- Create default account for development
+INSERT INTO accounts (id, name, slug, settings, active, created_at, updated_at)
+VALUES (
+    '00000000-0000-0000-0000-000000000001'::uuid,
+    'Default Account',
+    'default',
+    '{}'::jsonb,
+    true,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
+)
+ON CONFLICT (slug) DO NOTHING;
+
+-- Create default admin role
+INSERT INTO roles (account_id, name, permissions, created_at, updated_at)
+VALUES (
+    '00000000-0000-0000-0000-000000000001'::uuid,
+    'admin',
+    '["*"]'::jsonb,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
+)
+ON CONFLICT (account_id, name) DO NOTHING;
+
+-- ============================================
+-- STEP 4: Enable Row Level Security on Tables
+-- ============================================
 
 ALTER TABLE accounts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE roles ENABLE ROW LEVEL SECURITY;
@@ -49,7 +75,7 @@ ALTER TABLE employees ENABLE ROW LEVEL SECURITY;
 ALTER TABLE professionals ENABLE ROW LEVEL SECURITY;
 
 -- ============================================
--- STEP 4: Create RLS Policies
+-- STEP 5: Create RLS Policies
 -- ============================================
 
 -- Accounts table policy
@@ -95,7 +121,7 @@ CREATE POLICY professionals_isolation_policy ON professionals
     USING (account_id = current_user_account_id());
 
 -- ============================================
--- STEP 5: Create Triggers for updated_at
+-- STEP 6: Create Triggers for updated_at
 -- ============================================
 
 DROP TRIGGER IF EXISTS update_accounts_updated_at ON accounts;
@@ -125,33 +151,6 @@ CREATE TRIGGER update_employees_updated_at BEFORE UPDATE ON employees
 DROP TRIGGER IF EXISTS update_professionals_updated_at ON professionals;
 CREATE TRIGGER update_professionals_updated_at BEFORE UPDATE ON professionals
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
--- ============================================
--- STEP 6: Seed Default Data (Development Only)
--- ============================================
-
--- Create default account for development
-INSERT INTO accounts (id, name, slug, settings, active)
-VALUES (
-    '00000000-0000-0000-0000-000000000001'::uuid,
-    'Default Account',
-    'default',
-    '{}'::jsonb,
-    true
-)
-ON CONFLICT (slug) DO NOTHING;
-
--- Create default admin role
-INSERT INTO roles (account_id, name, permissions)
-SELECT 
-    '00000000-0000-0000-0000-000000000001'::uuid,
-    'admin',
-    '["*"]'::jsonb
-WHERE NOT EXISTS (
-    SELECT 1 FROM roles 
-    WHERE account_id = '00000000-0000-0000-0000-000000000001'::uuid 
-    AND name = 'admin'
-);
 
 -- ============================================
 -- VERIFICATION

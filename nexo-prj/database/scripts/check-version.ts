@@ -5,10 +5,20 @@
  */
 
 import { PrismaClient } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
+import pg from 'pg';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
-const prisma = new PrismaClient();
+// Ensure DATABASE_URL is set
+if (!process.env.DATABASE_URL) {
+  console.error('ERROR: DATABASE_URL environment variable is not set');
+  process.exit(1);
+}
+
+const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter });
 
 interface VersionInfo {
   component: string;

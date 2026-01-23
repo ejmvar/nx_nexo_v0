@@ -5,11 +5,21 @@
  */
 
 import { PrismaClient } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
+import pg from 'pg';
 import { readFileSync, readdirSync, existsSync } from 'fs';
 import { join } from 'path';
 import * as crypto from 'crypto';
 
-const prisma = new PrismaClient();
+// Ensure DATABASE_URL is set
+if (!process.env.DATABASE_URL) {
+  console.error('ERROR: DATABASE_URL environment variable is not set');
+  process.exit(1);
+}
+
+const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter });
 
 interface Migration {
   version: string;
@@ -83,20 +93,9 @@ async function applyMigration(migration: Migration): Promise<void> {
   console.log(`   ${migration.description || 'No description'}`);
 
   try {
-    // Execute migration in transaction
-    await prisma.$transaction(async (tx) => {
-      // Split SQL into statements (simple approach, may need refinement)
-      const statements = migration.sql
-        .split(';')
-        .map((s) => s.trim())
-        .filter((s) => s.length > 0 && !s.startsWith('--'));
-
-      for (const statement of statements) {
-        if (statement.trim()) {
-          await tx.$executeRawUnsafe(statement);
-        }
-      }
-    });
+    // Execute entire SQL file as one statement using pg pool
+    // This preserves PL/pgSQL function definitions with EXCEPTION blocks
+    await pool.query(migration.sql);
 
     console.log(`   ✅ Success (${Date.now() - startTime}ms)`);
   } catch (error) {
