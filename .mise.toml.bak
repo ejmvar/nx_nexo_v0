@@ -1,0 +1,86 @@
+[vars]
+PROJECT_NAME = "nexo-prj"
+
+# /myproject/mise.toml
+experimental_monorepo_root = true
+
+[env]
+MISE_EXPERIMENTAL=0
+_.file = ".GITHUB_EJMV_OWN.env"
+PROJECT_NAME = "nexo-prj"
+
+
+[tools]
+node = "latest"
+npm = "latest"
+pnpm = "latest"
+
+# "nix:nx" = "latest" # Manages Nx via Nix
+
+
+
+# [tasks.100-nx-npm-install]
+# description = "Installs/Updates Nx CLI"
+# raw = true
+# run = "npx npm install -g nx"
+
+[tasks.100-000-001-nx-pnpm-install]
+description = "Installs/Updates Nx CLI using PNPM"
+raw = true
+run = ". ~/.bashrc && pnpm setup && . ~/.bashrc && pnpm install -g nx"
+# ------------------------------
+# # If necessary to approve builds:
+# pnpm approve-builds -g
+# # or
+# pnpm approve-builds nx -g
+# ------------------------------
+
+
+# [tasks.100-000-nx-init-this-project]
+# description = "Initialize NX in this EXISTING project"
+
+
+[tasks.100-000-002-nx-CREATE-pnpm-project-here]
+description = "Initialize NX in this EXISTING project"
+raw = true
+# run = "npx create-nx-workspace@latest your-workspace-name --package-manager=pnpm"
+run = "npx create-nx-workspace@latest {{vars.PROJECT_NAME}} --package-manager=pnpm"
+
+
+[tasks.build-nx]
+ # Example of a task that uses Nx after installation
+# command = "nx build my-app"
+run = "nx build my-app"
+depends = ["nx-install"] # Runs nx-install first
+description = "Builds the Nx 'my-app' project"
+# Run it: mise run nx-install or mise run build-nx. 
+# Method 3: Using the Nix plugin (Most Integrated)
+# Install the plugin: mise plugin install nix https://github.com/jbadeau/mise-nix.git.
+
+
+
+# https://mise.jdx.dev/tasks/monorepo.html
+# NOP # "npx:nx" = "latest"
+
+# ### TASKS ### https://mise.jdx.dev/tasks/toml-tasks.html
+#[task.
+#mise tasks add nx-install --description "Installs/Updates Nx CLI" --raw -- npx npm install -g nx
+
+# ---------------
+
+# # .mise.toml
+# [tasks]
+# nx-install = { command = "npx npm install -g nx", description = "Installs/Updates Nx CLI", raw = true }
+
+# # Or, if you prefer using pnpm:
+# # nx-install = { command = "pnpm install -g nx", description = "Installs/Updates Nx CLI", raw = true }
+
+# [tasks.build-nx] # Example of a task that uses Nx after installation
+# command = "nx build my-app"
+# depends = ["nx-install"] # Runs nx-install first
+# description = "Builds the Nx 'my-app' project"
+
+
+
+# ---------------
+

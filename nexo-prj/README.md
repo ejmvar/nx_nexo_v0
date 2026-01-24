@@ -1,82 +1,229 @@
-# NexoPrj
+# NEXO ERP Backend
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+A comprehensive microservices-based ERP (Enterprise Resource Planning) system built with NestJS and NX monorepo. The system provides complete business management functionality including CRM, inventory, sales, purchasing, and production management.
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is almost ready ✨.
+## 🏗️ Architecture
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/nx-api/next?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+This project implements a microservices architecture with:
 
-## Finish your remote caching setup
+- **API Gateway**: Central routing point for all service requests
+- **Auth Service**: JWT-based authentication and authorization
+- **CRM Service**: Customer and lead management
+- **Stock Service**: Inventory and warehouse management (planned)
+- **Sales Service**: Order and sales pipeline management (planned)
+- **Purchases Service**: Procurement and supplier management (planned)
+- **Production Service**: Manufacturing and work order tracking (planned)
+- **Notifications Service**: Communication and alert system (planned)
 
-[Click here to finish setting up your workspace!](https://cloud.nx.app/connect/Pdk0fUH42z)
+## 🚀 Quick Start
 
+### Prerequisites
+- Node.js 18+
+- pnpm
+- PostgreSQL (for database integration)
 
-## Run tasks
-
-To run the dev server for your app, use:
-
-```sh
-npx nx dev nexo-prj
+### Installation
+```bash
+pnpm install
 ```
 
-To create a production bundle:
+### Build Services
+```bash
+# Build all services
+pnpm build
 
-```sh
-npx nx build nexo-prj
+# Or build individual services
+npx nx build api-gateway
+npx nx build auth-service
+npx nx build crm-service
 ```
 
-To see all available targets to run for a project, run:
+### Run Services
+```bash
+# Start API Gateway (port 3001)
+npx nx serve api-gateway
 
-```sh
-npx nx show project nexo-prj
+# Start Auth Service (port 3000)
+npx nx serve auth-service
+
+# Start CRM Service (port 3002)
+npx nx serve crm-service
 ```
 
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
+### Health Checks
+```bash
+# Run comprehensive health checks
+./testing/ci-health-check.sh
 
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Add new projects
-
-While you could add new projects to your workspace manually, you might want to leverage [Nx plugins](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) and their [code generation](https://nx.dev/features/generate-code?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) feature.
-
-Use the plugin's generator to create new projects.
-
-To generate a new application, use:
-
-```sh
-npx nx g @nx/next:app demo
+# Or use Python health checker
+python3 testing/health-checks.py
 ```
 
-To generate a new library, use:
+## 📋 Services Overview
 
-```sh
-npx nx g @nx/react:lib mylib
+### ✅ Implemented Services
+
+#### API Gateway (Port 3001)
+- Routes requests to appropriate microservices
+- Health check endpoint: `GET /health`
+- Proxy routes: `/api/v1/*`
+
+#### Auth Service (Port 3000)
+- JWT authentication
+- Login: `POST /api/v1/auth/login`
+- Profile: `POST /api/v1/auth/profile`
+- Health: `GET /health`
+
+#### CRM Service (Port 3002)
+- Customer management: `GET|POST|PUT|DELETE /api/v1/crm/customers`
+- Lead management: `GET|POST|PUT|DELETE /api/v1/crm/leads`
+- Contact management: Customer contact associations
+
+### 🔄 Planned Services
+
+- **Stock Service** (Port 3003): Product inventory and warehouse management
+- **Sales Service** (Port 3004): Order processing and sales pipeline
+- **Purchases Service** (Port 3005): Procurement and supplier management
+- **Production Service** (Port 3006): Manufacturing and work orders
+- **Notifications Service** (Port 3007): Email, SMS, and in-app notifications
+
+## 🧪 Testing
+
+### Manual Testing
+```bash
+# Run curl test examples
+./testing/curl-examples.sh
+
+# Use REST Client in VS Code
+# Open testing/restclient-examples.http
 ```
 
-You can use `npx nx list` to get a list of installed plugins. Then, run `npx nx list <plugin-name>` to learn about more specific capabilities of a particular plugin. Alternatively, [install Nx Console](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) to browse plugins and generators in your IDE.
+### Automated Testing
+```bash
+# Unit tests
+npx nx test api-gateway
+npx nx test auth-service
+npx nx test crm-service
 
-[Learn more about Nx plugins &raquo;](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) | [Browse the plugin registry &raquo;](https://nx.dev/plugin-registry?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+# Health checks
+python3 testing/health-checks.py --ci
+```
 
+### CI/CD Testing
+```bash
+# Run CI health checks
+./testing/ci-health-check.sh
+```
 
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+## 🗄️ Database
 
-## Install Nx Console
+### Schema Design
+- PostgreSQL with multi-tenancy support
+- Row Level Security (RLS) policies
+- 15+ tables across 7 business modules
+- Complete ER diagrams in `database/` directory
 
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
+### Current Status
+- Schema designed and documented
+- Mock data implementation in services
+- Database integration pending
 
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+## 📚 Documentation
 
-## Useful links
+- **Architecture**: `ARCHITECTURE.md` - High-level system design
+- **Tasks**: `TASKS.md` - Development roadmap and progress
+- **Testing**: `testing/README.md` - Testing infrastructure guide
+- **Services**: Individual READMEs in each service directory
 
-Learn more:
+## 🛠️ Development
 
-- [Learn more about this workspace setup](https://nx.dev/nx-api/next?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+### Project Structure
+```
+nexo-prj/
+├── apps/
+│   ├── api-gateway/          # API Gateway service
+│   ├── auth-service/         # Authentication service
+│   ├── crm-service/          # CRM service
+│   └── [other-services]/     # Planned services
+├── database/                 # Database schema and migrations
+├── testing/                  # Testing infrastructure
+└── [config files]           # NX and project configuration
+```
 
-And join the Nx community:
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+### Adding New Services
+```bash
+# Generate new service
+npx nx g @nx/nest:app [service-name]
+
+# Update API Gateway proxy routes
+# Add service URL mapping in proxy.service.ts
+
+# Create service documentation and tests
+```
+
+### Code Quality
+```bash
+# Lint code
+npx nx lint
+
+# Format code
+npx nx format
+
+# Run all tests
+npx nx run-many --target=test
+```
+
+## 🔐 Authentication
+
+The system uses JWT (JSON Web Tokens) for authentication:
+
+1. Login with credentials → Receive JWT token
+2. Include token in `Authorization: Bearer <token>` header
+3. Token validated on protected endpoints
+
+## 📊 API Response Format
+
+All API responses follow a consistent format:
+
+```json
+{
+  "data": [...],
+  "total": 100,
+  "page": 1,
+  "limit": 10
+}
+```
+
+## 🚀 Deployment
+
+### Development
+- Run services individually with `npx nx serve [service-name]`
+- Use testing scripts to verify functionality
+
+### Production
+- Docker containerization planned
+- Docker Compose for local orchestration
+- Kubernetes for cloud deployment
+
+## 🤝 Contributing
+
+1. Check `TASKS.md` for current priorities
+2. Follow established patterns for new services
+3. Add comprehensive tests for new features
+4. Update documentation
+5. Ensure CI/CD checks pass
+
+## 📈 Progress
+
+- **Infrastructure**: 100% ✅
+- **Core Services**: 25% (1/4 implemented)
+- **Database Integration**: 10%
+- **Testing**: 80%
+- **Documentation**: 90%
+
+See `TASKS.md` for detailed progress tracking.
+
+## 📄 License
+
+This project is part of the NEXO ERP system. See project documentation for licensing details.</content>
+<parameter name="filePath">/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/README.md

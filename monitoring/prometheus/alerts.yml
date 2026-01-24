@@ -1,0 +1,249 @@
+groups:
+  - name: nexo_critical_alerts
+    interval: 30s
+    rules:
+      # Service Down Alerts
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: infrastructure
+        annotations:
+          summary: "Service {{ $labels.job }} is down"
+          description: "{{ $labels.job }} has been down for more than 1 minute."
+
+      # High Error Rate
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          component: backend
+        annotations:
+          summary: "High error rate on {{ $labels.service }}"
+          description: "Error rate is {{ $value | humanizePercentage }} on {{ $labels.service }}"
+
+      # Database Connection Pool Exhaustion
+      - alert: DatabaseConnectionPoolExhausted
+        expr: pg_stat_database_numbackends / pg_settings_max_connections > 0.9
+        for: 2m
+        labels:
+          severity: critical
+          component: database
+        annotations:
+          summary: "PostgreSQL connection pool near exhaustion"
+          description: "Database connections at {{ $value | humanizePercentage }} of maximum"
+
+      # High Memory Usage
+      - alert: HighMemoryUsage
+        expr: (process_resident_memory_bytes / 1024 / 1024 / 1024) > 1.5
+        for: 5m
+        labels:
+          severity: warning
+          component: infrastructure
+        annotations:
+          summary: "High memory usage on {{ $labels.service }}"
+          description: "Memory usage is {{ $value }}GB on {{ $labels.service }}"
+
+      # High CPU Usage
+      - alert: HighCPUUsage
+        expr: rate(process_cpu_seconds_total[5m]) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          component: infrastructure
+        annotations:
+          summary: "High CPU usage on {{ $labels.service }}"
+          description: "CPU usage is {{ $value }}% on {{ $labels.service }}"
+
+  - name: nexo_performance_alerts
+    interval: 1m
+    rules:
+      # Slow API Response Time
+      - alert: SlowAPIResponse
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{service="backend"}[5m])) > 1
+        for: 5m
+        labels:
+          severity: warning
+          component: backend
+        annotations:
+          summary: "Slow API response time"
+          description: "95th percentile response time is {{ $value }}s"
+
+      # High Event Loop Lag
+      - alert: HighEventLoopLag
+        expr: nodejs_eventloop_lag_seconds > 0.1
+        for: 3m
+        labels:
+          severity: warning
+          component: backend
+        annotations:
+          summary: "High Node.js event loop lag"
+          description: "Event loop lag is {{ $value }}s on {{ $labels.service }}"
+
+      # Database Slow Queries
+      - alert: DatabaseSlowQueries
+        expr: rate(pg_slow_queries_total[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+          component: database
+        annotations:
+          summary: "High rate of slow database queries"
+          description: "{{ $value }} slow queries per second"
+
+      # Low Cache Hit Rate
+      - alert: LowCacheHitRate
+        expr: rate(cache_hits_total[5m]) / (rate(cache_hits_total[5m]) + rate(cache_misses_total[5m])) < 0.8
+        for: 10m
+        labels:
+          severity: warning
+          component: cache
+        annotations:
+          summary: "Low cache hit rate"
+          description: "Cache hit rate is {{ $value | humanizePercentage }}"
+
+  - name: nexo_database_alerts
+    interval: 1m
+    rules:
+      # Database Size Growth
+      - alert: DatabaseSizeGrowth
+        expr: rate(pg_database_size_bytes[1h]) > 10737418240  # 10GB/hour
+        for: 30m
+        labels:
+          severity: warning
+          component: database
+        annotations:
+          summary: "Rapid database growth detected"
+          description: "Database {{ $labels.datname }} growing at {{ $value | humanize }}B/s"
+
+      # High Transaction Rollback Rate
+      - alert: HighRollbackRate
+        expr: rate(pg_stat_database_xact_rollback[5m]) / rate(pg_stat_database_xact_commit[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          component: database
+        annotations:
+          summary: "High transaction rollback rate"
+          description: "Rollback rate is {{ $value | humanizePercentage }}"
+
+      # Database Deadlocks
+      - alert: DatabaseDeadlocks
+        expr: rate(pg_stat_database_deadlocks[5m]) > 0
+        for: 1m
+        labels:
+          severity: warning
+          component: database
+        annotations:
+          summary: "Database deadlocks detected"
+          description: "{{ $value }} deadlocks per second in {{ $labels.datname }}"
+
+      # Low Database Cache Hit Ratio
+      - alert: LowDatabaseCacheHitRatio
+        expr: pg_stat_database_blks_hit / (pg_stat_database_blks_hit + pg_stat_database_blks_read) < 0.95
+        for: 10m
+        labels:
+          severity: warning
+          component: database
+        annotations:
+          summary: "Low database cache hit ratio"
+          description: "Cache hit ratio is {{ $value | humanizePercentage }} for {{ $labels.datname }}"
+
+  - name: nexo_redis_alerts
+    interval: 1m
+    rules:
+      # Redis Memory Usage
+      - alert: RedisHighMemoryUsage
+        expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.9
+        for: 5m
+        labels:
+          severity: warning
+          component: cache
+        annotations:
+          summary: "Redis memory usage is high"
+          description: "Redis memory usage at {{ $value | humanizePercentage }}"
+
+      # Redis Evicted Keys
+      - alert: RedisEvictedKeys
+        expr: rate(redis_evicted_keys_total[5m]) > 100
+        for: 5m
+        labels:
+          severity: warning
+          component: cache
+        annotations:
+          summary: "Redis is evicting keys"
+          description: "{{ $value }} keys evicted per second"
+
+      # Redis Connection Errors
+      - alert: RedisConnectionErrors
+        expr: rate(redis_rejected_connections_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: critical
+          component: cache
+        annotations:
+          summary: "Redis connection errors"
+          description: "{{ $value }} connection rejections per second"
+
+  - name: nexo_security_alerts
+    interval: 30s
+    rules:
+      # High Authentication Failure Rate
+      - alert: HighAuthFailureRate
+        expr: rate(auth_requests_total{status="failed"}[5m]) > 10
+        for: 3m
+        labels:
+          severity: warning
+          component: security
+        annotations:
+          summary: "High authentication failure rate"
+          description: "{{ $value }} failed auth attempts per second"
+
+      # Invalid JWT Tokens
+      - alert: HighInvalidTokenRate
+        expr: rate(jwt_validation_total{status="invalid"}[5m]) > 5
+        for: 3m
+        labels:
+          severity: warning
+          component: security
+        annotations:
+          summary: "High invalid token rate"
+          description: "{{ $value }} invalid tokens per second"
+
+      # Suspicious Activity Pattern
+      - alert: SuspiciousActivityPattern
+        expr: rate(http_requests_total{status="401"}[5m]) > 50
+        for: 2m
+        labels:
+          severity: critical
+          component: security
+        annotations:
+          summary: "Suspicious activity detected"
+          description: "{{ $value }} unauthorized requests per second from {{ $labels.source_ip }}"
+
+  - name: nexo_disk_alerts
+    interval: 1m
+    rules:
+      # Disk Space Low
+      - alert: DiskSpaceLow
+        expr: (node_filesystem_avail_bytes / node_filesystem_size_bytes) < 0.2
+        for: 5m
+        labels:
+          severity: warning
+          component: infrastructure
+        annotations:
+          summary: "Low disk space on {{ $labels.instance }}"
+          description: "Only {{ $value | humanizePercentage }} disk space available"
+
+      # Disk Space Critical
+      - alert: DiskSpaceCritical
+        expr: (node_filesystem_avail_bytes / node_filesystem_size_bytes) < 0.1
+        for: 1m
+        labels:
+          severity: critical
+          component: infrastructure
+        annotations:
+          summary: "Critical disk space on {{ $labels.instance }}"
+          description: "Only {{ $value | humanizePercentage }} disk space available"

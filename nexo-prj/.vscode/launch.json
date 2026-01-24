@@ -4,9 +4,9 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug api-gateway with Nx",
+      "name": "Debug auth with Nx",
       "runtimeExecutable": "pnpm exec",
-      "runtimeArgs": ["nx", "serve", "api-gateway"],
+      "runtimeArgs": ["nx", "serve", "auth"],
       "env": {
         "NODE_OPTIONS": "--inspect=9229"
       },
@@ -22,9 +22,9 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug crm-core with Nx",
+      "name": "Debug api-gateway with Nx",
       "runtimeExecutable": "pnpm exec",
-      "runtimeArgs": ["nx", "serve", "crm-core"],
+      "runtimeArgs": ["nx", "serve", "api-gateway"],
       "env": {
         "NODE_OPTIONS": "--inspect=9230"
       },
@@ -40,11 +40,65 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "Debug auth with Nx",
+      "runtimeExecutable": "pnpm exec",
+      "runtimeArgs": ["nx", "serve", "auth"],
+      "env": {
+        "NODE_OPTIONS": "--inspect=9231"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "skipFiles": ["<node_internals>/**"],
+      "sourceMaps": true,
+      "outFiles": [
+        "${workspaceFolder}/back_auth/dist/**/*.(m|c|)js",
+        "!**/node_modules/**"
+      ]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug auth with Nx",
+      "runtimeExecutable": "pnpm exec",
+      "runtimeArgs": ["nx", "serve", "auth"],
+      "env": {
+        "NODE_OPTIONS": "--inspect=9232"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "skipFiles": ["<node_internals>/**"],
+      "sourceMaps": true,
+      "outFiles": [
+        "${workspaceFolder}/back_auth/dist/**/*.(m|c|)js",
+        "!**/node_modules/**"
+      ]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug @nexo-prj/auth-service with Nx",
+      "runtimeExecutable": "pnpm exec",
+      "runtimeArgs": ["nx", "serve", "@nexo-prj/auth-service"],
+      "env": {
+        "NODE_OPTIONS": "--inspect=9233"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "skipFiles": ["<node_internals>/**"],
+      "sourceMaps": true,
+      "outFiles": [
+        "${workspaceFolder}/auth-service/dist/**/*.(m|c|)js",
+        "!**/node_modules/**"
+      ]
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "Debug @nexo-prj/api-gateway with Nx",
       "runtimeExecutable": "pnpm exec",
       "runtimeArgs": ["nx", "serve", "@nexo-prj/api-gateway"],
       "env": {
-        "NODE_OPTIONS": "--inspect=9231"
+        "NODE_OPTIONS": "--inspect=9234"
       },
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
@@ -58,63 +112,9 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug @nexo-prj/crm-core with Nx",
+      "name": "Debug @nexo-prj/core-crm-service with Nx",
       "runtimeExecutable": "pnpm exec",
-      "runtimeArgs": ["nx", "serve", "@nexo-prj/crm-core"],
-      "env": {
-        "NODE_OPTIONS": "--inspect=9232"
-      },
-      "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen",
-      "skipFiles": ["<node_internals>/**"],
-      "sourceMaps": true,
-      "outFiles": [
-        "${workspaceFolder}/crm-core/dist/**/*.(m|c|)js",
-        "!**/node_modules/**"
-      ]
-    },
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "Debug @nexo-prj/stock with Nx",
-      "runtimeExecutable": "pnpm exec",
-      "runtimeArgs": ["nx", "serve", "@nexo-prj/stock"],
-      "env": {
-        "NODE_OPTIONS": "--inspect=9233"
-      },
-      "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen",
-      "skipFiles": ["<node_internals>/**"],
-      "sourceMaps": true,
-      "outFiles": [
-        "${workspaceFolder}/stock/dist/**/*.(m|c|)js",
-        "!**/node_modules/**"
-      ]
-    },
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "Debug @nexo-prj/purchases with Nx",
-      "runtimeExecutable": "pnpm exec",
-      "runtimeArgs": ["nx", "serve", "@nexo-prj/purchases"],
-      "env": {
-        "NODE_OPTIONS": "--inspect=9234"
-      },
-      "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen",
-      "skipFiles": ["<node_internals>/**"],
-      "sourceMaps": true,
-      "outFiles": [
-        "${workspaceFolder}/purchases/dist/**/*.(m|c|)js",
-        "!**/node_modules/**"
-      ]
-    },
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "Debug @nexo-prj/sales with Nx",
-      "runtimeExecutable": "pnpm exec",
-      "runtimeArgs": ["nx", "serve", "@nexo-prj/sales"],
+      "runtimeArgs": ["nx", "serve", "@nexo-prj/core-crm-service"],
       "env": {
         "NODE_OPTIONS": "--inspect=9235"
       },
@@ -123,16 +123,16 @@
       "skipFiles": ["<node_internals>/**"],
       "sourceMaps": true,
       "outFiles": [
-        "${workspaceFolder}/sales/dist/**/*.(m|c|)js",
+        "${workspaceFolder}/core-crm-service/dist/**/*.(m|c|)js",
         "!**/node_modules/**"
       ]
     },
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug @nexo-prj/production with Nx",
+      "name": "Debug @nexo-prj/stock-service with Nx",
       "runtimeExecutable": "pnpm exec",
-      "runtimeArgs": ["nx", "serve", "@nexo-prj/production"],
+      "runtimeArgs": ["nx", "serve", "@nexo-prj/stock-service"],
       "env": {
         "NODE_OPTIONS": "--inspect=9236"
       },
@@ -141,16 +141,16 @@
       "skipFiles": ["<node_internals>/**"],
       "sourceMaps": true,
       "outFiles": [
-        "${workspaceFolder}/production/dist/**/*.(m|c|)js",
+        "${workspaceFolder}/stock-service/dist/**/*.(m|c|)js",
         "!**/node_modules/**"
       ]
     },
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug @nexo-prj/notifications with Nx",
+      "name": "Debug @nexo-prj/compras-service with Nx",
       "runtimeExecutable": "pnpm exec",
-      "runtimeArgs": ["nx", "serve", "@nexo-prj/notifications"],
+      "runtimeArgs": ["nx", "serve", "@nexo-prj/compras-service"],
       "env": {
         "NODE_OPTIONS": "--inspect=9237"
       },
@@ -159,16 +159,16 @@
       "skipFiles": ["<node_internals>/**"],
       "sourceMaps": true,
       "outFiles": [
-        "${workspaceFolder}/notifications/dist/**/*.(m|c|)js",
+        "${workspaceFolder}/compras-service/dist/**/*.(m|c|)js",
         "!**/node_modules/**"
       ]
     },
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug @nexo-prj/auth with Nx",
+      "name": "Debug @nexo-prj/ventas-service with Nx",
       "runtimeExecutable": "pnpm exec",
-      "runtimeArgs": ["nx", "serve", "@nexo-prj/auth"],
+      "runtimeArgs": ["nx", "serve", "@nexo-prj/ventas-service"],
       "env": {
         "NODE_OPTIONS": "--inspect=9238"
       },
@@ -177,7 +177,79 @@
       "skipFiles": ["<node_internals>/**"],
       "sourceMaps": true,
       "outFiles": [
-        "${workspaceFolder}/auth/dist/**/*.(m|c|)js",
+        "${workspaceFolder}/ventas-service/dist/**/*.(m|c|)js",
+        "!**/node_modules/**"
+      ]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug @nexo-prj/produccion-service with Nx",
+      "runtimeExecutable": "pnpm exec",
+      "runtimeArgs": ["nx", "serve", "@nexo-prj/produccion-service"],
+      "env": {
+        "NODE_OPTIONS": "--inspect=9239"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "skipFiles": ["<node_internals>/**"],
+      "sourceMaps": true,
+      "outFiles": [
+        "${workspaceFolder}/produccion-service/dist/**/*.(m|c|)js",
+        "!**/node_modules/**"
+      ]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug notificaciones-service with Nx",
+      "runtimeExecutable": "pnpm exec",
+      "runtimeArgs": ["nx", "serve", "notificaciones-service"],
+      "env": {
+        "NODE_OPTIONS": "--inspect=9240"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "skipFiles": ["<node_internals>/**"],
+      "sourceMaps": true,
+      "outFiles": [
+        "${workspaceFolder}/apps/dist/**/*.(m|c|)js",
+        "!**/node_modules/**"
+      ]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug auth-service with Nx",
+      "runtimeExecutable": "pnpm exec",
+      "runtimeArgs": ["nx", "serve", "auth-service"],
+      "env": {
+        "NODE_OPTIONS": "--inspect=9241"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "skipFiles": ["<node_internals>/**"],
+      "sourceMaps": true,
+      "outFiles": [
+        "${workspaceFolder}/back_auth/dist/**/*.(m|c|)js",
+        "!**/node_modules/**"
+      ]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug auth-service with Nx",
+      "runtimeExecutable": "pnpm exec",
+      "runtimeArgs": ["nx", "serve", "auth-service"],
+      "env": {
+        "NODE_OPTIONS": "--inspect=9242"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "skipFiles": ["<node_internals>/**"],
+      "sourceMaps": true,
+      "outFiles": [
+        "${workspaceFolder}/./dist/**/*.(m|c|)js",
         "!**/node_modules/**"
       ]
     }

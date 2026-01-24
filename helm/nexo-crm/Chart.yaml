@@ -1,0 +1,17 @@
+apiVersion: v2
+name: nexo-crm
+description: NEXO CRM - Complete Customer Relationship Management System
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+keywords:
+  - crm
+  - nexo
+  - kubernetes
+  - postgresql
+  - redis
+  - keycloak
+home: https://github.com/nexo/nexo-crm
+maintainers:
+  - name: NEXO Development Team
+    email: dev@nexo.local

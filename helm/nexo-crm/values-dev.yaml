@@ -1,0 +1,101 @@
+# Development environment values
+# Optimized for local development with minimal resources
+
+global:
+  environment: development
+  domain: dev.nexo.local
+  imagePullPolicy: IfNotPresent
+
+postgresql:
+  replicaCount: 1
+  persistence:
+    enabled: true
+    size: 5Gi
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "250m"
+
+redis:
+  replicaCount: 1
+  persistence:
+    enabled: true
+    size: 2Gi
+  resources:
+    requests:
+      memory: "64Mi"
+      cpu: "50m"
+    limits:
+      memory: "128Mi"
+      cpu: "100m"
+
+keycloak:
+  replicaCount: 1
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+
+backend:
+  replicaCount: 1
+  env:
+    nodeEnv: development
+    logLevel: debug
+  autoscaling:
+    enabled: false
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "250m"
+
+frontend:
+  replicaCount: 1
+  service:
+    type: NodePort
+  autoscaling:
+    enabled: false
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "250m"
+
+prometheus:
+  replicaCount: 1
+  persistence:
+    enabled: true
+    size: 5Gi
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "250m"
+
+grafana:
+  replicaCount: 1
+  persistence:
+    enabled: true
+    size: 2Gi
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "250m"
+
+ingress:
+  enabled: false

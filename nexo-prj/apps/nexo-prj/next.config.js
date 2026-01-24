@@ -10,6 +10,13 @@ const nextConfig = {
   // Use this to set Nx-specific options
   // See: https://nx.dev/recipes/next/next-config-setup
   nx: {},
+  // Transpile the shared-ui library from source
+  transpilePackages: ['@nexo-prj/shared-ui'],
+  output: 'standalone',
+  experimental: {
+    // Allow importing from workspace libraries
+    externalDir: true,
+  },
 };
 
 const plugins = [

@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
     "composite": true,
     "declarationMap": true,
     "emitDeclarationOnly": true,
@@ -18,8 +19,11 @@
     "target": "es2022",
     "customConditions": ["@nexo-prj/source"],
     "paths": {
-      "@nexo-prj/api-client": ["./api-client/src/index.ts"],
-      "@nexo-prj/ui": ["./libs/src/index.ts"]
+      "@nexo-prj/shared-ui": ["dist/libs/shared-ui/src/index.d.ts"],
+      "@nexo-prj/shared-ui/*": ["dist/libs/shared-ui/src/*"],
+      "@nexo-prj/shared/logger": ["libs/shared/logger/src/index.ts"],
+      "@nexo-prj/shared/health": ["libs/shared/health/src/index.ts"],
+      "@nexo-prj/shared/metrics": ["libs/shared/metrics/src/index.ts"]
     }
   }
 }

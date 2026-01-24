@@ -1,0 +1,29 @@
+{
+  "installation": {
+    "version": "22.3.3",
+    "plugins": {
+      "@nx/jest": "22.3.3",
+      "@nx/next": "22.3.3",
+      "@nx/eslint": "22.3.3",
+      "@nx/vite": "22.3.3",
+      "@nx/vitest": "22.3.3",
+      "@nx/playwright": "22.3.3",
+      "@nx/docker": "22.3.3"
+    }
+  },
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "plugins": [
+    {
+      "plugin": "@nx/docker",
+      "options": {
+        "buildTarget": {
+          "name": "docker:build"
+        },
+        "runTarget": {
+          "name": "docker:run"
+        }
+      }
+    }
+  ],
+  "nxCloudId": "69711e0ac2385d08db588326"
+}

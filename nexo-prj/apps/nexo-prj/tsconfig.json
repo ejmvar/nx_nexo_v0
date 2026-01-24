@@ -1,12 +1,27 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "jsx": "preserve",
-    "noEmit": true,
+    "composite": true,
+    "declarationMap": true,
     "emitDeclarationOnly": false,
+    "importHelpers": true,
+    "isolatedModules": true,
+    "lib": ["es2022", "dom", "dom.iterable"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "noEmitOnError": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "es2022",
+    "customConditions": ["@nexo-prj/source"],
+    "jsx": "react-jsx",
+    "noEmit": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
@@ -17,7 +32,9 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@nexo-prj/shared-ui": ["../../libs/shared-ui/src/index.ts"],
+      "@nexo-prj/shared-ui/*": ["../../libs/shared-ui/src/*"]
     },
     "types": ["jest", "node"],
     "outDir": "dist",
@@ -29,9 +46,11 @@
     "src/**/*.tsx",
     "src/**/*.js",
     "src/**/*.jsx",
-    "../../apps/nexo-prj/.next/types/**/*.ts",
-    "../../dist/apps/nexo-prj/.next/types/**/*.ts",
-    "next-env.d.ts"
+    "../../ap../.next/types/**/*.ts",
+    "../../dist/ap../.next/types/**/*.ts",
+    "next-env.d.ts",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
   ],
   "exclude": [
     "out-tsc",
@@ -45,5 +64,6 @@
     "eslint.config.js",
     "eslint.config.cjs",
     "eslint.config.mjs"
-  ]
+  ],
+  "references": []
 }

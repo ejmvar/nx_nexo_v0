@@ -1,0 +1,258 @@
+# ============================================================================
+# NEXO CRM - Raspberry Pi Build & Deployment Makefile
+# ============================================================================
+# Optimized for Raspberry Pi 4 (4GB RAM) with ARM64 architecture
+
+.PHONY: help setup build-multi build-rpi push-multi test-resources start stop clean health logs
+
+# Variables
+REGISTRY ?= nexo
+VERSION ?= latest
+PLATFORMS := linux/amd64,linux/arm64,linux/arm/v7
+
+# Default target
+help:
+	@echo "NEXO CRM - Raspberry Pi Deployment"
+	@echo "===================================="
+	@echo ""
+	@echo "Setup Commands:"
+	@echo "  make setup          - Install Docker buildx for multi-platform builds"
+	@echo "  make test-resources - Test current system resources"
+	@echo ""
+	@echo "Build Commands:"
+	@echo "  make build-multi    - Build multi-platform images (amd64, arm64, arm/v7)"
+	@echo "  make build-rpi      - Build ARM64 images only (for Raspberry Pi)"
+	@echo "  make push-multi     - Build and push multi-platform images to registry"
+	@echo ""
+	@echo "Deployment Commands:"
+	@echo "  make start          - Start all services with resource limits"
+	@echo "  make stop           - Stop all services"
+	@echo "  make restart        - Restart all services"
+	@echo "  make clean          - Stop services and remove volumes"
+	@echo ""
+	@echo "Monitoring Commands:"
+	@echo "  make health         - Check health status of all services"
+	@echo "  make logs           - Show logs for all services"
+	@echo "  make stats          - Show resource usage statistics"
+	@echo "  make test-memory    - Test memory allocation for Raspberry Pi"
+	@echo ""
+	@echo "Configuration:"
+	@echo "  REGISTRY=$(REGISTRY)"
+	@echo "  VERSION=$(VERSION)"
+	@echo "  PLATFORMS=$(PLATFORMS)"
+
+# Setup Docker buildx for multi-platform builds
+setup:
+	@echo "Setting up Docker buildx for multi-platform builds..."
+	docker buildx create --name nexo-builder --use || docker buildx use nexo-builder
+	docker buildx inspect --bootstrap
+	@echo "✅ Docker buildx ready for multi-platform builds"
+
+# Test system resources (Raspberry Pi check)
+test-resources:
+	@echo "Testing system resources..."
+	@echo ""
+	@echo "Memory:"
+	@free -h
+	@echo ""
+	@echo "CPU:"
+	@lscpu | grep -E "Architecture|CPU\(s\)|Model name" || echo "lscpu not available"
+	@echo ""
+	@echo "Disk:"
+	@df -h /
+	@echo ""
+	@echo "Docker Info:"
+	@docker info | grep -E "Operating System|Architecture|CPUs|Total Memory"
+
+# Build multi-platform images
+build-multi: setup
+	@echo "Building multi-platform Docker images..."
+	docker buildx build \
+		--platform $(PLATFORMS) \
+		--file nexo-prj/apps/auth-service/Dockerfile \
+		--tag $(REGISTRY)/auth-service:$(VERSION) \
+		--load \
+		./nexo-prj
+	docker buildx build \
+		--platform $(PLATFORMS) \
+		--file nexo-prj/apps/api-gateway/Dockerfile \
+		--tag $(REGISTRY)/api-gateway:$(VERSION) \
+		--load \
+		./nexo-prj
+	docker buildx build \
+		--platform $(PLATFORMS) \
+		--file nexo-prj/apps/crm-service/Dockerfile \
+		--tag $(REGISTRY)/crm-service:$(VERSION) \
+		--load \
+		./nexo-prj
+	@echo "✅ Multi-platform images built successfully"
+
+# Build ARM64 only (faster for Raspberry Pi)
+build-rpi:
+	@echo "Building ARM64 images for Raspberry Pi..."
+	docker buildx build \
+		--platform linux/arm64 \
+		--file nexo-prj/apps/auth-service/Dockerfile \
+		--tag $(REGISTRY)/auth-service:$(VERSION)-arm64 \
+		--load \
+		./nexo-prj
+	docker buildx build \
+		--platform linux/arm64 \
+		--file nexo-prj/apps/api-gateway/Dockerfile \
+		--tag $(REGISTRY)/api-gateway:$(VERSION)-arm64 \
+		--load \
+		./nexo-prj
+	docker buildx build \
+		--platform linux/arm64 \
+		--file nexo-prj/apps/crm-service/Dockerfile \
+		--tag $(REGISTRY)/crm-service:$(VERSION)-arm64 \
+		--load \
+		./nexo-prj
+	@echo "✅ ARM64 images built for Raspberry Pi"
+
+# Build and push multi-platform images
+push-multi: setup
+	@echo "Building and pushing multi-platform images..."
+	docker buildx build \
+		--platform $(PLATFORMS) \
+		--file nexo-prj/apps/auth-service/Dockerfile \
+		--tag $(REGISTRY)/auth-service:$(VERSION) \
+		--push \
+		./nexo-prj
+	docker buildx build \
+		--platform $(PLATFORMS) \
+		--file nexo-prj/apps/api-gateway/Dockerfile \
+		--tag $(REGISTRY)/api-gateway:$(VERSION) \
+		--push \
+		./nexo-prj
+	docker buildx build \
+		--platform $(PLATFORMS) \
+		--file nexo-prj/apps/crm-service/Dockerfile \
+		--tag $(REGISTRY)/crm-service:$(VERSION) \
+		--push \
+		./nexo-prj
+	@echo "✅ Images pushed to registry"
+
+# Start services (database only for now)
+start:
+	@echo "Starting NEXO CRM services..."
+	@echo "Note: Using resource limits optimized for Raspberry Pi 4 (4GB)"
+	docker compose -f docker-compose.full.yml up -d postgres redis
+	@echo ""
+	@echo "✅ Database services started"
+	@echo "Run 'make health' to check service status"
+
+# Start all services including backend
+start-all:
+	@echo "Starting all NEXO CRM services..."
+	docker compose -f docker-compose.full.yml up -d
+	@echo ""
+	@echo "✅ All services started"
+	@echo "Run 'make health' to check service status"
+
+# Stop services
+stop:
+	@echo "Stopping NEXO CRM services..."
+	docker compose -f docker-compose.full.yml down
+	@echo "✅ Services stopped"
+
+# Restart services
+restart: stop start
+
+# Clean everything (including volumes)
+clean:
+	@echo "⚠️  WARNING: This will delete all data!"
+	@echo "Press Ctrl+C to cancel, or wait 5 seconds to continue..."
+	@sleep 5
+	docker compose -f docker-compose.full.yml down -v
+	@echo "✅ All services stopped and data removed"
+
+# Check health status
+health:
+	@echo "Service Health Status:"
+	@echo "====================="
+	@docker compose -f docker-compose.full.yml ps
+	@echo ""
+	@echo "Container Health Details:"
+	@docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | grep nexo || echo "No services running"
+
+# Show logs
+logs:
+	docker compose -f docker-compose.full.yml logs -f
+
+# Show resource usage statistics
+stats:
+	@echo "Resource Usage (Raspberry Pi):"
+	@echo "=============================="
+	@docker stats --no-stream --format "table {{.Container}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.MemPerc}}\t{{.NetIO}}" || echo "No containers running"
+
+# Test memory allocation for Raspberry Pi
+test-memory:
+	@echo "Memory Test for Raspberry Pi 4 (4GB):"
+	@echo "====================================="
+	@echo ""
+	@echo "Target Memory Allocation:"
+	@echo "  PostgreSQL:     256MB - 512MB"
+	@echo "  Redis:          64MB  - 128MB"
+	@echo "  Auth Service:   128MB - 256MB"
+	@echo "  API Gateway:    128MB - 256MB"
+	@echo "  CRM Service:    128MB - 256MB"
+	@echo "  Frontend:       256MB - 512MB"
+	@echo "  ---------------------------------"
+	@echo "  Total Minimum:  960MB"
+	@echo "  Total Maximum:  1.8GB"
+	@echo ""
+	@echo "System Memory Available:"
+	@free -h | grep Mem
+	@echo ""
+	@echo "Current Docker Memory Usage:"
+	@docker stats --no-stream --format "table {{.Container}}\t{{.MemUsage}}\t{{.MemPerc}}" | grep nexo || echo "No services running yet"
+	@echo ""
+	@echo "✅ Raspberry Pi 4 (4GB) should have sufficient memory"
+	@echo "💡 Recommended: Close other applications for best performance"
+
+# Database commands
+db-shell:
+	docker exec -it nexo-postgres psql -U nexo_admin -d nexo_crm
+
+db-backup:
+	@echo "Creating database backup..."
+	@mkdir -p backups
+	docker exec nexo-postgres pg_dump -U nexo_admin nexo_crm > backups/nexo_crm_$$(date +%Y%m%d_%H%M%S).sql
+	@echo "✅ Backup created in backups/ directory"
+
+db-restore:
+	@echo "⚠️  This will restore database from latest backup"
+	@ls -t backups/*.sql | head -1
+	@echo "Press Ctrl+C to cancel, or wait 5 seconds to continue..."
+	@sleep 5
+	@cat $$(ls -t backups/*.sql | head -1) | docker exec -i nexo-postgres psql -U nexo_admin -d nexo_crm
+	@echo "✅ Database restored"
+
+# Development helpers
+dev-status:
+	@echo "NEXO CRM Development Status:"
+	@echo "==========================="
+	@echo ""
+	@make health
+	@echo ""
+	@make stats
+	@echo ""
+	@echo "Quick Commands:"
+	@echo "  make logs           - View all logs"
+	@echo "  make db-shell       - Access database"
+	@echo "  make test-memory    - Check memory usage"
+
+# Install system dependencies for Raspberry Pi
+install-deps-rpi:
+	@echo "Installing Raspberry Pi dependencies..."
+	sudo apt-get update
+	sudo apt-get install -y \
+		docker.io \
+		docker-compose \
+		git \
+		make \
+		curl
+	@echo "✅ Dependencies installed"
+	@echo "Add user to docker group: sudo usermod -aG docker $$USER"
+	@echo "Then logout and login again"

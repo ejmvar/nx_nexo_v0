@@ -1,0 +1,29 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'auth-service'
+    static_configs:
+      - targets: ['host.docker.internal:3001']
+        labels:
+          service: 'auth-service'
+          environment: 'development'
+
+  - job_name: 'api-gateway'
+    static_configs:
+      - targets: ['host.docker.internal:3002']
+        labels:
+          service: 'api-gateway'
+          environment: 'development'
+
+  - job_name: 'crm-service'
+    static_configs:
+      - targets: ['host.docker.internal:3003']
+        labels:
+          service: 'crm-service'
+          environment: 'development'
+
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']

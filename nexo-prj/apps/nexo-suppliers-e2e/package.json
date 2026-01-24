@@ -1,0 +1,10 @@
+{
+  "name": "@nexo-prj/nexo-suppliers-e2e",
+  "version": "0.0.1",
+  "private": true,
+  "nx": {
+    "implicitDependencies": [
+      "@nexo-prj/nexo-suppliers"
+    ]
+  }
+}

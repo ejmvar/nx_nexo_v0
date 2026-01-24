@@ -17,101 +17,14 @@
   "nxCloudId": "696a9b125c0e4a6f8e5a0e0a",
   "plugins": [
     {
-      "plugin": "@nx/js/typescript",
-      "options": {
-        "typecheck": {
-          "targetName": "typecheck"
-        },
-        "build": {
-          "targetName": "build",
-          "configName": "tsconfig.lib.json",
-          "buildDepsName": "build-deps",
-          "watchDepsName": "watch-deps"
-        }
-      },
-      "exclude": ["shared/*"]
-    },
-    {
-      "plugin": "@nx/next/plugin",
-      "options": {
-        "startTargetName": "start",
-        "buildTargetName": "build",
-        "devTargetName": "dev",
-        "serveStaticTargetName": "serve-static",
-        "buildDepsTargetName": "build-deps",
-        "watchDepsTargetName": "watch-deps"
-      }
-    },
-    {
-      "plugin": "@nx/eslint/plugin",
-      "options": {
-        "targetName": "lint"
-      }
-    },
-    {
-      "plugin": "@nx/playwright/plugin",
-      "options": {
-        "targetName": "e2e"
-      }
-    },
-    {
-      "plugin": "@nx/jest/plugin",
-      "options": {
-        "targetName": "test"
-      },
-      "exclude": [
-        "apps-e2e/**/*",
-        "apps-e2e/**/*",
-        "api-gateway-e2e/**/*",
-        "crm-core-e2e/**/*",
-        "stock-e2e/**/*",
-        "purchases-e2e/**/*",
-        "sales-e2e/**/*",
-        "production-e2e/**/*",
-        "notifications-e2e/**/*",
-        "auth-e2e/**/*"
-      ]
-    },
-    {
       "plugin": "@nx/webpack/plugin",
       "options": {
         "buildTargetName": "build",
         "serveTargetName": "serve",
         "previewTargetName": "preview",
         "buildDepsTargetName": "build-deps",
-        "watchDepsTargetName": "watch-deps",
+        "watchDepsName": "watch-deps",
         "serveStaticTargetName": "serve-static"
-      }
-    },
-    {
-      "plugin": "@nx/js/typescript",
-      "include": ["shared/*"],
-      "options": {
-        "typecheck": {
-          "targetName": "typecheck"
-        }
-      }
-    },
-    {
-      "plugin": "@nx/vite/plugin",
-      "options": {
-        "buildTargetName": "build",
-        "testTargetName": "test",
-        "serveTargetName": "serve",
-        "devTargetName": "dev",
-        "previewTargetName": "preview",
-        "serveStaticTargetName": "serve-static",
-        "typecheckTargetName": "typecheck",
-        "buildDepsTargetName": "build-deps",
-        "watchDepsTargetName": "watch-deps"
-      }
-    },
-    {
-      "plugin": "@nx/vitest",
-      "options": {
-        "testTargetName": "test",
-        "ciTargetName": "test-ci",
-        "testMode": "watch"
       }
     }
   ],
@@ -125,11 +38,6 @@
       "application": {
         "style": "tailwind",
         "linter": "eslint"
-      }
-    },
-    "@nx/react": {
-      "library": {
-        "unitTestRunner": "vitest"
       }
     }
   }

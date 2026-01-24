@@ -1,0 +1,39 @@
+# NEXO Frontend - Docker Compose Production
+# ==========================================
+# Production deployment configuration
+
+version: '3.8'
+
+services:
+  # Frontend production server
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - NODE_ENV=production
+    container_name: nexo-frontend-prod
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+      - NEXT_TELEMETRY_DISABLED=1
+    networks:
+      - nexo-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  nexo-network:
+    driver: bridge
