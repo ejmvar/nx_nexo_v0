@@ -120,33 +120,63 @@ export class AuthService {
   async login(loginDto: LoginDto): Promise<AuthResponse> {
     const { email, password } = loginDto;
 
-    // Find user with roles
-    const user = await this.prisma.user.findUnique({
-      where: { email },
-      include: {
-        roles: {
-          include: {
-            role: true,
+    // Use superuser connection for login lookup (before we know the account context)
+    const { PrismaClient } = await import('@prisma/client');
+    const { PrismaPg } = await import('@prisma/adapter-pg');
+    const pg = await import('pg');
+    
+    const superPool = new pg.Pool({
+      connectionString: process.env.DATABASE_URL_SUPERUSER,
+    });
+    const superAdapter = new PrismaPg(superPool);
+    const superPrisma = new PrismaClient({ adapter: superAdapter });
+
+    try {
+      // Find user with roles and account using superuser connection
+      const user = await superPrisma.user.findUnique({
+        where: { email },
+        include: {
+          account: true,
+          roles: {
+            include: {
+              role: true,
+            },
           },
         },
-      },
-    });
+      });
 
-    if (!user || !user.active) {
-      throw new UnauthorizedException('Invalid credentials');
+      if (!user || !user.active) {
+        throw new UnauthorizedException('Invalid credentials');
+      }
+
+      // Verify password
+      const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+      if (!isPasswordValid) {
+        throw new UnauthorizedException('Invalid credentials');
+      }
+
+      // Extract role IDs
+      const roleIds = user.roles.map((ur) => ur.roleId);
+
+      // Update last login using superuser connection
+      await superPrisma.user.update({
+        where: { id: user.id },
+        data: { lastLoginAt: new Date() },
+      });
+
+      // Generate tokens
+      return this.generateAuthTokens(
+        user.id,
+        user.email,
+        user.accountId,
+        roleIds,
+        user,
+        user.account
+      );
+    } finally {
+      await superPrisma.$disconnect();
+      await superPool.end();
     }
-
-    // Verify password
-    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
-    if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-
-    // Extract role IDs
-    const roleIds = user.roles.map((ur) => ur.roleId);
-
-    // Generate tokens
-    return this.generateAuthResponse(user.id, user.email, user.accountId, roleIds);
   }
 
   /**
@@ -161,26 +191,50 @@ export class AuthService {
         secret: process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET,
       });
 
-      // Find user to ensure they still exist and are active
-      const user = await this.prisma.user.findUnique({
-        where: { id: payload.sub },
-        include: {
-          roles: {
-            include: {
-              role: true,
+      // Use superuser connection to verify user still exists
+      const { PrismaClient } = await import('@prisma/client');
+      const { PrismaPg } = await import('@prisma/adapter-pg');
+      const pg = await import('pg');
+      
+      const superPool = new pg.Pool({
+        connectionString: process.env.DATABASE_URL_SUPERUSER,
+      });
+      const superAdapter = new PrismaPg(superPool);
+      const superPrisma = new PrismaClient({ adapter: superAdapter });
+
+      try {
+        // Find user to ensure they still exist and are active
+        const user = await superPrisma.user.findUnique({
+          where: { id: payload.sub },
+          include: {
+            account: true,
+            roles: {
+              include: {
+                role: true,
+              },
             },
           },
-        },
-      });
+        });
 
-      if (!user || !user.active) {
-        throw new UnauthorizedException('User no longer exists or is inactive');
+        if (!user || !user.active) {
+          throw new UnauthorizedException('User no longer exists or is inactive');
+        }
+
+        const roleIds = user.roles.map((ur) => ur.roleId);
+
+        // Generate new tokens
+        return this.generateAuthTokens(
+          user.id,
+          user.email,
+          user.accountId,
+          roleIds,
+          user,
+          user.account
+        );
+      } finally {
+        await superPrisma.$disconnect();
+        await superPool.end();
       }
-
-      const roleIds = user.roles.map((ur) => ur.roleId);
-
-      // Generate new tokens
-      return this.generateAuthResponse(user.id, user.email, user.accountId, roleIds);
     } catch (error) {
       throw new UnauthorizedException('Invalid refresh token');
     }
@@ -190,86 +244,43 @@ export class AuthService {
    * Validate user from JWT payload (used by Passport JWT Strategy)
    */
   async validateUser(payload: JwtPayload) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: payload.sub },
-      include: {
-        account: true,
-        roles: {
-          include: {
-            role: true,
+    // Use superuser connection for validation lookup
+    const { PrismaClient } = await import('@prisma/client');
+    const { PrismaPg } = await import('@prisma/adapter-pg');
+    const pg = await import('pg');
+    
+    const superPool = new pg.Pool({
+      connectionString: process.env.DATABASE_URL_SUPERUSER,
+    });
+    const superAdapter = new PrismaPg(superPool);
+    const superPrisma = new PrismaClient({ adapter: superAdapter });
+
+    try {
+      const user = await superPrisma.user.findUnique({
+        where: { id: payload.sub },
+        include: {
+          account: true,
+          roles: {
+            include: {
+              role: true,
+            },
           },
         },
-      },
-    });
+      });
 
-    if (!user || !user.active) {
-      throw new UnauthorizedException('User not found or inactive');
+      if (!user || !user.active) {
+        throw new UnauthorizedException('User not found or inactive');
+      }
+
+      return user;
+    } finally {
+      await superPrisma.$disconnect();
+      await superPool.end();
     }
-
-    return user;
   }
 
   /**
-   * Generate auth response with access and refresh tokens
-   */
-  private async generateAuthResponse(
-    userId: string,
-    email: string,
-    accountId: string,
-    roleIds: string[]
-  ): Promise<AuthResponse> {
-    const payload: JwtPayload = {
-      sub: userId,
-      email,
-      accountId, // Critical for RLS enforcement in downstream services
-      roleIds,
-    };
-
-    const accessToken = this.jwtService.sign(payload, {
-      secret: process.env.JWT_SECRET,
-      expiresIn: (process.env.JWT_EXPIRES_IN || '15m') as any,
-    });
-
-    const refreshToken = this.jwtService.sign(payload, {
-      secret: process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET,
-      expiresIn: (process.env.JWT_REFRESH_EXPIRES_IN || '7d') as any,
-    });
-
-    // Update last login
-    await this.prisma.user.update({
-      where: { id: userId },
-      data: { lastLoginAt: new Date() },
-    });
-
-    // Fetch user with relations for response
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      include: {
-        account: true,
-        roles: {
-          include: {
-            role: true,
-          },
-        },
-      },
-    });
-
-    return {
-      accessToken,
-      refreshToken,
-      user: {
-        id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        account: user.account,
-        roles: user.roles.map((ur) => ur.role),
-      },
-    };
-  }
-
-  /**
-   * Generate tokens without database queries (for registration)
+   * Generate tokens without database queries (for registration/login)
    */
   private async generateAuthTokens(
     userId: string,
@@ -296,6 +307,13 @@ export class AuthService {
       expiresIn: (process.env.JWT_REFRESH_EXPIRES_IN || '7d') as any,
     });
 
+    // Build roles array from user data if available
+    const roles = user.roles ? user.roles.map((ur: any) => ur.role) : [{
+      id: roleIds[0],
+      name: 'Admin',
+      permissions: ['*'],
+    }];
+
     return {
       accessToken,
       refreshToken,
@@ -309,11 +327,7 @@ export class AuthService {
           name: account.name,
           slug: account.slug,
         },
-        roles: [{
-          id: roleIds[0],
-          name: 'Admin',
-          permissions: ['*'],
-        }],
+        roles,
       },
     };
   }
