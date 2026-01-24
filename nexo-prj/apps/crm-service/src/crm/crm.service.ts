@@ -89,6 +89,7 @@ export class CrmService {
     const client = await this.db.getClient();
     try {
       await client.query('BEGIN');
+      await client.query('SET LOCAL app.current_account_id = $1', [accountId]);
 
       // Auto-generate username if not provided
       const username = clientData.username || clientData.email.split('@')[0];
@@ -96,20 +97,19 @@ export class CrmService {
       // Auto-generate client_code if not provided
       const client_code = clientData.client_code || `CL${Date.now().toString().slice(-8)}`;
 
-      // Create user first (password should be set through auth service or hashed here)
+      // Create user first (using correct Prisma schema columns)
       const userResult = await client.query(
-        `INSERT INTO users (account_id, email, username, password_hash, full_name, phone, role, status)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        `INSERT INTO users (account_id, email, username, password_hash, first_name, last_name, active)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)
          RETURNING id`,
         [
           accountId,
           clientData.email,
           username,
           clientData.password ? `temp_${clientData.password}` : 'temporary_hash', // Simplified for now
-          clientData.full_name,
-          clientData.phone || null,
-          'client',
-          'active',
+          clientData.full_name?.split(' ')[0] || clientData.full_name || 'Client',
+          clientData.full_name?.split(' ').slice(1).join(' ') || '',
+          true,
         ]
       );
 
@@ -138,6 +138,7 @@ export class CrmService {
       await client.query('ROLLBACK');
       throw new BadRequestException(`Failed to create client: ${error.message}`);
     } finally {
+      await client.query('RESET app.current_account_id').catch(() => {});
       client.release();
     }
   }
@@ -146,6 +147,7 @@ export class CrmService {
     const client = await this.db.getClient();
     try {
       await client.query('BEGIN');
+      await client.query('SET LOCAL app.current_account_id = $1', [accountId]);
 
       // Get user_id
       const clientRecord = await client.query('SELECT user_id FROM clients WHERE id = $1', [id]);
@@ -217,6 +219,7 @@ export class CrmService {
       await client.query('ROLLBACK');
       throw new BadRequestException(`Failed to update client: ${error.message}`);
     } finally {
+      await client.query('RESET app.current_account_id').catch(() => {});
       client.release();
     }
   }
@@ -225,6 +228,7 @@ export class CrmService {
     const client = await this.db.getClient();
     try {
       await client.query('BEGIN');
+      await client.query('SET LOCAL app.current_account_id = $1', [accountId]);
 
       // Get user_id before deletion
       const clientRecord = await client.query('SELECT user_id FROM clients WHERE id = $1', [id]);
@@ -240,6 +244,7 @@ export class CrmService {
       await client.query('ROLLBACK');
       throw new BadRequestException(`Failed to delete client: ${error.message}`);
     } finally {
+      await client.query('RESET app.current_account_id').catch(() => {});
       client.release();
     }
   }
@@ -314,6 +319,7 @@ export class CrmService {
     const client = await this.db.getClient();
     try {
       await client.query('BEGIN');
+      await client.query('SET LOCAL app.current_account_id = $1', [accountId]);
 
       // Auto-generate username if not provided
       const username = employeeData.username || employeeData.email.split('@')[0];
@@ -364,28 +370,81 @@ export class CrmService {
       await client.query('ROLLBACK');
       throw new BadRequestException(`Failed to create employee: ${error.message}`);
     } finally {
+      await client.query('RESET app.current_account_id').catch(() => {});
       client.release();
     }
   }
 
   async updateEmployee(accountId: string, id: string, employeeData: UpdateEmployeeDto) {
-    // Similar to updateClient - abbreviated for brevity
-    const result = await this.db.query('SELECT user_id FROM employees WHERE id = $1', [id]);
+    const result = await this.db.queryWithAccount(accountId, 'SELECT user_id FROM employees WHERE id = $1', [id]);
     if (result.rows.length === 0) {
       throw new NotFoundException('Employee not found');
     }
 
-    // Update logic similar to client...
-    return this.getEmployee(accountId, id);
+    const client = await this.db.getClient();
+    try {
+      await client.query('BEGIN');
+      await client.query('SET LOCAL app.current_account_id = $1', [accountId]);
+
+      const userId = result.rows[0].user_id;
+      const userUpdates: string[] = [];
+      const userParams: any[] = [];
+      let paramCount = 0;
+
+      if (employeeData.full_name) {
+        userUpdates.push(`full_name = $${++paramCount}`);
+        userParams.push(employeeData.full_name);
+      }
+      if (employeeData.phone !== undefined) {
+        userUpdates.push(`phone = $${++paramCount}`);
+        userParams.push(employeeData.phone);
+      }
+
+      if (userUpdates.length > 0) {
+        userParams.push(userId);
+        await client.query(`UPDATE users SET ${userUpdates.join(', ')} WHERE id = $${++paramCount}`, userParams);
+      }
+
+      const employeeUpdates: string[] = [];
+      const employeeParams: any[] = [];
+      paramCount = 0;
+
+      if (employeeData.department !== undefined) {
+        employeeUpdates.push(`department = $${++paramCount}`);
+        employeeParams.push(employeeData.department);
+      }
+      if (employeeData.position !== undefined) {
+        employeeUpdates.push(`position = $${++paramCount}`);
+        employeeParams.push(employeeData.position);
+      }
+      if (employeeData.salary_level !== undefined) {
+        employeeUpdates.push(`salary_level = $${++paramCount}`);
+        employeeParams.push(employeeData.salary_level);
+      }
+
+      if (employeeUpdates.length > 0) {
+        employeeParams.push(id);
+        await client.query(`UPDATE employees SET ${employeeUpdates.join(', ')} WHERE id = $${++paramCount}`, employeeParams);
+      }
+
+      await client.query('COMMIT');
+      return this.getEmployee(accountId, id);
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw new BadRequestException(`Failed to update employee: ${error.message}`);
+    } finally {
+      await client.query('RESET app.current_account_id').catch(() => {});
+      client.release();
+    }
   }
 
   async deleteEmployee(accountId: string, id: string) {
-    const result = await this.db.query('SELECT user_id FROM employees WHERE id = $1', [id]);
+    const result = await this.db.queryWithAccount(accountId, 'SELECT user_id FROM employees WHERE id = $1', [id]);
     if (result.rows.length === 0) {
       throw new NotFoundException('Employee not found');
     }
 
-    await this.db.query('DELETE FROM users WHERE id = $1', [result.rows[0].user_id]);
+    await this.db.queryWithAccount(accountId, 'DELETE FROM users WHERE id = $1', [result.rows[0].user_id]);
   }
 
   // ==================== SUPPLIERS ====================
@@ -459,9 +518,12 @@ export class CrmService {
   }
 
   async createSupplier(accountId: string, supplierData: CreateSupplierDto) {
+    const client = await this.db.getClient();
     try {
-      // Insert user first
-      const userResult = await this.db.query(
+      await client.query('BEGIN');
+      await client.query('SET LOCAL app.current_account_id = $1', [accountId]);
+
+      const userResult = await client.query(
         `INSERT INTO users (account_id, full_name, username, email, password_hash, role)
          VALUES ($1, $2, $3, $4, $5, 'supplier')
          RETURNING id`,
@@ -470,8 +532,7 @@ export class CrmService {
 
       const userId = userResult.rows[0].id;
 
-      // Insert supplier with all fields
-      const supplierResult = await this.db.query(
+      const supplierResult = await client.query(
         `INSERT INTO suppliers (
           user_id, supplier_code, company_name, tax_id, 
           business_address, payment_terms, rating, status
@@ -490,14 +551,19 @@ export class CrmService {
         ]
       );
 
+      await client.query('COMMIT');
       return this.getSupplier(accountId, supplierResult.rows[0].id);
     } catch (error) {
+      await client.query('ROLLBACK');
       throw new BadRequestException(`Failed to create supplier: ${error.message}`);
+    } finally {
+      await client.query('RESET app.current_account_id').catch(() => {});
+      client.release();
     }
   }
 
   async updateSupplier(accountId: string, id: string, supplierData: UpdateSupplierDto) {
-    const result = await this.db.query('SELECT user_id FROM suppliers WHERE id = $1', [id]);
+    const result = await this.db.queryWithAccount(accountId, 'SELECT user_id FROM suppliers WHERE id = $1', [id]);
     if (result.rows.length === 0) {
       throw new NotFoundException('Supplier not found');
     }
@@ -505,6 +571,7 @@ export class CrmService {
     const client = await this.db.getClient();
     try {
       await client.query('BEGIN');
+      await client.query('SET LOCAL app.current_account_id = $1', [accountId]);
 
       if (supplierData.full_name) {
         await client.query(
@@ -569,17 +636,18 @@ export class CrmService {
       await client.query('ROLLBACK');
       throw new BadRequestException(`Failed to update supplier: ${error.message}`);
     } finally {
+      await client.query('RESET app.current_account_id').catch(() => {});
       client.release();
     }
   }
 
   async deleteSupplier(accountId: string, id: string) {
-    const result = await this.db.query('SELECT user_id FROM suppliers WHERE id = $1', [id]);
+    const result = await this.db.queryWithAccount(accountId, 'SELECT user_id FROM suppliers WHERE id = $1', [id]);
     if (result.rows.length === 0) {
       throw new NotFoundException('Supplier not found');
     }
 
-    await this.db.query('DELETE FROM users WHERE id = $1', [result.rows[0].user_id]);
+    await this.db.queryWithAccount(accountId, 'DELETE FROM users WHERE id = $1', [result.rows[0].user_id]);
   }
 
   // ==================== PROFESSIONALS ====================
@@ -700,7 +768,7 @@ export class CrmService {
   }
 
   async updateProfessional(accountId: string, id: string, professionalData: UpdateProfessionalDto) {
-    const result = await this.db.query('SELECT user_id FROM professionals WHERE id = $1', [id]);
+    const result = await this.db.queryWithAccount(accountId, 'SELECT user_id FROM professionals WHERE id = $1', [id]);
     if (result.rows.length === 0) {
       throw new NotFoundException('Professional not found');
     }
@@ -708,6 +776,7 @@ export class CrmService {
     const client = await this.db.getClient();
     try {
       await client.query('BEGIN');
+      await client.query('SET LOCAL app.current_account_id = $1', [accountId]);
 
       if (professionalData.full_name) {
         const updateFields = [];
@@ -773,17 +842,18 @@ export class CrmService {
       await client.query('ROLLBACK');
       throw new BadRequestException(`Failed to update professional: ${error.message}`);
     } finally {
+      await client.query('RESET app.current_account_id').catch(() => {});
       client.release();
     }
   }
 
   async deleteProfessional(accountId: string, id: string) {
-    const result = await this.db.query('SELECT user_id FROM professionals WHERE id = $1', [id]);
+    const result = await this.db.queryWithAccount(accountId, 'SELECT user_id FROM professionals WHERE id = $1', [id]);
     if (result.rows.length === 0) {
       throw new NotFoundException('Professional not found');
     }
 
-    await this.db.query('DELETE FROM users WHERE id = $1', [result.rows[0].user_id]);
+    await this.db.queryWithAccount(accountId, 'DELETE FROM users WHERE id = $1', [result.rows[0].user_id]);
   }
 
   // ==================== PROJECTS ====================

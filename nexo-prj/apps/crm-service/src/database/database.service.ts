@@ -11,11 +11,11 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
 
   constructor(private configService: ConfigService) {
     this.pool = new Pool({
-      host: this.configService.get('DB_HOST', this.configService.get('POSTGRES_HOST', 'localhost')),
-      port: this.configService.get('DB_PORT', this.configService.get('POSTGRES_PORT', 5432)),
-      database: this.configService.get('DB_NAME', this.configService.get('POSTGRES_DB', 'nexo')),
-      user: this.configService.get('DB_USER', this.configService.get('POSTGRES_USER', 'nexo_user')),
-      password: this.configService.get('DB_PASSWORD', this.configService.get('POSTGRES_PASSWORD', 'nexo_password')),
+      host: this.configService.get('DB_HOST') || this.configService.get('POSTGRES_HOST') || 'localhost',
+      port: parseInt(this.configService.get('DB_PORT') || this.configService.get('POSTGRES_PORT') || '5432'),
+      database: this.configService.get('DB_NAME') || this.configService.get('POSTGRES_DB') || 'nexo_crm',
+      user: this.configService.get('DB_USER') || this.configService.get('POSTGRES_USER') || 'nexo_app',
+      password: this.configService.get('DB_PASSWORD') || this.configService.get('POSTGRES_PASSWORD') || 'nexo_app_password',
       max: 10,
       idleTimeoutMillis: 30000,
       connectionTimeoutMillis: 2000,
