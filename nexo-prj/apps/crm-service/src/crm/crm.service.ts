@@ -82,22 +82,18 @@ export class CrmService {
   }
 
   async createClient(accountId: string, clientData: CreateClientDto) {
-    const result = await this.db.queryWithAccount(
+    const sql = 'INSERT INTO clients (account_id, name, email, phone, company, address, status, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP) RETURNING id';
+    const params = [
       accountId,
-      `INSERT INTO clients (account_id, name, email, phone, company, address, status)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
-       RETURNING id`,
-      [
-        accountId,
-        clientData.full_name || clientData.company_name || 'Unnamed Client',
-        clientData.email,
-        clientData.phone || null,
-        clientData.company_name || null,
-        clientData.billing_address || null,
-        'active',
-      ]
-    );
-
+      clientData.full_name || clientData.company_name || 'Unnamed Client',
+      clientData.email,
+      clientData.phone || null,
+      clientData.company_name || null,
+      clientData.billing_address || null,
+      'active',
+    ];
+    
+    const result = await this.db.queryWithAccount(accountId, sql, params);
     return this.getClient(accountId, result.rows[0].id);
   }
 
