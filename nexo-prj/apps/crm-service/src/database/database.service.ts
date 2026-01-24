@@ -59,13 +59,21 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   async queryWithAccount(accountId: string, text: string, params?: any[]) {
     const client = await this.pool.connect();
     try {
-      // Set the account context for RLS
+      // Start transaction and set the account context for RLS
+      await client.query('BEGIN');
       await client.query('SET LOCAL app.current_account_id = $1', [accountId]);
       
       // Execute the actual query
       const result = await client.query(text, params);
       
+      // Commit transaction
+      await client.query('COMMIT');
+      
       return result;
+    } catch (error) {
+      // Rollback on error
+      await client.query('ROLLBACK').catch(() => {});
+      throw error;
     } finally {
       // Reset the context and release client
       await client.query('RESET app.current_account_id').catch(() => {});
