@@ -301,14 +301,23 @@ DELETE /api/crm/tasks/:id
 
 ### Rate Limiting
 
-**Configuration**: 100 requests per 60 seconds per IP address
+**Configuration**: Configurable via environment variables
+
+```bash
+# Default: 100 requests per 60 seconds per IP address
+THROTTLE_TTL=60000    # Time window in milliseconds
+THROTTLE_LIMIT=100    # Max requests per time window
+```
 
 ```typescript
-// Configured in app.module.ts
-ThrottlerModule.forRoot([{
-  ttl: 60000,  // 60 seconds
-  limit: 100,  // 100 requests
-}])
+// Configured in app.module.ts using ConfigService
+ThrottlerModule.forRootAsync({
+  inject: [ConfigService],
+  useFactory: (config: ConfigService) => ([{
+    ttl: config.get<number>('THROTTLE_TTL', 60000),
+    limit: config.get<number>('THROTTLE_LIMIT', 100),
+  }]),
+})
 ```
 
 **Response when rate limit exceeded**:
@@ -359,6 +368,10 @@ CRM_SERVICE_URL=http://localhost:3003
 
 # Frontend URL  
 FRONTEND_URL=http://localhost:3000
+
+# Rate Limiting / Throttle
+THROTTLE_TTL=60000      # Time window in milliseconds (default: 60 seconds)
+THROTTLE_LIMIT=100      # Max requests per time window (default: 100)
 ```
 
 ### Proxy Service Configuration
@@ -532,13 +545,20 @@ curl http://localhost:3003/api/health
 
 **Problem**: Getting 429 errors too frequently
 
-**Solution**: Adjust rate limit in `app.module.ts`:
+**Solution**: Adjust rate limit in `.env.local`:
 
-```typescript
-ThrottlerModule.forRoot([{
-  ttl: 60000,
-  limit: 200,  // Increase from 100 to 200
-}])
+```bash
+# Increase from default 100 to 200
+THROTTLE_LIMIT=200
+
+# Or increase time window from 60s to 120s
+THROTTLE_TTL=120000
+```
+
+Then restart the API Gateway:
+```bash
+./stop-services.sh
+./start-services.sh
 ```
 
 ### CORS Errors in Browser
