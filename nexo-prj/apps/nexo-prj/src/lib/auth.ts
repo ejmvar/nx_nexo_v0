@@ -1,7 +1,9 @@
 // Authentication utility functions
 import { jwtDecode } from 'jwt-decode';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002/api';
+// API Gateway base URL
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
+const API_PREFIX = '/api'; // Gateway routes start with /api
 
 export interface User {
   userId: string;
@@ -20,7 +22,10 @@ export interface RegisterData {
   email: string;
   password: string;
   username: string;
-  full_name: string;
+  firstName: string;
+  lastName: string;
+  accountName: string;
+  accountSlug: string;
 }
 
 export interface LoginData {
@@ -36,7 +41,7 @@ const USER_KEY = 'nexo_user';
 export const authService = {
   // Register new user
   async register(data: RegisterData): Promise<AuthTokens> {
-    const response = await fetch(`${API_URL}/auth/register`, {
+    const response = await fetch(`${API_URL}${API_PREFIX}/auth/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -56,7 +61,7 @@ export const authService = {
 
   // Login user
   async login(data: LoginData): Promise<AuthTokens> {
-    const response = await fetch(`${API_URL}/auth/login`, {
+    const response = await fetch(`${API_URL}${API_PREFIX}/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -80,7 +85,7 @@ export const authService = {
     
     if (token) {
       try {
-        await fetch(`${API_URL}/auth/logout`, {
+        await fetch(`${API_URL}${API_PREFIX}/auth/logout`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -103,7 +108,7 @@ export const authService = {
     }
 
     try {
-      const response = await fetch(`${API_URL}/auth/refresh`, {
+      const response = await fetch(`${API_URL}${API_PREFIX}/auth/refresh`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -222,7 +227,7 @@ export async function apiClient(
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  let response = await fetch(`${API_URL}${endpoint}`, {
+  let response = await fetch(`${API_URL}${API_PREFIX}${endpoint}`, {
     ...options,
     headers,
   });
@@ -233,7 +238,7 @@ export async function apiClient(
     
     if (newToken) {
       headers['Authorization'] = `Bearer ${newToken}`;
-      response = await fetch(`${API_URL}${endpoint}`, {
+      response = await fetch(`${API_URL}${API_PREFIX}${endpoint}`, {
         ...options,
         headers,
       });
