@@ -1,6 +1,7 @@
 // API Client Configuration
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-const AUTH_BASE_URL = process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:3000';
+// All requests go through API Gateway (port 3002)
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
+const AUTH_BASE_URL = API_BASE_URL; // Auth also goes through gateway
 
 export const API_CONFIG = {
   BASE_URL: API_BASE_URL,
