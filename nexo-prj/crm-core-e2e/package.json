@@ -1,0 +1,26 @@
+{
+  "name": "@nexo-prj/crm-core-e2e",
+  "version": "0.0.1",
+  "private": true,
+  "nx": {
+    "implicitDependencies": [
+      "@nexo-prj/crm-core"
+    ],
+    "targets": {
+      "e2e": {
+        "executor": "@nx/jest:jest",
+        "outputs": [
+          "{projectRoot}/test-output/jest/coverage"
+        ],
+        "options": {
+          "jestConfig": "crm-core-e2e/jest.config.cts",
+          "passWithNoTests": true
+        },
+        "dependsOn": [
+          "@nexo-prj/crm-core:build",
+          "@nexo-prj/crm-core:serve"
+        ]
+      }
+    }
+  }
+}

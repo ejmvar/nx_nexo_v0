@@ -1,11 +1,11 @@
-import styles from './libs.module.scss';
+import styles from './libs.module.css';
 
-export function NexoPrjSharedUi() {
+export function NexoPrjUi() {
   return (
     <div className={styles['container']}>
-      <h1>Welcome to NexoPrjSharedUi!</h1>
+      <h1>Welcome to NexoPrjUi!</h1>
     </div>
   );
 }
 
-export default NexoPrjSharedUi;
+export default NexoPrjUi;

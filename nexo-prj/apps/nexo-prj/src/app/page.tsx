@@ -1,8 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { Box, Card, CardContent, Typography, Grid, Button } from '@mui/material';
-import { Business, People, Engineering, Person } from '@mui/icons-material';
 
 export default function PortalSelection() {
   const portals = [
@@ -10,134 +8,101 @@ export default function PortalSelection() {
       id: 'employee',
       title: 'Employee Portal',
       description: 'Access your employee dashboard, tasks, and company resources',
-      icon: <People sx={{ fontSize: 48, color: 'primary.main' }} />,
+      icon: '👥',
       href: '/employee',
-      color: 'primary.main'
+      color: 'from-blue-500 to-blue-600'
     },
     {
       id: 'client',
       title: 'Client Portal',
       description: 'Manage your projects, view progress, and communicate with your team',
-      icon: <Business sx={{ fontSize: 48, color: 'secondary.main' }} />,
+      icon: '🏢',
       href: '/client',
-      color: 'secondary.main'
+      color: 'from-purple-500 to-purple-600'
     },
     {
       id: 'supplier',
       title: 'Supplier Portal',
       description: 'Manage orders, deliveries, and supplier relationships',
-      icon: <Engineering sx={{ fontSize: 48, color: 'success.main' }} />,
+      icon: '⚙️',
       href: '/supplier',
-      color: 'success.main'
+      color: 'from-green-500 to-green-600'
     },
     {
       id: 'professional',
       title: 'Professional Portal',
       description: 'Access professional services, certifications, and development tools',
-      icon: <Person sx={{ fontSize: 48, color: 'warning.main' }} />,
+      icon: '👤',
       href: '/professional',
-      color: 'warning.main'
+      color: 'from-orange-500 to-orange-600'
     }
   ];
 
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        p: 2
-      }}
-    >
-      <Box sx={{ maxWidth: 1200, width: '100%' }}>
-        <Box sx={{ textAlign: 'center', mb: 6 }}>
-          <Typography
-            variant="h2"
-            component="h1"
-            sx={{
-              color: 'white',
-              fontWeight: 'bold',
-              mb: 2,
-              textShadow: '2px 2px 4px rgba(0,0,0,0.3)'
-            }}
-          >
+    <div className="min-h-screen bg-gradient-to-br from-indigo-600 via-purple-600 to-purple-700 flex items-center justify-center p-4">
+      <div className="max-w-7xl w-full">
+        <div className="text-center mb-12">
+          <h1 className="text-5xl font-bold text-white mb-4 drop-shadow-lg">
             Welcome to NEXO
-          </Typography>
-          <Typography
-            variant="h5"
-            sx={{
-              color: 'white',
-              opacity: 0.9,
-              textShadow: '1px 1px 2px rgba(0,0,0,0.3)'
-            }}
-          >
+          </h1>
+          <p className="text-xl text-white/90 drop-shadow">
             Multi-Portal Business Management System
-          </Typography>
-        </Box>
+          </p>
+        </div>
 
-        <Grid container spacing={4} justifyContent="center">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {portals.map((portal) => (
-            <Grid size={{ xs: 12, sm: 6, md: 3 }} key={portal.id}>
-              <Card
-                sx={{
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
-                  '&:hover': {
-                    transform: 'translateY(-8px)',
-                    boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
-                  },
-                  cursor: 'pointer'
-                }}
-              >
-                <CardContent sx={{ flexGrow: 1, textAlign: 'center', p: 4 }}>
-                  <Box sx={{ mb: 3 }}>
-                    {portal.icon}
-                  </Box>
-                  <Typography
-                    variant="h5"
-                    component="h2"
-                    sx={{ mb: 2, fontWeight: 'bold' }}
-                  >
+            <Link
+              key={portal.id}
+              href={portal.href}
+              className="group"
+            >
+              <div className="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 cursor-pointer h-full flex flex-col p-8">
+                <div className="text-center mb-4">
+                  <div className="text-6xl mb-4">{portal.icon}</div>
+                  <h2 className="text-2xl font-bold mb-3 text-gray-900">
                     {portal.title}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ mb: 3, minHeight: 60 }}
-                  >
+                  </h2>
+                  <p className="text-gray-600 min-h-[60px] mb-6">
                     {portal.description}
-                  </Typography>
-                  <Button
-                    component={Link}
-                    href={portal.href}
-                    variant="contained"
-                    fullWidth
-                    sx={{
-                      backgroundColor: portal.color,
-                      '&:hover': {
-                        backgroundColor: portal.color,
-                        opacity: 0.9
-                      }
-                    }}
-                  >
+                  </p>
+                </div>
+                <div className="mt-auto">
+                  <div className={`w-full bg-gradient-to-r ${portal.color} text-white py-3 px-6 rounded-lg text-center font-semibold group-hover:opacity-90 transition-opacity`}>
                     Access Portal
-                  </Button>
-                </CardContent>
-              </Card>
-            </Grid>
+                  </div>
+                </div>
+              </div>
+            </Link>
           ))}
-        </Grid>
+        </div>
 
-        <Box sx={{ textAlign: 'center', mt: 6 }}>
-          <Typography variant="body2" sx={{ color: 'white', opacity: 0.7 }}>
+        <div className="text-center mt-12 space-y-4">
+          <div className="flex justify-center gap-4">
+            <Link
+              href="/login"
+              className="px-8 py-3 bg-white text-indigo-600 rounded-lg font-semibold hover:bg-white/90 transition-colors shadow-lg"
+            >
+              Sign In
+            </Link>
+            <Link
+              href="/register"
+              className="px-8 py-3 bg-white/20 hover:bg-white/30 text-white rounded-lg font-semibold transition-colors backdrop-blur-sm border-2 border-white/30"
+            >
+              Sign Up
+            </Link>
+          </div>
+          <Link
+            href="/health"
+            className="inline-block mb-4 px-6 py-2 bg-white/10 hover:bg-white/20 text-white/80 rounded-lg transition-colors backdrop-blur-sm text-sm"
+          >
+            🔍 System Health Check
+          </Link>
+          <p className="text-white/70 text-sm">
             © 2026 NEXO Business Solutions. All rights reserved.
-          </Typography>
-        </Box>
-      </Box>
-    </Box>
+          </p>
+        </div>
+      </div>
+    </div>
   );
 }

@@ -5,13 +5,8 @@ import { firstValueFrom } from 'rxjs';
 @Injectable()
 export class ProxyService {
   private readonly serviceUrls = {
-    auth: 'http://localhost:3000',
-    crm: 'http://localhost:3002', // Placeholder for future services
-    stock: 'http://localhost:3003',
-    sales: 'http://localhost:3004',
-    purchases: 'http://localhost:3005',
-    production: 'http://localhost:3006',
-    notifications: 'http://localhost:3007',
+    auth: process.env.AUTH_SERVICE_URL || 'http://localhost:3001',
+    crm: process.env.CRM_SERVICE_URL || 'http://localhost:3003',
   };
 
   constructor(private readonly httpService: HttpService) {}
@@ -23,14 +18,21 @@ export class ProxyService {
     }
 
     const url = `${baseUrl}${path}`;
+    
+    // Filter out problematic headers
+    const cleanHeaders = { ...headers };
+    delete cleanHeaders['host'];
+    delete cleanHeaders['content-length'];
+    
     const config = {
       method,
       url,
       data,
       headers: {
         'Content-Type': 'application/json',
-        ...headers,
+        ...cleanHeaders,
       },
+      timeout: 30000, // 30 second timeout
     };
 
     try {
@@ -52,6 +54,12 @@ export class ProxyService {
           headers: config.headers
         }
       });
+      
+      // If there's a response from the service, return it
+      if (error?.response) {
+        throw error.response.data;
+      }
+      
       throw new Error(`Service ${service} error: ${error?.message || 'Unknown error'}`);
     }
   }

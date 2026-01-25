@@ -6,32 +6,22 @@
   "tags": ["type:ui"],
   "targets": {
     "build": {
-      "executor": "@nx/rollup:rollup",
+      "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
         "main": "libs/shared-ui/src/index.ts",
+        "outputPath": "dist/libs/shared-ui",
         "tsConfig": "libs/shared-ui/tsconfig.lib.json",
-        "outputPath": "libs/shared-ui/dist",
-        "format": ["esm", "cjs"],
         "assets": []
       },
       "configurations": {
-        "development": {
-          "buildableProjectDepsInPackageJsonType": "dependencies",
-          "updateBuildableProjectDepsInPackageJson": true
-        },
-        "production": {
-          "buildableProjectDepsInPackageJsonType": "dependencies",
-          "updateBuildableProjectDepsInPackageJson": true,
-          "optimization": true,
-          "extractLicenses": true,
-          "sourceMap": false
-        }
+        "development": {},
+        "production": {}
       }
     },
     "test": {
-      "executor": "@nx/vite:test",
+      "executor": "@nx/vitest:test",
       "outputs": ["{options.reportsDirectory}"],
       "options": {
         "reportsDirectory": "{workspaceRoot}/test-output/libs/shared-ui"

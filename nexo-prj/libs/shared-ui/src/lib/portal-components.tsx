@@ -1,41 +1,21 @@
+'use client';
+
 import React from 'react';
-import {
-  AppBar,
-  Toolbar,
-  Typography,
-  Button,
-  Avatar,
-  Box,
-  IconButton,
-  Drawer,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Divider,
-  Card,
-  CardContent,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Checkbox,
-} from '@mui/material';
-import {
-  Menu,
-  Dashboard,
-  Assignment,
-  People,
-  Business,
-  Assessment,
+import { 
+  LayoutDashboard, 
+  ClipboardList, 
+  Users, 
+  Building, 
+  TrendingUp, 
   Settings,
-  Logout,
-  ArrowBack,
-} from '@mui/icons-material';
-import Link from 'next/link';
+  Briefcase,
+  Package
+} from 'lucide-react';
+
+// Utility function for conditional classes
+function cn(...classes: (string | undefined | null | false)[]) {
+  return classes.filter(Boolean).join(' ');
+}
 
 // Placeholder chart components - to be implemented with actual charting library
 export interface ChartProps {
@@ -44,58 +24,58 @@ export interface ChartProps {
 }
 
 export const LineChartComponent: React.FC<ChartProps> = ({ title = 'Line Chart', data }) => (
-  <Card>
-    <CardContent>
-      <Typography variant="h6">{title}</Typography>
-      <Box sx={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: '#f5f5f5' }}>
-        <Typography color="textSecondary">Line Chart Component - To be implemented</Typography>
-      </Box>
-    </CardContent>
-  </Card>
+  <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+    <div className="p-6">
+      <h3 className="text-lg font-semibold">{title}</h3>
+      <div className="h-[200px] flex items-center justify-center bg-muted/50 mt-4 rounded">
+        <p className="text-muted-foreground text-sm">Line Chart Component - To be implemented</p>
+      </div>
+    </div>
+  </div>
 );
 
 export const BarChartComponent: React.FC<ChartProps> = ({ title = 'Bar Chart', data }) => (
-  <Card>
-    <CardContent>
-      <Typography variant="h6">{title}</Typography>
-      <Box sx={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: '#f5f5f5' }}>
-        <Typography color="textSecondary">Bar Chart Component - To be implemented</Typography>
-      </Box>
-    </CardContent>
-  </Card>
+  <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+    <div className="p-6">
+      <h3 className="text-lg font-semibold">{title}</h3>
+      <div className="h-[200px] flex items-center justify-center bg-muted/50 mt-4 rounded">
+        <p className="text-muted-foreground text-sm">Bar Chart Component - To be implemented</p>
+      </div>
+    </div>
+  </div>
 );
 
 export const PieChartComponent: React.FC<ChartProps> = ({ title = 'Pie Chart', data }) => (
-  <Card>
-    <CardContent>
-      <Typography variant="h6">{title}</Typography>
-      <Box sx={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: '#f5f5f5' }}>
-        <Typography color="textSecondary">Pie Chart Component - To be implemented</Typography>
-      </Box>
-    </CardContent>
-  </Card>
+  <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+    <div className="p-6">
+      <h3 className="text-lg font-semibold">{title}</h3>
+      <div className="h-[200px] flex items-center justify-center bg-muted/50 mt-4 rounded">
+        <p className="text-muted-foreground text-sm">Pie Chart Component - To be implemented</p>
+      </div>
+    </div>
+  </div>
 );
 
 export const AreaChartComponent: React.FC<ChartProps> = ({ title = 'Area Chart', data }) => (
-  <Card>
-    <CardContent>
-      <Typography variant="h6">{title}</Typography>
-      <Box sx={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: '#f5f5f5' }}>
-        <Typography color="textSecondary">Area Chart Component - To be implemented</Typography>
-      </Box>
-    </CardContent>
-  </Card>
+  <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+    <div className="p-6">
+      <h3 className="text-lg font-semibold">{title}</h3>
+      <div className="h-[200px] flex items-center justify-center bg-muted/50 mt-4 rounded">
+        <p className="text-muted-foreground text-sm">Area Chart Component - To be implemented</p>
+      </div>
+    </div>
+  </div>
 );
 
 export const DonutChartComponent: React.FC<ChartProps> = ({ title = 'Donut Chart' }) => (
-  <Card>
-    <CardContent>
-      <Typography variant="h6">{title}</Typography>
-      <Box sx={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: '#f5f5f5' }}>
-        <Typography color="textSecondary">Donut Chart Component - To be implemented</Typography>
-      </Box>
-    </CardContent>
-  </Card>
+  <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+    <div className="p-6">
+      <h3 className="text-lg font-semibold">{title}</h3>
+      <div className="h-[200px] flex items-center justify-center bg-muted/50 mt-4 rounded">
+        <p className="text-muted-foreground text-sm">Donut Chart Component - To be implemented</p>
+      </div>
+    </div>
+  </div>
 );
 
 // KPI Card component
@@ -108,41 +88,38 @@ export interface KPICardProps {
 }
 
 export const KPICard: React.FC<KPICardProps> = ({ title, value, subtitle, icon, change }) => (
-  <Card>
-    <CardContent>
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Box>
-          <Typography color="textSecondary" gutterBottom>
+  <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+    <div className="p-6">
+      <div className="flex items-center justify-between space-x-4">
+        <div className="space-y-1.5">
+          <p className="text-sm text-muted-foreground">
             {title}
-          </Typography>
-          <Typography variant="h4">
+          </p>
+          <h3 className="text-3xl font-bold tracking-tight">
             {value}
-          </Typography>
+          </h3>
           {subtitle && (
-            <Typography color="textSecondary" variant="body2">
+            <p className="text-sm text-muted-foreground">
               {subtitle}
-            </Typography>
+            </p>
           )}
           {change !== undefined && (
-            <Typography
-              variant="body2"
-              sx={{
-                color: change >= 0 ? 'success.main' : 'error.main',
-                fontWeight: 'bold'
-              }}
-            >
+            <p className={cn(
+              "text-sm font-semibold",
+              change >= 0 ? "text-green-600" : "text-red-600"
+            )}>
               {change >= 0 ? '+' : ''}{change}%
-            </Typography>
+            </p>
           )}
-        </Box>
+        </div>
         {icon && (
-          <Box sx={{ color: 'primary.main' }}>
+          <div className="text-primary">
             {icon}
-          </Box>
+          </div>
         )}
-      </Box>
-    </CardContent>
-  </Card>
+      </div>
+    </div>
+  </div>
 );
 
 // Data Table component
@@ -153,7 +130,6 @@ export interface DataTableColumn<T = any> {
   cell?: (props: { row: { original: T } }) => React.ReactNode;
 }
 
-// Export as type alias for better compatibility
 export type DataTableColumnType<T = any> = DataTableColumn<T>;
 
 export interface DataTableProps<T = any> {
@@ -170,50 +146,50 @@ export const DataTable = <T,>({
   columns,
   title,
   enableRowSelection,
-  enableSorting,
-  enableFiltering,
 }: DataTableProps<T>) => (
-  <Card>
+  <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
     {title && (
-      <CardContent>
-        <Typography variant="h6">{title}</Typography>
-      </CardContent>
+      <div className="p-6 pb-0">
+        <h3 className="text-lg font-semibold">{title}</h3>
+      </div>
     )}
-    <TableContainer component={Paper}>
-      <Table>
-        <TableHead>
-          <TableRow>
+    <div className="relative w-full overflow-auto">
+      <table className="w-full caption-bottom text-sm">
+        <thead className="border-b">
+          <tr className="border-b transition-colors hover:bg-muted/50">
             {enableRowSelection && (
-              <TableCell padding="checkbox">
-                <Checkbox />
-              </TableCell>
+              <th className="h-12 px-4 text-left align-middle font-medium">
+                <input type="checkbox" className="h-4 w-4 rounded border" />
+              </th>
             )}
             {columns.map((column) => (
-              <TableCell key={column.id}>{column.header}</TableCell>
+              <th key={column.id} className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                {column.header}
+              </th>
             ))}
-          </TableRow>
-        </TableHead>
-        <TableBody>
+          </tr>
+        </thead>
+        <tbody className="[&_tr:last-child]:border-0">
           {data.map((row, index) => (
-            <TableRow key={index}>
+            <tr key={index} className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
               {enableRowSelection && (
-                <TableCell padding="checkbox">
-                  <Checkbox />
-                </TableCell>
+                <td className="p-4 align-middle">
+                  <input type="checkbox" className="h-4 w-4 rounded border" />
+                </td>
               )}
               {columns.map((column) => (
-                <TableCell key={column.id}>
+                <td key={column.id} className="p-4 align-middle">
                   {column.cell
                     ? column.cell({ row: { original: row } })
                     : (row[column.accessorKey] as React.ReactNode)}
-                </TableCell>
+                </td>
               ))}
-            </TableRow>
+            </tr>
           ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
-  </Card>
+        </tbody>
+      </table>
+    </div>
+  </div>
 );
 
 export interface PortalHeaderProps {
@@ -234,32 +210,37 @@ export const PortalHeader: React.FC<PortalHeaderProps> = ({
   backHref = '/',
 }) => {
   return (
-    <AppBar position="static" sx={{ bgcolor: 'primary.main' }}>
-      <Toolbar>
+    <header className="sticky top-0 z-50 w-full border-b bg-primary text-primary-foreground">
+      <div className="flex h-16 items-center px-4 gap-4">
         {showBackButton && (
-          <Button
-            component={Link}
+          <a
             href={backHref}
-            startIcon={<ArrowBack />}
-            sx={{ color: 'white', mr: 2 }}
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-primary/90 h-10 px-4 py-2"
           >
-            Back to Portal Selection
-          </Button>
+            <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back
+          </a>
         )}
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          {title}
-        </Typography>
-        <Avatar sx={{ bgcolor: 'primary.dark', mr: 1 }}>
-          {userAvatar || userName.charAt(0).toUpperCase()}
-        </Avatar>
-        <Typography variant="body1" sx={{ mr: 2 }}>
-          {userName}
-        </Typography>
-        <Button color="inherit" startIcon={<Logout />} onClick={onLogout}>
-          Logout
-        </Button>
-      </Toolbar>
-    </AppBar>
+        <h1 className="text-xl font-semibold flex-1">{title}</h1>
+        <div className="flex items-center gap-3">
+          <div className="h-8 w-8 rounded-full bg-primary-foreground/20 flex items-center justify-center text-sm font-semibold">
+            {userAvatar || userName.charAt(0).toUpperCase()}
+          </div>
+          <span className="text-sm hidden sm:inline-block">{userName}</span>
+          <button
+            onClick={onLogout}
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-primary/90 h-10 px-4 py-2"
+          >
+            <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            <span className="hidden sm:inline">Logout</span>
+          </button>
+        </div>
+      </div>
+    </header>
   );
 };
 
@@ -280,62 +261,76 @@ export const PortalSidebar: React.FC<PortalSidebarProps> = ({
   isOpen,
   onToggle,
 }) => {
-  const drawerContent = (
-    <Box sx={{ width: 250 }} role="presentation">
-      <Typography variant="h6" sx={{ p: 2 }}>
-        Navigation
-      </Typography>
-      <Divider />
-      <List>
-        {menuItems.map((item, index) => (
-          <ListItem key={index} component={Link} href={item.href} sx={{ cursor: 'pointer' }}>
-            <ListItemIcon>
-              {item.icon}
-            </ListItemIcon>
-            <ListItemText primary={item.text} />
-          </ListItem>
-        ))}
-      </List>
-    </Box>
-  );
-
   return (
-    <Drawer anchor="left" open={isOpen} onClose={onToggle}>
-      {drawerContent}
-    </Drawer>
+    <>
+      {/* Backdrop */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40"
+          onClick={onToggle}
+          aria-hidden="true"
+        />
+      )}
+      
+      {/* Drawer */}
+      <div className={cn(
+        "fixed left-0 top-0 h-full w-64 bg-background border-r z-50 transition-transform duration-300 ease-in-out",
+        isOpen ? "translate-x-0" : "-translate-x-full"
+      )}>
+        <div className="p-6">
+          <h2 className="text-lg font-semibold mb-4">Navigation</h2>
+          <div className="border-t my-4" />
+          <nav className="space-y-1">
+            {menuItems.map((item, index) => (
+              <a
+                key={index}
+                href={item.href}
+                className="flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+                onClick={onToggle}
+              >
+                <span className="flex items-center justify-center w-5 h-5">
+                  {item.icon}
+                </span>
+                <span>{item.text}</span>
+              </a>
+            ))}
+          </nav>
+        </div>
+      </div>
+    </>
   );
 };
 
-// Default menu items for different portals
+// Default menu items for different portals - using emoji icons for simplicity
 export const getEmployeeMenuItems = (): MenuItem[] => [
-  { icon: <Dashboard />, text: 'Dashboard', href: '/employee/dashboard' },
-  { icon: <Assignment />, text: 'My Tasks', href: '/employee/tasks' },
-  { icon: <People />, text: 'Team', href: '/employee/team' },
-  { icon: <Business />, text: 'Projects', href: '/employee/projects' },
-  { icon: <Assessment />, text: 'Reports', href: '/employee/reports' },
-  { icon: <Settings />, text: 'Settings', href: '/employee/settings' },
+  { icon: <LayoutDashboard size={18} />, text: 'Dashboard', href: '/employee/dashboard' },
+  { icon: <ClipboardList size={18} />, text: 'My Tasks', href: '/employee/tasks' },
+  { icon: <Users size={18} />, text: 'Team', href: '/employee/team' },
+  { icon: <Briefcase size={18} />, text: 'Projects', href: '/employee/projects' },
+  { icon: <TrendingUp size={18} />, text: 'Reports', href: '/employee/reports' },
+  { icon: <Settings size={18} />, text: 'Settings', href: '/employee/settings' },
 ];
 
 export const getClientMenuItems = (): MenuItem[] => [
-  { icon: <Dashboard />, text: 'Dashboard', href: '/client/dashboard' },
-  { icon: <Assignment />, text: 'My Projects', href: '/client/projects' },
-  { icon: <Business />, text: 'Services', href: '/client/services' },
-  { icon: <Assessment />, text: 'Reports', href: '/client/reports' },
-  { icon: <Settings />, text: 'Settings', href: '/client/settings' },
+  { icon: <LayoutDashboard size={18} />, text: 'Dashboard', href: '/client/dashboard' },
+  { icon: <ClipboardList size={18} />, text: 'My Projects', href: '/client/projects' },
+  { icon: <Building size={18} />, text: 'Services', href: '/client/services' },
+  { icon: <TrendingUp size={18} />, text: 'Reports', href: '/client/reports' },
+  { icon: <Settings size={18} />, text: 'Settings', href: '/client/settings' },
 ];
 
 export const getSupplierMenuItems = (): MenuItem[] => [
-  { icon: <Dashboard />, text: 'Dashboard', href: '/supplier/dashboard' },
-  { icon: <Assignment />, text: 'Orders', href: '/supplier/orders' },
-  { icon: <Business />, text: 'Products', href: '/supplier/products' },
-  { icon: <Assessment />, text: 'Analytics', href: '/supplier/analytics' },
-  { icon: <Settings />, text: 'Settings', href: '/supplier/settings' },
+  { icon: <LayoutDashboard size={18} />, text: 'Dashboard', href: '/supplier/dashboard' },
+  { icon: <ClipboardList size={18} />, text: 'Orders', href: '/supplier/orders' },
+  { icon: <Package size={18} />, text: 'Products', href: '/supplier/products' },
+  { icon: <TrendingUp size={18} />, text: 'Analytics', href: '/supplier/analytics' },
+  { icon: <Settings size={18} />, text: 'Settings', href: '/supplier/settings' },
 ];
 
 export const getProfessionalMenuItems = (): MenuItem[] => [
-  { icon: <Dashboard />, text: 'Dashboard', href: '/professional/dashboard' },
-  { icon: <Assignment />, text: 'Assignments', href: '/professional/assignments' },
-  { icon: <People />, text: 'Clients', href: '/professional/clients' },
-  { icon: <Assessment />, text: 'Performance', href: '/professional/performance' },
-  { icon: <Settings />, text: 'Settings', href: '/professional/settings' },
+  { icon: <LayoutDashboard size={18} />, text: 'Dashboard', href: '/professional/dashboard' },
+  { icon: <Briefcase size={18} />, text: 'Assignments', href: '/professional/assignments' },
+  { icon: <Users size={18} />, text: 'Clients', href: '/professional/clients' },
+  { icon: <TrendingUp size={18} />, text: 'Performance', href: '/professional/performance' },
+  { icon: <Settings size={18} />, text: 'Settings', href: '/professional/settings' },
 ];

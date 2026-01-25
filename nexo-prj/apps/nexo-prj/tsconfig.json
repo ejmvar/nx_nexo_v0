@@ -1,11 +1,12 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "composite": true,
     "declarationMap": true,
     "emitDeclarationOnly": false,
     "importHelpers": true,
     "isolatedModules": true,
-    "lib": ["es2022"],
+    "lib": ["es2022", "dom", "dom.iterable"],
     "module": "esnext",
     "moduleResolution": "bundler",
     "noEmitOnError": true,
@@ -31,7 +32,9 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@nexo-prj/shared-ui": ["../../libs/shared-ui/src/index.ts"],
+      "@nexo-prj/shared-ui/*": ["../../libs/shared-ui/src/*"]
     },
     "types": ["jest", "node"],
     "outDir": "dist",
@@ -62,9 +65,5 @@
     "eslint.config.cjs",
     "eslint.config.mjs"
   ],
-  "references": [
-    {
-      "path": "../../shared-ui"
-    }
-  ]
+  "references": []
 }

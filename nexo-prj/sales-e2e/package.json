@@ -1,0 +1,26 @@
+{
+  "name": "@nexo-prj/sales-e2e",
+  "version": "0.0.1",
+  "private": true,
+  "nx": {
+    "implicitDependencies": [
+      "@nexo-prj/sales"
+    ],
+    "targets": {
+      "e2e": {
+        "executor": "@nx/jest:jest",
+        "outputs": [
+          "{projectRoot}/test-output/jest/coverage"
+        ],
+        "options": {
+          "jestConfig": "sales-e2e/jest.config.cts",
+          "passWithNoTests": true
+        },
+        "dependsOn": [
+          "@nexo-prj/sales:build",
+          "@nexo-prj/sales:serve"
+        ]
+      }
+    }
+  }
+}

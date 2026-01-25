@@ -1,43 +1,18 @@
 'use client';
 
-import {
-  Box,
-  Container,
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Chip,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  LinearProgress,
-  Button,
-  CardActions,
-} from '@mui/material';
-import {
-  Dashboard,
-  Assignment,
-  TrendingUp,
-  Business,
-  Message,
-} from '@mui/icons-material';
+import { useState } from 'react';
 import {
   PortalHeader,
+  PortalSidebar,
   getClientMenuItems,
   PieChartComponent,
   AreaChartComponent,
   KPICard,
   DataTable,
+  DataTableColumn,
 } from '@nexo-prj/shared-ui';
 
-interface DataTableColumn<T = any> {
-  id: string;
-  header: string;
-  accessorKey: keyof T;
-  cell?: (props: { row: { original: T } }) => React.ReactNode;
-}
+export const dynamic = 'force-dynamic';
 
 interface Project {
   id: string;
@@ -49,9 +24,9 @@ interface Project {
 }
 
 export default function ClientPortal() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const menuItems = getClientMenuItems();
 
-  // Sample data for charts
   const budgetData = [
     { name: 'Development', value: 45000, fill: '#2196f3' },
     { name: 'Design', value: 25000, fill: '#4caf50' },
@@ -60,270 +35,178 @@ export default function ClientPortal() {
   ];
 
   const revenueData = [
-    { name: 'Jan', value: 12000 },
-    { name: 'Feb', value: 15000 },
-    { name: 'Mar', value: 18000 },
-    { name: 'Apr', value: 22000 },
-    { name: 'May', value: 25000 },
-    { name: 'Jun', value: 28000 },
+    { name: 'Q1', value: 120000 },
+    { name: 'Q2', value: 145000 },
+    { name: 'Q3', value: 165000 },
+    { name: 'Q4', value: 185000 },
   ];
 
-  // Sample projects for table
   const projects: Project[] = [
-    {
-      id: '1',
-      name: 'Website Redesign',
-      status: 'in-progress',
-      progress: 75,
-      budget: '$45,000',
-      deadline: '2026-03-15',
-    },
-    {
-      id: '2',
-      name: 'Mobile App Development',
-      status: 'in-progress',
-      progress: 45,
-      budget: '$120,000',
-      deadline: '2026-04-30',
-    },
-    {
-      id: '3',
-      name: 'Brand Strategy',
-      status: 'completed',
-      progress: 100,
-      budget: '$25,000',
-      deadline: '2026-01-15',
-    },
-    {
-      id: '4',
-      name: 'SEO Optimization',
-      status: 'planning',
-      progress: 10,
-      budget: '$15,000',
-      deadline: '2026-05-01',
-    },
+    { id: '1', name: 'Website Redesign', status: 'in-progress', progress: 65, budget: '$45,000', deadline: '2026-03-15' },
+    { id: '2', name: 'Mobile App', status: 'planning', progress: 20, budget: '$85,000', deadline: '2026-06-30' },
+    { id: '3', name: 'Marketing Campaign', status: 'in-progress', progress: 80, budget: '$25,000', deadline: '2026-02-28' },
+    { id: '4', name: 'CRM Integration', status: 'completed', progress: 100, budget: '$35,000', deadline: '2026-01-15' },
   ];
 
-  const columns: DataTableColumn<Project>[] = [
-    {
-      id: 'name',
-      header: 'Project Name',
-      accessorKey: 'name',
-    },
+  const projectColumns: DataTableColumn<Project>[] = [
+    { id: 'name', header: 'Project Name', accessorKey: 'name' },
     {
       id: 'status',
       header: 'Status',
       accessorKey: 'status',
-      cell: ({ row }) => {
-        const status = row.original.status;
-        const color =
-          status === 'completed'
-            ? 'success'
-            : status === 'in-progress'
-            ? 'primary'
-            : 'warning';
-        return <Chip label={status} color={color} size="small" />;
-      },
+      cell: ({ row }) => (
+        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+          row.original.status === 'completed' ? 'bg-green-100 text-green-800' :
+          row.original.status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
+          'bg-gray-100 text-gray-800'
+        }`}>
+          {row.original.status}
+        </span>
+      )
     },
     {
       id: 'progress',
       header: 'Progress',
       accessorKey: 'progress',
       cell: ({ row }) => (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <LinearProgress
-            variant="determinate"
-            value={row.original.progress}
-            sx={{ width: 100 }}
-          />
-          <Typography variant="body2">{row.original.progress}%</Typography>
-        </Box>
-      ),
+        <div className="flex items-center gap-2">
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div
+              className="bg-blue-600 h-2 rounded-full transition-all"
+              style={{ width: `${row.original.progress}%` }}
+            />
+          </div>
+          <span className="text-sm text-gray-600">{row.original.progress}%</span>
+        </div>
+      )
     },
-    {
-      id: 'budget',
-      header: 'Budget',
-      accessorKey: 'budget',
-    },
-    {
-      id: 'deadline',
-      header: 'Deadline',
-      accessorKey: 'deadline',
-    },
+    { id: 'budget', header: 'Budget', accessorKey: 'budget' },
+    { id: 'deadline', header: 'Deadline', accessorKey: 'deadline' },
+  ];
+
+  const recentActivity = [
+    { icon: '📋', text: 'Project milestone completed', time: '2 hours ago' },
+    { icon: '💬', text: 'New message from team', time: '5 hours ago' },
+    { icon: '📊', text: 'Weekly report generated', time: '1 day ago' },
+    { icon: '✅', text: 'Invoice approved', time: '2 days ago' },
   ];
 
   return (
-    <Box sx={{ flexGrow: 1, bgcolor: 'grey.50', minHeight: '100vh' }}>
+    <div className="min-h-screen bg-gray-50">
       <PortalHeader
         title="Client Portal"
-        userName="ABC Corporation"
-        userAvatar="A"
-        onLogout={() => console.log('Logout clicked')}
+        userName="John Client"
+        onLogout={() => console.log('Logout')}
         showBackButton={true}
         backHref="/"
       />
 
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-        <Grid container spacing={3}>
-          {/* Sidebar Menu */}
-          <Grid size={{ xs: 12, md: 3 }}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Navigation
-                </Typography>
-                <List>
-                  {menuItems.map((item, index) => (
-                    <ListItem key={index} sx={{ cursor: 'pointer' }}>
-                      <ListItemIcon>{item.icon}</ListItemIcon>
-                      <ListItemText primary={item.text} />
-                    </ListItem>
-                  ))}
-                </List>
-              </CardContent>
-            </Card>
-          </Grid>
+      <PortalSidebar
+        menuItems={menuItems}
+        isOpen={sidebarOpen}
+        onToggle={() => setSidebarOpen(!sidebarOpen)}
+      />
 
-          {/* Main Content */}
-          <Grid size={{ xs: 12, md: 9 }}>
-            {/* Welcome Section */}
-            <Card sx={{ mb: 3 }}>
-              <CardContent>
-                <Typography variant="h4" gutterBottom>
-                  Welcome, ABC Corporation
-                </Typography>
-                <Typography variant="body1" color="text.secondary" gutterBottom>
-                  Manage your projects and track progress
-                </Typography>
-                <Box sx={{ mt: 2 }}>
-                  <Chip label="Premium Client" color="success" sx={{ mr: 1 }} />
-                  <Chip label="4 Active Projects" variant="outlined" sx={{ mr: 1 }} />
-                  <Chip label="Verified Account" variant="outlined" />
-                </Box>
-              </CardContent>
-            </Card>
+      <button
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        className="fixed left-4 top-20 z-30 bg-primary text-white p-2 rounded-md shadow-lg hover:bg-primary/90"
+      >
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
 
-            {/* KPI Cards */}
-            <Grid container spacing={2} sx={{ mb: 3 }}>
-              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                <KPICard
-                  title="Active Projects"
-                  value="4"
-                  subtitle="Currently in progress"
-                  change={25}
-                  icon={<Assignment />}
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                <KPICard
-                  title="Total Investment"
-                  value="$205K"
-                  subtitle="This quarter"
-                  change={15.5}
-                  icon={<TrendingUp />}
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                <KPICard
-                  title="Completion Rate"
-                  value="88%"
-                  subtitle="Average across projects"
-                  change={3.2}
-                  icon={<Dashboard />}
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                <KPICard
-                  title="Unread Messages"
-                  value="5"
-                  subtitle="Requires attention"
-                  change={-12}
-                  icon={<Message />}
-                />
-              </Grid>
-            </Grid>
+      <main className="p-6 max-w-7xl mx-auto">
+        <div className="mb-6">
+          <h2 className="text-3xl font-bold text-gray-900">Dashboard Overview</h2>
+          <p className="text-gray-600">Welcome back! Here's what's happening with your projects.</p>
+        </div>
 
-            {/* Charts */}
-            <Grid container spacing={2} sx={{ mb: 3 }}>
-              <Grid size={{ xs: 12, md: 7 }}>
-                <Card>
-                  <CardContent>
-                    <AreaChartComponent
-                      data={revenueData}
-                      title="Project Investment Over Time"
-                    />
-                  </CardContent>
-                </Card>
-              </Grid>
-              <Grid size={{ xs: 12, md: 5 }}>
-                <Card>
-                  <CardContent>
-                    <PieChartComponent
-                      data={budgetData}
-                      title="Budget Allocation"
-                    />
-                  </CardContent>
-                </Card>
-              </Grid>
-            </Grid>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <KPICard
+            title="Active Projects"
+            value="12"
+            subtitle="3 completed this month"
+            icon={<span className="text-4xl">📊</span>}
+            change={15}
+          />
+          <KPICard
+            title="Total Budget"
+            value="$190K"
+            subtitle="Across all projects"
+            icon={<span className="text-4xl">💰</span>}
+            change={8}
+          />
+          <KPICard
+            title="Team Members"
+            value="24"
+            subtitle="Active collaborators"
+            icon={<span className="text-4xl">👥</span>}
+            change={12}
+          />
+          <KPICard
+            title="Completion Rate"
+            value="87%"
+            subtitle="On-time delivery"
+            icon={<span className="text-4xl">✅</span>}
+            change={5}
+          />
+        </div>
 
-            {/* Projects Table */}
-            <Card sx={{ mb: 3 }}>
-              <DataTable
-                data={projects}
-                columns={columns}
-                title="My Projects"
-                enableRowSelection
-                enableSorting
-                enableFiltering
-              />
-            </Card>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <PieChartComponent title="Budget Distribution" data={budgetData} />
+          <AreaChartComponent title="Revenue Trends" data={revenueData} />
+        </div>
 
-            {/* Project Updates */}
-            <Card sx={{ mb: 3 }}>
-              <CardContent>
-                <Typography variant="h5" gutterBottom>
-                  Recent Updates
-                </Typography>
-                <List>
-                  <ListItem>
-                    <ListItemIcon>
-                      <Assignment />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary="Website Redesign - Design Phase Complete"
-                      secondary="Updated 3 hours ago"
-                    />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemIcon>
-                      <Business />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary="Mobile App - Development Sprint Started"
-                      secondary="Updated 1 day ago"
-                    />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemIcon>
-                      <Message />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary="New Message from Project Manager"
-                      secondary="Updated 2 days ago"
-                    />
-                  </ListItem>
-                </List>
-              </CardContent>
-              <CardActions>
-                <Button size="small" color="primary">
-                  View All Updates
-                </Button>
-              </CardActions>
-            </Card>
-          </Grid>
-        </Grid>
-      </Container>
-    </Box>
+        <div className="mb-8">
+          <DataTable
+            title="Active Projects"
+            data={projects}
+            columns={projectColumns}
+            enableRowSelection={true}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 bg-white rounded-lg border shadow-sm p-6">
+            <h3 className="text-lg font-semibold mb-4">Project Timeline</h3>
+            <div className="space-y-4">
+              {projects.slice(0, 3).map((project) => (
+                <div key={project.id} className="border-l-4 border-blue-500 pl-4 py-2">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h4 className="font-semibold">{project.name}</h4>
+                      <p className="text-sm text-gray-600">Due: {project.deadline}</p>
+                    </div>
+                    <span className={`px-2 py-1 text-xs rounded ${
+                      project.status === 'completed' ? 'bg-green-100 text-green-800' :
+                      project.status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
+                      'bg-gray-100 text-gray-800'
+                    }`}>
+                      {project.status}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg border shadow-sm p-6">
+            <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
+            <div className="space-y-4">
+              {recentActivity.map((activity, index) => (
+                <div key={index} className="flex items-start gap-3">
+                  <span className="text-2xl">{activity.icon}</span>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">{activity.text}</p>
+                    <p className="text-xs text-gray-500">{activity.time}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
   );
 }

@@ -1,0 +1,85 @@
+.alert {
+  display: flex;
+  align-items: flex-start;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid;
+  position: relative;
+}
+
+.content {
+  flex: 1;
+}
+
+.title {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.message {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  margin-left: 0.75rem;
+  border-radius: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.closeButton:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.closeIcon {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Variants */
+.success {
+  background-color: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #166534;
+}
+
+.success .closeButton:hover {
+  background-color: rgba(22, 101, 52, 0.1);
+}
+
+.warning {
+  background-color: #fffbeb;
+  border-color: #fde68a;
+  color: #92400e;
+}
+
+.warning .closeButton:hover {
+  background-color: rgba(146, 64, 14, 0.1);
+}
+
+.error {
+  background-color: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+.error .closeButton:hover {
+  background-color: rgba(153, 27, 27, 0.1);
+}
+
+.info {
+  background-color: #eff6ff;
+  border-color: #bfdbfe;
+  color: #1e40af;
+}
+
+.info .closeButton:hover {
+  background-color: rgba(30, 64, 175, 0.1);
+}

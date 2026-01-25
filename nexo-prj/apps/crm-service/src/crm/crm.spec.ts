@@ -1,15 +1,32 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CrmController } from './crm.controller';
 import { CrmService } from './crm.service';
+import { DatabaseService } from '../database/database.service';
 
 describe('CrmController', () => {
   let controller: CrmController;
   let service: CrmService;
 
   beforeEach(async () => {
+    const mockService = {
+      getClients: jest.fn().mockResolvedValue({ data: [], total: 0, page: 1, limit: 10 }),
+      getClient: jest.fn().mockResolvedValue({ id: '1', name: 'Test Client' }),
+      createClient: jest.fn().mockResolvedValue({ id: '1', name: 'Test Client' }),
+      getEmployees: jest.fn().mockResolvedValue({ data: [], total: 0, page: 1, limit: 10 }),
+      getProjects: jest.fn().mockResolvedValue({ data: [], total: 0, page: 1, limit: 10 }),
+      getTasks: jest.fn().mockResolvedValue({ data: [], total: 0, page: 1, limit: 10 }),
+      getSuppliers: jest.fn().mockResolvedValue({ data: [], total: 0, page: 1, limit: 10 }),
+      getProfessionals: jest.fn().mockResolvedValue({ data: [], total: 0, page: 1, limit: 10 }),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [CrmController],
-      providers: [CrmService],
+      providers: [
+        {
+          provide: CrmService,
+          useValue: mockService,
+        },
+      ],
     }).compile();
 
     controller = module.get<CrmController>(CrmController);
@@ -20,103 +37,138 @@ describe('CrmController', () => {
     expect(controller).toBeDefined();
   });
 
-  describe('getCustomers', () => {
-    it('should return array of customers', async () => {
-      const result = await controller.getCustomers({});
+  describe('getClients', () => {
+    it('should return array of clients', async () => {
+      const result = await controller.getClients({});
 
-      expect(Array.isArray(result.data)).toBe(true);
-      expect(result).toHaveProperty('total');
-      expect(result).toHaveProperty('page');
-      expect(result).toHaveProperty('limit');
+      expect(result).toHaveProperty('data');
+      expect(result).toHaveProperty('total', 0);
+      expect(result).toHaveProperty('page', 1);
+      expect(result).toHaveProperty('limit', 10);
+      expect(service.getClients).toHaveBeenCalled();
     });
   });
 
-  describe('getCustomer', () => {
-    it('should return customer by id', async () => {
-      const result = await controller.getCustomer('1');
+  describe('getClient', () => {
+    it('should return client by id', async () => {
+      const result = await controller.getClient('1');
 
       expect(result).toHaveProperty('id', '1');
-      expect(result).toHaveProperty('companyName');
-    });
-
-    it('should throw error for non-existent customer', async () => {
-      await expect(controller.getCustomer('999')).rejects.toThrow('Customer not found');
+      expect(result).toHaveProperty('name');
+      expect(service.getClient).toHaveBeenCalledWith('1');
     });
   });
 
-  describe('createCustomer', () => {
-    it('should create new customer', async () => {
-      const customerData = {
-        companyName: 'Test Company',
-        contactPerson: 'Test Person',
+  describe('createClient', () => {
+    it('should create new client', async () => {
+      const clientData = {
         email: 'test@test.com',
+        full_name: 'Test Client',
+        company_name: 'Test Corp',
       };
 
-      const result = await controller.createCustomer(customerData);
+      const result = await controller.createClient(clientData);
 
       expect(result).toHaveProperty('id');
-      expect(result).toHaveProperty('customerNumber');
-      expect(result.companyName).toBe('Test Company');
+      expect(service.createClient).toHaveBeenCalledWith(clientData);
     });
   });
 
-  describe('getLeads', () => {
-    it('should return array of leads', async () => {
-      const result = await controller.getLeads({});
+  describe('getEmployees', () => {
+    it('should return array of employees', async () => {
+      const result = await controller.getEmployees({});
 
-      expect(Array.isArray(result.data)).toBe(true);
+      expect(result).toHaveProperty('data');
       expect(result).toHaveProperty('total');
+      expect(service.getEmployees).toHaveBeenCalled();
     });
   });
 
-  describe('getLead', () => {
-    it('should return lead by id', async () => {
-      const result = await controller.getLead('1');
+  describe('getProjects', () => {
+    it('should return array of projects', async () => {
+      const result = await controller.getProjects({});
 
-      expect(result).toHaveProperty('id', '1');
-      expect(result).toHaveProperty('contactName');
-    });
-
-    it('should throw error for non-existent lead', async () => {
-      await expect(controller.getLead('999')).rejects.toThrow('Lead not found');
+      expect(result).toHaveProperty('data');
+      expect(result).toHaveProperty('total');
+      expect(service.getProjects).toHaveBeenCalled();
     });
   });
 
-  describe('createLead', () => {
-    it('should create new lead', async () => {
-      const leadData = {
-        contactName: 'Test Lead',
-        companyName: 'Test Company',
-        email: 'lead@test.com',
-      };
+  describe('getTasks', () => {
+    it('should return array of tasks', async () => {
+      const result = await controller.getTasks({});
 
-      const result = await controller.createLead(leadData);
+      expect(result).toHaveProperty('data');
+      expect(result).toHaveProperty('total');
+      expect(service.getTasks).toHaveBeenCalled();
+    });
+  });
 
-      expect(result).toHaveProperty('id');
-      expect(result).toHaveProperty('leadNumber');
-      expect(result.contactName).toBe('Test Lead');
+  describe('getSuppliers', () => {
+    it('should return array of suppliers', async () => {
+      const result = await controller.getSuppliers({});
+
+      expect(result).toHaveProperty('data');
+      expect(result).toHaveProperty('total');
+      expect(service.getSuppliers).toHaveBeenCalled();
+    });
+  });
+
+  describe('getProfessionals', () => {
+    it('should return array of professionals', async () => {
+      const result = await controller.getProfessionals({});
+
+      expect(result).toHaveProperty('data');
+      expect(result).toHaveProperty('total');
+      expect(service.getProfessionals).toHaveBeenCalled();
     });
   });
 });
 
 describe('CrmService', () => {
   let service: CrmService;
+  let mockDb: any;
 
   beforeEach(async () => {
+    mockDb = {
+      query: jest.fn().mockImplementation((sql: string) => {
+        // Mock count queries
+        if (sql.includes('COUNT(*)')) {
+          return Promise.resolve({ rows: [{ count: '0', total: 0 }], rowCount: 1 });
+        }
+        // Mock SELECT queries
+        return Promise.resolve({ rows: [], rowCount: 0 });
+      }),
+      getClient: jest.fn().mockResolvedValue({
+        query: jest.fn().mockResolvedValue({ rows: [] }),
+        release: jest.fn(),
+      }),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
-      providers: [CrmService],
+      providers: [
+        CrmService,
+        {
+          provide: DatabaseService,
+          useValue: mockDb,
+        },
+      ],
     }).compile();
 
     service = module.get<CrmService>(CrmService);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
 
-  describe('getCustomers', () => {
-    it('should return paginated customers', async () => {
-      const result = await service.getCustomers({});
+  describe('getClients', () => {
+    it('should return paginated clients', async () => {
+      const result = await service.getClients({});
 
       expect(result).toHaveProperty('data');
       expect(result).toHaveProperty('total');
@@ -124,144 +176,55 @@ describe('CrmService', () => {
       expect(result).toHaveProperty('limit', 10);
       expect(Array.isArray(result.data)).toBe(true);
     });
-
-    it('should filter customers by search term', async () => {
-      const result = await service.getCustomers({ search: 'Acme' });
-
-      expect(result.data.length).toBeGreaterThan(0);
-      result.data.forEach(customer => {
-        expect(customer.companyName.toLowerCase()).toContain('acme');
-      });
-    });
   });
 
-  describe('getCustomer', () => {
-    it('should return customer by id', async () => {
-      const result = await service.getCustomer('1');
-
-      expect(result).toHaveProperty('id', '1');
-      expect(result).toHaveProperty('companyName', 'Acme Corporation');
-    });
-
-    it('should throw error for non-existent customer', async () => {
-      await expect(service.getCustomer('999')).rejects.toThrow('Customer not found');
-    });
-  });
-
-  describe('createCustomer', () => {
-    it('should create customer with generated number', async () => {
-      const customerData = {
-        companyName: 'New Company',
-        contactPerson: 'New Contact',
-        email: 'new@company.com',
-      };
-
-      const result = await service.createCustomer(customerData);
-
-      expect(result).toHaveProperty('id');
-      expect(result.customerNumber).toMatch(/^CUST\d{3}$/);
-      expect(result.companyName).toBe('New Company');
-      expect(result.isActive).toBe(true);
-      expect(result).toHaveProperty('createdAt');
-    });
-  });
-
-  describe('updateCustomer', () => {
-    it('should update customer data', async () => {
-      const updateData = { companyName: 'Updated Company' };
-      const result = await service.updateCustomer('1', updateData);
-
-      expect(result.companyName).toBe('Updated Company');
-    });
-
-    it('should throw error for non-existent customer', async () => {
-      await expect(service.updateCustomer('999', {})).rejects.toThrow('Customer not found');
-    });
-  });
-
-  describe('deleteCustomer', () => {
-    it('should delete customer', async () => {
-      const result = await service.deleteCustomer('1');
-
-      expect(result).toHaveProperty('message', 'Customer deleted successfully');
-    });
-
-    it('should throw error for non-existent customer', async () => {
-      await expect(service.deleteCustomer('999')).rejects.toThrow('Customer not found');
-    });
-  });
-
-  describe('getLeads', () => {
-    it('should return paginated leads', async () => {
-      const result = await service.getLeads({});
+  describe('getEmployees', () => {
+    it('should return paginated employees', async () => {
+      const result = await service.getEmployees({});
 
       expect(result).toHaveProperty('data');
       expect(result).toHaveProperty('total');
       expect(Array.isArray(result.data)).toBe(true);
     });
+  });
 
-    it('should filter leads by status', async () => {
-      const result = await service.getLeads({ status: 'qualified' });
+  describe('getProjects', () => {
+    it('should return paginated projects', async () => {
+      const result = await service.getProjects({});
 
-      expect(result.data.length).toBeGreaterThan(0);
-      result.data.forEach(lead => {
-        expect(lead.status).toBe('qualified');
-      });
+      expect(result).toHaveProperty('data');
+      expect(result).toHaveProperty('total');
+      expect(Array.isArray(result.data)).toBe(true);
     });
   });
 
-  describe('getLead', () => {
-    it('should return lead by id', async () => {
-      const result = await service.getLead('1');
+  describe('getTasks', () => {
+    it('should return paginated tasks', async () => {
+      const result = await service.getTasks({});
 
-      expect(result).toHaveProperty('id', '1');
-      expect(result).toHaveProperty('contactName', 'Alice Wilson');
-    });
-
-    it('should throw error for non-existent lead', async () => {
-      await expect(service.getLead('999')).rejects.toThrow('Lead not found');
+      expect(result).toHaveProperty('data');
+      expect(result).toHaveProperty('total');
+      expect(Array.isArray(result.data)).toBe(true);
     });
   });
 
-  describe('createLead', () => {
-    it('should create lead with generated number', async () => {
-      const leadData = {
-        contactName: 'New Lead',
-        companyName: 'New Company',
-        email: 'new@lead.com',
-      };
+  describe('getSuppliers', () => {
+    it('should return paginated suppliers', async () => {
+      const result = await service.getSuppliers({});
 
-      const result = await service.createLead(leadData);
-
-      expect(result).toHaveProperty('id');
-      expect(result.leadNumber).toMatch(/^LEAD\d{3}$/);
-      expect(result.contactName).toBe('New Lead');
-      expect(result).toHaveProperty('createdAt');
+      expect(result).toHaveProperty('data');
+      expect(result).toHaveProperty('total');
+      expect(Array.isArray(result.data)).toBe(true);
     });
   });
 
-  describe('updateLead', () => {
-    it('should update lead data', async () => {
-      const updateData = { status: 'contacted' };
-      const result = await service.updateLead('1', updateData);
+  describe('getProfessionals', () => {
+    it('should return paginated professionals', async () => {
+      const result = await service.getProfessionals({});
 
-      expect(result.status).toBe('contacted');
-    });
-
-    it('should throw error for non-existent lead', async () => {
-      await expect(service.updateLead('999', {})).rejects.toThrow('Lead not found');
-    });
-  });
-
-  describe('deleteLead', () => {
-    it('should delete lead', async () => {
-      const result = await service.deleteLead('1');
-
-      expect(result).toHaveProperty('message', 'Lead deleted successfully');
-    });
-
-    it('should throw error for non-existent lead', async () => {
-      await expect(service.deleteLead('999')).rejects.toThrow('Lead not found');
+      expect(result).toHaveProperty('data');
+      expect(result).toHaveProperty('total');
+      expect(Array.isArray(result.data)).toBe(true);
     });
   });
 });

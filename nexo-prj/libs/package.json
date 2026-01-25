@@ -1,11 +1,7 @@
 {
-  "name": "@nexo-prj/shared-ui",
+  "name": "@nexo-prj/ui",
   "version": "0.0.1",
   "type": "module",
-  "scripts": {
-    "build": "vite build",
-    "test": "vitest"
-  },
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",

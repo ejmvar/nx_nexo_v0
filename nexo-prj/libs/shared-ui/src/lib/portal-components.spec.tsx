@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import {
@@ -44,7 +43,7 @@ describe('PortalHeader', () => {
   it('shows back button when showBackButton is true', () => {
     render(<PortalHeader title="Test Portal" showBackButton={true} />);
 
-    expect(screen.getByText('Back to Portal Selection')).toBeInTheDocument();
+    expect(screen.getByText('Back')).toBeInTheDocument();
   });
 
   it('calls onLogout when logout button is clicked', () => {
@@ -66,7 +65,7 @@ describe('PortalHeader', () => {
       />
     );
 
-    const backLink = screen.getByText('Back to Portal Selection');
+    const backLink = screen.getByText('Back');
     expect(backLink.closest('a')).toHaveAttribute('href', '/custom');
   });
 });
@@ -92,7 +91,7 @@ describe('PortalSidebar', () => {
   });
 
   it('does not render when closed', () => {
-    render(
+    const { container } = render(
       <PortalSidebar
         menuItems={mockMenuItems}
         isOpen={false}
@@ -100,10 +99,12 @@ describe('PortalSidebar', () => {
       />
     );
 
-    expect(screen.queryByText('Navigation')).not.toBeInTheDocument();
+    // Check that the drawer is hidden (has -translate-x-full class)
+    const drawer = container.querySelector('.fixed.left-0');
+    expect(drawer).toHaveClass('-translate-x-full');
   });
 
-  it('calls onToggle when closed', () => {
+  it('calls onToggle when backdrop is clicked', () => {
     const mockOnToggle = vi.fn();
     render(
       <PortalSidebar
@@ -113,10 +114,11 @@ describe('PortalSidebar', () => {
       />
     );
 
-    // Click outside or trigger close - this is simplified for testing
-    const drawer = screen.getByRole('presentation');
-    fireEvent.keyDown(drawer, { key: 'Escape' });
+    // Click the backdrop
+    const backdrop = document.querySelector('.fixed.inset-0.bg-black\\/50');
+    fireEvent.click(backdrop!);
 
+    expect(mockOnToggle).toHaveBeenCalledTimes(1);
     // Note: In a real scenario, you'd test the actual close behavior
     // This is a basic structure test
   });

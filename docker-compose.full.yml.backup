@@ -1,0 +1,249 @@
+# NEXO Full Stack - Docker Compose
+# ==================================
+# Complete multi-container orchestration for development
+# Includes: Frontend, API Gateway, Auth, CRM, and PostgreSQL
+# Optimized for Raspberry Pi compatibility
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: nexo-postgres
+    environment:
+      POSTGRES_DB: nexo_crm
+      POSTGRES_USER: nexo_admin
+      POSTGRES_PASSWORD: nexo_dev_password_2026
+      POSTGRES_HOST_AUTH_METHOD: scram-sha-256
+      # Raspberry Pi optimizations
+      POSTGRES_INITDB_ARGS: "-E UTF8 --locale=C"
+      POSTGRES_MAX_CONNECTIONS: "50"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/init-db.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - nexo-network
+    # Raspberry Pi resource limits (4GB model)
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nexo_admin -d nexo_crm"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    # PostgreSQL performance tuning for Raspberry Pi
+    command:
+      - "postgres"
+      - "-c"
+      - "shared_buffers=128MB"
+      - "-c"
+      - "effective_cache_size=256MB"
+      - "-c"
+      - "maintenance_work_mem=64MB"
+      - "-c"
+      - "checkpoint_completion_target=0.9"
+      - "-c"
+      - "wal_buffers=4MB"
+      - "-c"
+      - "default_statistics_target=100"
+      - "-c"
+      - "random_page_cost=1.1"
+      - "-c"
+      - "work_mem=4MB"
+      - "-c"
+      - "min_wal_size=1GB"
+      - "-c"
+      - "max_wal_size=2GB"
+
+  # Auth Service (Port 3000)
+  auth-service:
+    build:
+      context: ./nexo-prj
+      dockerfile: apps/auth-service/Dockerfile
+      # Multi-platform support
+      platforms:
+        - linux/amd64
+        - linux/arm64
+        - linux/arm/v7
+    container_name: nexo-auth-service
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://nexo_admin:nexo_dev_password_2026@postgres:5432/nexo_crm
+      - JWT_SECRET=nexo_jwt_secret_key_2026_change_in_production
+      - JWT_EXPIRATION=24h
+      # Node.js memory optimization for Raspberry Pi
+      - NODE_OPTIONS=--max-old-space-size=256
+    networks:
+      - nexo-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      # Multi-platform support
+      platforms:
+        - linux/amd64
+        - linux/arm64
+        - linux/arm/v7
+    container_name: nexo-api-gateway
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - AUTH_SERVICE_URL=http://auth-service:3000
+      - CRM_SERVICE_URL=http://crm-service:3002
+      # Node.js memory optimization for Raspberry Pi
+      - NODE_OPTIONS=--max-old-space-size=256
+    networks:
+      - nexo-network
+    depends_on:
+      - auth-service
+    # Raspberry Pi resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
+  # API Gateway (Port 3001)
+  api-gateway:
+    build:
+      context: ./nexo-prj
+      dockerfile: apps/api-gateway/Dockerfile
+    container_name: nexo-api-gateway
+    ports:
+      # Multi-platform support
+      platforms:
+        - linux/amd64
+        - linux/arm64
+        - linux/arm/v7
+    container_name: nexo-crm-service
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://nexo_admin:nexo_dev_password_2026@postgres:5432/nexo_crm
+      # Node.js memory optimization for Raspberry Pi
+      - NODE_OPTIONS=--max-old-space-size=256
+    networks:
+      - nexo-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # Raspberry Pi resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
+  # CRM Service (Port 3002)
+  crm-service:
+    build:
+      context: ./nexo-prj
+      dockerfile: apps/crm-service/Dockerfile
+    container_name: nexo-crm-service
+    ports:
+      # Multi-platform support
+      platforms:
+        - linux/amd64
+        - linux/arm64
+        - linux/arm/v7
+    container_name: nexo-frontend
+    ports:
+      - "4200:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://localhost:3001
+      - NEXT_PUBLIC_AUTH_URL=http://localhost:3000
+      # Node.js memory optimization for Raspberry Pi
+      - NODE_OPTIONS=--max-old-space-size=512
+    networks:
+      - nexo-network
+    depends_on:
+      - api-gateway
+    # Raspberry Pi resource limits (Frontend needs more memory)
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+  # Frontend (Next.js) (Port 3000 exposed as 4200)
+  frontend:
+    build:
+      context: ./nexo-prj
+      dockerfile: apps/nexo-prj/Dockerfile
+    container_name: nexo-frontend
+    ports:
+      - "4200:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://localhost:3001
+      - NEXT_PUBLIC_AUTH_URL=http://localhost:3000
+    # Raspberry Pi optimized Redis configuration
+    command:
+      - redis-server
+      - --appendonly yes
+      - --maxmemory 128mb
+      - --maxmemory-policy allkeys-lru
+      - --save 900 1
+      - --save 300 10
+      - --save 60 10000
+    # Raspberry Pi resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 128M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+    networks:
+      - nexo-network
+    depends_on:
+      - api-gateway
+    restart: unless-stopped
+
+  # Redis Cache (Optional but recommended)
+  redis:
+    image: redis:7-alpine
+    container_name: nexo-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - nexo-network
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    restart: unless-stopped
+
+networks:
+  nexo-network:
+    driver: bridge
+    name: nexo-network
+
+volumes:
+  postgres_data:
+    name: nexo_postgres_data
+  redis_data:
+    name: nexo_redis_data

@@ -1,0 +1,26 @@
+{
+  "name": "@nexo-prj/production-e2e",
+  "version": "0.0.1",
+  "private": true,
+  "nx": {
+    "implicitDependencies": [
+      "@nexo-prj/production"
+    ],
+    "targets": {
+      "e2e": {
+        "executor": "@nx/jest:jest",
+        "outputs": [
+          "{projectRoot}/test-output/jest/coverage"
+        ],
+        "options": {
+          "jestConfig": "production-e2e/jest.config.cts",
+          "passWithNoTests": true
+        },
+        "dependsOn": [
+          "@nexo-prj/production:build",
+          "@nexo-prj/production:serve"
+        ]
+      }
+    }
+  }
+}

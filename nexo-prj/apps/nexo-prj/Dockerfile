@@ -13,20 +13,24 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 # Copy the app's package.json
 COPY apps/nexo-prj/package.json ./apps/nexo-prj/
 
-# Copy source code first
-COPY apps ./apps
-COPY libs ./libs
+# Copy necessary config files
 COPY nx.json tsconfig.base.json ./
-COPY .nx ./.nx
 
-# Install dependencies (this will build the shared-ui library as part of the workspace)
+# Copy shared-ui library source (needed for transpilation)
+COPY libs/shared-ui ./libs/shared-ui
+
+# Install dependencies
 RUN pnpm install --frozen-lockfile
 
-# Build the application (shared-ui is already built)
+# Copy Next.js app source
+COPY apps/nexo-prj ./apps/nexo-prj
+
+# Build the Next.js application (will transpile shared-ui on the fly)
 RUN cd apps/nexo-prj && pnpm build
 
 # Expose port
 EXPOSE 3000
 
 # Start the application
-CMD ["cd", "apps/nexo-prj", "&&", "pnpm", "start"]
+WORKDIR /app/apps/nexo-prj
+CMD ["pnpm", "start"]

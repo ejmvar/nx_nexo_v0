@@ -1,0 +1,26 @@
+{
+  "name": "@nexo-prj/stock-e2e",
+  "version": "0.0.1",
+  "private": true,
+  "nx": {
+    "implicitDependencies": [
+      "@nexo-prj/stock"
+    ],
+    "targets": {
+      "e2e": {
+        "executor": "@nx/jest:jest",
+        "outputs": [
+          "{projectRoot}/test-output/jest/coverage"
+        ],
+        "options": {
+          "jestConfig": "stock-e2e/jest.config.cts",
+          "passWithNoTests": true
+        },
+        "dependsOn": [
+          "@nexo-prj/stock:build",
+          "@nexo-prj/stock:serve"
+        ]
+      }
+    }
+  }
+}

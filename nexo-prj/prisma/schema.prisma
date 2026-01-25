@@ -1,0 +1,199 @@
+// Prisma Schema for NEXO CRM
+// Multi-tenant architecture with Row Level Security (RLS)
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================
+// TENANT MANAGEMENT
+// ============================================
+
+model Account {
+  id        String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name      String   @db.VarChar(255)
+  slug      String   @unique @db.VarChar(100)
+  settings  Json     @default("{}")
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  roles         Role[]
+  users         User[]
+  clients       Client[]
+  suppliers     Supplier[]
+  employees     Employee[]
+  professionals Professional[]
+
+  @@map("accounts")
+}
+
+// ============================================
+// USER MANAGEMENT & AUTHENTICATION
+// ============================================
+
+model Role {
+  id          String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  accountId   String   @map("account_id") @db.Uuid
+  name        String   @db.VarChar(100)
+  permissions Json     @default("[]")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  account Account    @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  users   UserRole[]
+
+  @@unique([accountId, name])
+  @@index([accountId])
+  @@map("roles")
+}
+
+model User {
+  id            String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  accountId     String    @map("account_id") @db.Uuid
+  email         String    @unique @db.VarChar(255)
+  username      String    @unique @db.VarChar(100)
+  passwordHash  String    @map("password_hash") @db.VarChar(255)
+  firstName     String?   @map("first_name") @db.VarChar(100)
+  lastName      String?   @map("last_name") @db.VarChar(100)
+  active        Boolean   @default(true)
+  emailVerified Boolean   @default(false) @map("email_verified")
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  lastLoginAt   DateTime? @map("last_login_at") @db.Timestamptz(6)
+
+  // Relations
+  account       Account        @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  roles         UserRole[]
+  clients       Client[]
+  employees     Employee[]
+  professionals Professional[]
+
+  @@index([accountId])
+  @@index([email])
+  @@map("users")
+}
+
+model UserRole {
+  userId String @map("user_id") @db.Uuid
+  roleId String @map("role_id") @db.Uuid
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+  @@map("user_roles")
+}
+
+// ============================================
+// CRM ENTITIES
+// ============================================
+
+model Client {
+  id        String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  accountId String   @map("account_id") @db.Uuid
+  name      String   @db.VarChar(255)
+  email     String?  @db.VarChar(255)
+  phone     String?  @db.VarChar(50)
+  company   String?  @db.VarChar(255)
+  address   String?  @db.Text
+  status    String   @default("active") @db.VarChar(50)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  createdBy String?  @map("created_by") @db.Uuid
+
+  // Relations
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  creator User?   @relation(fields: [createdBy], references: [id])
+
+  @@index([accountId])
+  @@map("clients")
+}
+
+model Supplier {
+  id        String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  accountId String   @map("account_id") @db.Uuid
+  name      String   @db.VarChar(255)
+  email     String?  @db.VarChar(255)
+  phone     String?  @db.VarChar(50)
+  company   String?  @db.VarChar(255)
+  address   String?  @db.Text
+  status    String   @default("active") @db.VarChar(50)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId])
+  @@map("suppliers")
+}
+
+model Employee {
+  id         String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  accountId  String    @map("account_id") @db.Uuid
+  userId     String?   @map("user_id") @db.Uuid
+  name       String    @db.VarChar(255)
+  email      String?   @db.VarChar(255)
+  phone      String?   @db.VarChar(50)
+  position   String?   @db.VarChar(100)
+  department String?   @db.VarChar(100)
+  hireDate   DateTime? @map("hire_date") @db.Date
+  status     String    @default("active") @db.VarChar(50)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  user    User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([accountId])
+  @@map("employees")
+}
+
+model Professional {
+  id         String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  accountId  String   @map("account_id") @db.Uuid
+  userId     String?  @map("user_id") @db.Uuid
+  name       String   @db.VarChar(255)
+  email      String?  @db.VarChar(255)
+  phone      String?  @db.VarChar(50)
+  specialty  String?  @db.VarChar(100)
+  hourlyRate Decimal? @map("hourly_rate") @db.Decimal(10, 2)
+  status     String   @default("active") @db.VarChar(50)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  user    User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([accountId])
+  @@map("professionals")
+}
+
+// ============================================
+// MIGRATION TRACKING (Custom)
+// ============================================
+
+model MigrationHistory {
+  id           Int      @id @default(autoincrement())
+  version      String   @unique @db.VarChar(50)
+  name         String   @db.VarChar(255)
+  description  String?  @db.Text
+  checksum     String   @db.VarChar(64)
+  appliedAt    DateTime @default(now()) @map("applied_at") @db.Timestamptz(6)
+  executionMs  Int      @map("execution_ms")
+  success      Boolean  @default(true)
+  errorMessage String?  @map("error_message") @db.Text
+
+  @@map("migration_history")
+}

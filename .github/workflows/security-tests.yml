@@ -1,0 +1,123 @@
+name: Security Integration Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+jobs:
+  security-tests:
+    name: Multi-Tenant Security & RBAC Tests
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: nexo_crm
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install dependencies
+        working-directory: ./nexo-prj
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup database
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/nexo_crm
+        working-directory: ./nexo-prj
+        run: |
+          # Generate Prisma client
+          pnpm prisma generate
+          
+          # Run migrations
+          pnpm prisma migrate deploy
+
+      - name: Start Auth Service
+        working-directory: ./nexo-prj
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/nexo_crm
+          JWT_SECRET: test-jwt-secret-for-ci-32-characters-long
+          REFRESH_SECRET: test-refresh-secret-for-ci-32-characters
+          PORT: 3001
+        run: |
+          pnpm nx serve auth-service > /tmp/auth-service.log 2>&1 &
+          echo $! > /tmp/auth-service.pid
+          
+          # Wait for service to be ready
+          timeout 60 bash -c 'until curl -sf http://localhost:3001/api > /dev/null; do sleep 1; done'
+
+      - name: Start CRM Service
+        working-directory: ./nexo-prj
+        env:
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_NAME: nexo_crm
+          DB_USER: nexo_app
+          DB_PASSWORD: nexo_app_password
+          JWT_SECRET: test-jwt-secret-for-ci-32-characters-long
+          PORT: 3003
+        run: |
+          pnpm nx serve crm-service > /tmp/crm-service.log 2>&1 &
+          echo $! > /tmp/crm-service.pid
+          
+          # Wait for service to be ready
+          timeout 60 bash -c 'until curl -sf http://localhost:3003/api > /dev/null; do sleep 1; done'
+
+      - name: Run Security Integration Tests
+        env:
+          AUTH_URL: http://localhost:3001
+          CRM_URL: http://localhost:3003
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_NAME: nexo_crm
+          DB_USER: postgres
+        run: |
+          chmod +x test-security-integration.sh
+          ./test-security-integration.sh
+
+      - name: Upload test logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: service-logs
+          path: |
+            /tmp/auth-service.log
+            /tmp/crm-service.log
+          retention-days: 7
+
+      - name: Cleanup services
+        if: always()
+        run: |
+          if [ -f /tmp/auth-service.pid ]; then
+            kill $(cat /tmp/auth-service.pid) || true
+          fi
+          if [ -f /tmp/crm-service.pid ]; then
+            kill $(cat /tmp/crm-service.pid) || true
+          fi

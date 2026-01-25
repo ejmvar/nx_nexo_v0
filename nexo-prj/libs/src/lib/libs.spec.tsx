@@ -1,10 +1,10 @@
 import { render } from '@testing-library/react';
 
-import NexoPrjSharedUi from './libs';
+import { Button } from './components';
 
-describe('NexoPrjSharedUi', () => {
+describe('Button', () => {
   it('should render successfully', () => {
-    const { baseElement } = render(<NexoPrjSharedUi />);
+    const { baseElement } = render(<Button>Click me</Button>);
     expect(baseElement).toBeTruthy();
   });
 });
