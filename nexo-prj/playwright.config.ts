@@ -73,13 +73,13 @@ export default defineConfig({
   webServer: [
     {
       command: 'pnpm nx serve auth-service',
-      url: 'http://localhost:3001/health',
+      url: 'http://localhost:3001/api/auth/health',
       timeout: 60 * 1000,
       reuseExistingServer: true,
     },
     {
-      command: 'pnpm nx serve gateway-service',
-      url: 'http://localhost:3002/health',
+      command: 'pnpm nx serve api-gateway',
+      url: 'http://localhost:3002/api/health',
       timeout: 60 * 1000,
       reuseExistingServer: true,
     },

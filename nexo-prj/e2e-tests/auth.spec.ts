@@ -30,7 +30,7 @@ test.describe('Authentication API', () => {
   });
 
   test('should fail to register with duplicate email', async ({ request }) => {
-    const response = await request.post('/auth/register', {
+    const response = await request.post('/api/auth/register', {
       data: {
         email: testUser.email,
         password: testUser.password,
@@ -55,7 +55,7 @@ test.describe('Authentication API', () => {
   });
 
   test('should fail to login with invalid credentials', async ({ request }) => {
-    const response = await request.post('/auth/login', {
+    const response = await request.post('/api/auth/login', {
       data: {
         email: testUser.email,
         password: 'WrongPassword123!',
@@ -82,7 +82,7 @@ test.describe('Authentication API', () => {
   });
 
   test('should fail to access profile without token', async ({ request }) => {
-    const response = await request.get('/auth/profile');
+    const response = await request.get('/api/auth/profile');
     
     expect(response.ok()).toBeFalsy();
     expect(response.status()).toBe(401);
@@ -127,7 +127,7 @@ test.describe('Authentication API', () => {
     ];
     
     for (const { password, desc } of weakPasswords) {
-      const response = await request.post('/auth/register', {
+      const response = await request.post('/api/auth/register', {
         data: {
           email: `weak-${Date.now()}@test.com`,
           password,
@@ -153,7 +153,7 @@ test.describe('JWT Token Behavior', () => {
   });
 
   test('should accept Bearer token in Authorization header', async ({ request }) => {
-    const response = await request.get('/auth/profile', {
+    const response = await request.get('/api/auth/profile', {
       headers: { 'Authorization': `Bearer ${testToken}` },
     });
     
@@ -161,7 +161,7 @@ test.describe('JWT Token Behavior', () => {
   });
 
   test('should reject token without Bearer prefix', async ({ request }) => {
-    const response = await request.get('/auth/profile', {
+    const response = await request.get('/api/auth/profile', {
       headers: { 'Authorization': testToken },
     });
     
