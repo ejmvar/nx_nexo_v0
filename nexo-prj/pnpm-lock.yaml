@@ -607,8 +607,6 @@ importers:
         specifier: ^19.0.0
         version: 19.2.3(react@19.2.3)
 
-  apps/nexo-prj-e2e: {}
-
   apps/nexo-professionals:
     dependencies:
       next:

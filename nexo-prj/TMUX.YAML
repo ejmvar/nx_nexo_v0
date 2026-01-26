@@ -1,0 +1,23 @@
+
+
+# From nexo-prj directory
+pnpm nx reset  # Clear NX cache
+cd nexo-prj && pnpm install
+
+# Serve applications
+- window: authS
+pnpm nx serve auth-service 2>&1 tee  auth-service
+pnpm nx serve crm-service 2>&1 tee   crm-service
+pnpm nx serve api-gateway 2>&1 tee   api-gateway
+
+# Build
+pnpm nx build crm-service 2>&1 tee
+
+# Test
+pnpm nx test crm-service 2>&1 tee
+
+# Lint
+pnpm nx lint crm-service 2>&1 tee
+
+# Run multiple
+pnpm nx run-many --target=build --all 2>&1 tee
