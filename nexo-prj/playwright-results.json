@@ -1,0 +1,1989 @@
+{
+  "config": {
+    "configFile": "/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/playwright.config.ts",
+    "rootDir": "/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/e2e-tests",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {},
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "html",
+        {
+          "outputFolder": "playwright-report"
+        }
+      ],
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "playwright-results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "api-auth",
+        "name": "api-auth",
+        "testDir": "/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/e2e-tests",
+        "testIgnore": [],
+        "testMatch": [
+          "/auth\\.spec\\.ts/"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "api-crm-crud",
+        "name": "api-crm-crud",
+        "testDir": "/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/e2e-tests",
+        "testIgnore": [],
+        "testMatch": [
+          "/crm-crud\\.spec\\.ts/"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "api-rbac",
+        "name": "api-rbac",
+        "testDir": "/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/e2e-tests",
+        "testIgnore": [],
+        "testMatch": [
+          "/rbac\\.spec\\.ts/"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "api-audit",
+        "name": "api-audit",
+        "testDir": "/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/e2e-tests",
+        "testIgnore": [],
+        "testMatch": [
+          "/audit\\.spec\\.ts/"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "api-full-lifecycle",
+        "name": "api-full-lifecycle",
+        "testDir": "/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/e2e-tests",
+        "testIgnore": [],
+        "testMatch": [
+          "/full-lifecycle\\.spec\\.ts/"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.57.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "rbac.spec.ts",
+      "file": "rbac.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "RBAC Permission Enforcement",
+          "file": "rbac.spec.ts",
+          "line": 8,
+          "column": 6,
+          "specs": [],
+          "suites": [
+            {
+              "title": "Admin Role (Full Access)",
+              "file": "rbac.spec.ts",
+              "line": 50,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "Admin should have full read access to all entities",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-rbac",
+                      "projectName": "api-rbac",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "f2d4bd4479eae63a7f57-35c53a8b65cd64367f6e",
+                  "file": "rbac.spec.ts",
+                  "line": 51,
+                  "column": 9
+                },
+                {
+                  "title": "Admin should have full write access",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-rbac",
+                      "projectName": "api-rbac",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "f2d4bd4479eae63a7f57-2a144dcee3f66ae9f870",
+                  "file": "rbac.spec.ts",
+                  "line": 70,
+                  "column": 9
+                },
+                {
+                  "title": "Admin should have delete access",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-rbac",
+                      "projectName": "api-rbac",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "f2d4bd4479eae63a7f57-59855757daf650a0a9ab",
+                  "file": "rbac.spec.ts",
+                  "line": 91,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "Manager Role (Client/Project/Task Management)",
+              "file": "rbac.spec.ts",
+              "line": 119,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "Manager should have read access to clients",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-rbac",
+                      "projectName": "api-rbac",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "f2d4bd4479eae63a7f57-aaaa4049b1a23d25410f",
+                  "file": "rbac.spec.ts",
+                  "line": 131,
+                  "column": 9
+                },
+                {
+                  "title": "Manager should have write access to projects",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-rbac",
+                      "projectName": "api-rbac",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "f2d4bd4479eae63a7f57-2b951d24c5202bed8549",
+                  "file": "rbac.spec.ts",
+                  "line": 145,
+                  "column": 9
+                },
+                {
+                  "title": "Manager should NOT have access to employee salaries (if implemented)",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-rbac",
+                      "projectName": "api-rbac",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "f2d4bd4479eae63a7f57-67d35b276de4e6006be4",
+                  "file": "rbac.spec.ts",
+                  "line": 167,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "Employee Role (Limited Access)",
+              "file": "rbac.spec.ts",
+              "line": 177,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "Employee should have read access to projects",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-rbac",
+                      "projectName": "api-rbac",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "f2d4bd4479eae63a7f57-b2f94e57b9702db6b192",
+                  "file": "rbac.spec.ts",
+                  "line": 186,
+                  "column": 9
+                },
+                {
+                  "title": "Employee should NOT have write access to clients",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-rbac",
+                      "projectName": "api-rbac",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "f2d4bd4479eae63a7f57-c062ccd4506ab6cbe55f",
+                  "file": "rbac.spec.ts",
+                  "line": 198,
+                  "column": 9
+                },
+                {
+                  "title": "Employee should NOT have delete access",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-rbac",
+                      "projectName": "api-rbac",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "f2d4bd4479eae63a7f57-a1d86a06a0577d3c2fd1",
+                  "file": "rbac.spec.ts",
+                  "line": 214,
+                  "column": 9
+                },
+                {
+                  "title": "Employee should have write access to tasks",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-rbac",
+                      "projectName": "api-rbac",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "f2d4bd4479eae63a7f57-0a7933967b26f3e612f5",
+                  "file": "rbac.spec.ts",
+                  "line": 223,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "Client Role (Read-Only Access)",
+              "file": "rbac.spec.ts",
+              "line": 250,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "Client should have read access to projects",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-rbac",
+                      "projectName": "api-rbac",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "f2d4bd4479eae63a7f57-d7b111c556d96d4cc8dd",
+                  "file": "rbac.spec.ts",
+                  "line": 259,
+                  "column": 9
+                },
+                {
+                  "title": "Client should have read access to tasks",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-rbac",
+                      "projectName": "api-rbac",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "f2d4bd4479eae63a7f57-57febaa0277bb643cff7",
+                  "file": "rbac.spec.ts",
+                  "line": 271,
+                  "column": 9
+                },
+                {
+                  "title": "Client should NOT have write access to projects",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-rbac",
+                      "projectName": "api-rbac",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "f2d4bd4479eae63a7f57-7b78263184e7aac29985",
+                  "file": "rbac.spec.ts",
+                  "line": 283,
+                  "column": 9
+                },
+                {
+                  "title": "Client should NOT have access to employees",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-rbac",
+                      "projectName": "api-rbac",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "f2d4bd4479eae63a7f57-cb50b40ff99b571cd506",
+                  "file": "rbac.spec.ts",
+                  "line": 301,
+                  "column": 9
+                },
+                {
+                  "title": "Client should NOT have access to suppliers",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-rbac",
+                      "projectName": "api-rbac",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "f2d4bd4479eae63a7f57-1e970b0e1522134597da",
+                  "file": "rbac.spec.ts",
+                  "line": 310,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "Unauthorized Access",
+              "file": "rbac.spec.ts",
+              "line": 324,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "should deny access without token",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-rbac",
+                      "projectName": "api-rbac",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "f2d4bd4479eae63a7f57-5152b5ed017d845f4684",
+                  "file": "rbac.spec.ts",
+                  "line": 325,
+                  "column": 9
+                },
+                {
+                  "title": "should deny access with invalid token",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-rbac",
+                      "projectName": "api-rbac",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "f2d4bd4479eae63a7f57-fc5c63ab2bc063e4cb31",
+                  "file": "rbac.spec.ts",
+                  "line": 339,
+                  "column": 9
+                },
+                {
+                  "title": "should deny access with expired token",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-rbac",
+                      "projectName": "api-rbac",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "f2d4bd4479eae63a7f57-fdc47b9af6b89e9c7a3c",
+                  "file": "rbac.spec.ts",
+                  "line": 347,
+                  "column": 9
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "crm-crud.spec.ts",
+      "file": "crm-crud.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "CRM CRUD Operations",
+          "file": "crm-crud.spec.ts",
+          "line": 8,
+          "column": 6,
+          "specs": [],
+          "suites": [
+            {
+              "title": "Clients Management",
+              "file": "crm-crud.spec.ts",
+              "line": 21,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "should create a new client",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-crm-crud",
+                      "projectName": "api-crm-crud",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "4c93bece4ebdccd824f2-5af70bfd10c455b82017",
+                  "file": "crm-crud.spec.ts",
+                  "line": 22,
+                  "column": 9
+                },
+                {
+                  "title": "should retrieve all clients",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-crm-crud",
+                      "projectName": "api-crm-crud",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "4c93bece4ebdccd824f2-5451811d38d9b2f62641",
+                  "file": "crm-crud.spec.ts",
+                  "line": 49,
+                  "column": 9
+                },
+                {
+                  "title": "should retrieve client by ID",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-crm-crud",
+                      "projectName": "api-crm-crud",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "4c93bece4ebdccd824f2-0f62ff374e4745b5a487",
+                  "file": "crm-crud.spec.ts",
+                  "line": 61,
+                  "column": 9
+                },
+                {
+                  "title": "should update client",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-crm-crud",
+                      "projectName": "api-crm-crud",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "4c93bece4ebdccd824f2-c77605dcf45cd5f99daa",
+                  "file": "crm-crud.spec.ts",
+                  "line": 72,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "Employees Management",
+              "file": "crm-crud.spec.ts",
+              "line": 95,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "should create a new employee",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-crm-crud",
+                      "projectName": "api-crm-crud",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "4c93bece4ebdccd824f2-2027ca3f6581eee76267",
+                  "file": "crm-crud.spec.ts",
+                  "line": 96,
+                  "column": 9
+                },
+                {
+                  "title": "should retrieve all employees",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-crm-crud",
+                      "projectName": "api-crm-crud",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "4c93bece4ebdccd824f2-b93a54fe59efae5cd65d",
+                  "file": "crm-crud.spec.ts",
+                  "line": 123,
+                  "column": 9
+                },
+                {
+                  "title": "should retrieve employee by ID",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-crm-crud",
+                      "projectName": "api-crm-crud",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "4c93bece4ebdccd824f2-78733de655c6e20f47a4",
+                  "file": "crm-crud.spec.ts",
+                  "line": 134,
+                  "column": 9
+                },
+                {
+                  "title": "should update employee",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-crm-crud",
+                      "projectName": "api-crm-crud",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "4c93bece4ebdccd824f2-a7d0de1542c2f18b65d8",
+                  "file": "crm-crud.spec.ts",
+                  "line": 145,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "Suppliers Management",
+              "file": "crm-crud.spec.ts",
+              "line": 167,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "should create a new supplier",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-crm-crud",
+                      "projectName": "api-crm-crud",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "4c93bece4ebdccd824f2-605dfc7f7ffea7142233",
+                  "file": "crm-crud.spec.ts",
+                  "line": 168,
+                  "column": 9
+                },
+                {
+                  "title": "should retrieve all suppliers",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-crm-crud",
+                      "projectName": "api-crm-crud",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "4c93bece4ebdccd824f2-d36050512c2c006c5b9c",
+                  "file": "crm-crud.spec.ts",
+                  "line": 195,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "Professionals Management",
+              "file": "crm-crud.spec.ts",
+              "line": 211,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "should create a new professional",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-crm-crud",
+                      "projectName": "api-crm-crud",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "4c93bece4ebdccd824f2-ed4d242670c02ae5cfe9",
+                  "file": "crm-crud.spec.ts",
+                  "line": 212,
+                  "column": 9
+                },
+                {
+                  "title": "should retrieve all professionals",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-crm-crud",
+                      "projectName": "api-crm-crud",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "4c93bece4ebdccd824f2-819dee4c0bb16403e6e5",
+                  "file": "crm-crud.spec.ts",
+                  "line": 237,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "Projects Management",
+              "file": "crm-crud.spec.ts",
+              "line": 253,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "should create a new project",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-crm-crud",
+                      "projectName": "api-crm-crud",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "4c93bece4ebdccd824f2-4ef28676fb76382fad9b",
+                  "file": "crm-crud.spec.ts",
+                  "line": 254,
+                  "column": 9
+                },
+                {
+                  "title": "should retrieve all projects",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-crm-crud",
+                      "projectName": "api-crm-crud",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "4c93bece4ebdccd824f2-84bc1061e6b9d80d30e1",
+                  "file": "crm-crud.spec.ts",
+                  "line": 280,
+                  "column": 9
+                },
+                {
+                  "title": "should retrieve project by ID",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-crm-crud",
+                      "projectName": "api-crm-crud",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "4c93bece4ebdccd824f2-ed1f764edad21c90ed77",
+                  "file": "crm-crud.spec.ts",
+                  "line": 291,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "Tasks Management",
+              "file": "crm-crud.spec.ts",
+              "line": 307,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "should create a new task",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-crm-crud",
+                      "projectName": "api-crm-crud",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "4c93bece4ebdccd824f2-8a6e033932c3d142efa9",
+                  "file": "crm-crud.spec.ts",
+                  "line": 308,
+                  "column": 9
+                },
+                {
+                  "title": "should retrieve all tasks",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-crm-crud",
+                      "projectName": "api-crm-crud",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "4c93bece4ebdccd824f2-1686df14bc1b254a50fd",
+                  "file": "crm-crud.spec.ts",
+                  "line": 334,
+                  "column": 9
+                },
+                {
+                  "title": "should retrieve task by ID",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-crm-crud",
+                      "projectName": "api-crm-crud",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "4c93bece4ebdccd824f2-87efbc3650e4db731c8c",
+                  "file": "crm-crud.spec.ts",
+                  "line": 345,
+                  "column": 9
+                },
+                {
+                  "title": "should update task status",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-crm-crud",
+                      "projectName": "api-crm-crud",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "4c93bece4ebdccd824f2-4b0c4755bb4e130d663e",
+                  "file": "crm-crud.spec.ts",
+                  "line": 356,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "Delete Operations",
+              "file": "crm-crud.spec.ts",
+              "line": 377,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "should delete task",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-crm-crud",
+                      "projectName": "api-crm-crud",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "4c93bece4ebdccd824f2-523238779c6f749dd699",
+                  "file": "crm-crud.spec.ts",
+                  "line": 378,
+                  "column": 9
+                },
+                {
+                  "title": "should delete project",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-crm-crud",
+                      "projectName": "api-crm-crud",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "4c93bece4ebdccd824f2-08434c9d38e0ec8dd794",
+                  "file": "crm-crud.spec.ts",
+                  "line": 386,
+                  "column": 9
+                },
+                {
+                  "title": "should delete professional",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-crm-crud",
+                      "projectName": "api-crm-crud",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "4c93bece4ebdccd824f2-24918f33b9c0f8198ca3",
+                  "file": "crm-crud.spec.ts",
+                  "line": 394,
+                  "column": 9
+                },
+                {
+                  "title": "should delete supplier",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-crm-crud",
+                      "projectName": "api-crm-crud",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "4c93bece4ebdccd824f2-7a66469a259122b55208",
+                  "file": "crm-crud.spec.ts",
+                  "line": 402,
+                  "column": 9
+                },
+                {
+                  "title": "should delete employee",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-crm-crud",
+                      "projectName": "api-crm-crud",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "4c93bece4ebdccd824f2-2657475d2a5878c16d8f",
+                  "file": "crm-crud.spec.ts",
+                  "line": 410,
+                  "column": 9
+                },
+                {
+                  "title": "should delete client",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-crm-crud",
+                      "projectName": "api-crm-crud",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "4c93bece4ebdccd824f2-5db6be4107132938776e",
+                  "file": "crm-crud.spec.ts",
+                  "line": 418,
+                  "column": 9
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "auth.spec.ts",
+      "file": "auth.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Authentication API",
+          "file": "auth.spec.ts",
+          "line": 8,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should register a new user successfully",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api-auth",
+                  "projectName": "api-auth",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-a1a3fd9b554f1db01a5e",
+              "file": "auth.spec.ts",
+              "line": 19,
+              "column": 7
+            },
+            {
+              "title": "should fail to register with duplicate email",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api-auth",
+                  "projectName": "api-auth",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-66aa89a92588500d71f1",
+              "file": "auth.spec.ts",
+              "line": 32,
+              "column": 7
+            },
+            {
+              "title": "should login with valid credentials",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api-auth",
+                  "projectName": "api-auth",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-a4a6ab9005d2feb2eba1",
+              "file": "auth.spec.ts",
+              "line": 47,
+              "column": 7
+            },
+            {
+              "title": "should fail to login with invalid credentials",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api-auth",
+                  "projectName": "api-auth",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-21af4dffdaa160bfddbf",
+              "file": "auth.spec.ts",
+              "line": 57,
+              "column": 7
+            },
+            {
+              "title": "should get user profile with valid token",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api-auth",
+                  "projectName": "api-auth",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-6d73c7b82aa711142526",
+              "file": "auth.spec.ts",
+              "line": 69,
+              "column": 7
+            },
+            {
+              "title": "should fail to access profile without token",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api-auth",
+                  "projectName": "api-auth",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-12d4e39b417817e27872",
+              "file": "auth.spec.ts",
+              "line": 84,
+              "column": 7
+            },
+            {
+              "title": "should fail to access profile with invalid token",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api-auth",
+                  "projectName": "api-auth",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-f14ade514840297c804d",
+              "file": "auth.spec.ts",
+              "line": 91,
+              "column": 7
+            },
+            {
+              "title": "should update user profile",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api-auth",
+                  "projectName": "api-auth",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-fa25e03fa91bf925070a",
+              "file": "auth.spec.ts",
+              "line": 102,
+              "column": 7
+            },
+            {
+              "title": "should validate password requirements",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api-auth",
+                  "projectName": "api-auth",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-3b311104c96a28a701f4",
+              "file": "auth.spec.ts",
+              "line": 122,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "JWT Token Behavior",
+          "file": "auth.spec.ts",
+          "line": 146,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should accept Bearer token in Authorization header",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api-auth",
+                  "projectName": "api-auth",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-71e528e831f419666357",
+              "file": "auth.spec.ts",
+              "line": 155,
+              "column": 7
+            },
+            {
+              "title": "should reject token without Bearer prefix",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api-auth",
+                  "projectName": "api-auth",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-746a5072ffd4ad9c830e",
+              "file": "auth.spec.ts",
+              "line": 163,
+              "column": 7
+            },
+            {
+              "title": "should reject malformed tokens",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api-auth",
+                  "projectName": "api-auth",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-969d6901e60930de6c05",
+              "file": "auth.spec.ts",
+              "line": 171,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "audit.spec.ts",
+      "file": "audit.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Audit Logging System",
+          "file": "audit.spec.ts",
+          "line": 8,
+          "column": 6,
+          "specs": [],
+          "suites": [
+            {
+              "title": "CRUD Operations Logging",
+              "file": "audit.spec.ts",
+              "line": 32,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "should log client creation",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-audit",
+                      "projectName": "api-audit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "45efdff6a4d2e1f7e786-a82d553487220e3de0fc",
+                  "file": "audit.spec.ts",
+                  "line": 33,
+                  "column": 9
+                },
+                {
+                  "title": "should log client read operation",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-audit",
+                      "projectName": "api-audit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "45efdff6a4d2e1f7e786-6a1da6dc5f64583b9881",
+                  "file": "audit.spec.ts",
+                  "line": 53,
+                  "column": 9
+                },
+                {
+                  "title": "should log client update",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-audit",
+                      "projectName": "api-audit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "45efdff6a4d2e1f7e786-cf9ac58a4cf3adcb6e93",
+                  "file": "audit.spec.ts",
+                  "line": 63,
+                  "column": 9
+                },
+                {
+                  "title": "should log client deletion",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-audit",
+                      "projectName": "api-audit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "45efdff6a4d2e1f7e786-4ed818d63efed1303611",
+                  "file": "audit.spec.ts",
+                  "line": 78,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "Audit Log Access Control",
+              "file": "audit.spec.ts",
+              "line": 89,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "Admin should be able to access audit logs",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-audit",
+                      "projectName": "api-audit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "45efdff6a4d2e1f7e786-50bb79939ce4c6e004f7",
+                  "file": "audit.spec.ts",
+                  "line": 90,
+                  "column": 9
+                },
+                {
+                  "title": "Non-admin users should NOT access audit logs",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-audit",
+                      "projectName": "api-audit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "45efdff6a4d2e1f7e786-ac53b780c742f099b236",
+                  "file": "audit.spec.ts",
+                  "line": 98,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "Audit Log Content Validation",
+              "file": "audit.spec.ts",
+              "line": 112,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "logged entries should contain required metadata",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-audit",
+                      "projectName": "api-audit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "45efdff6a4d2e1f7e786-fad05167efe355f65ee4",
+                  "file": "audit.spec.ts",
+                  "line": 113,
+                  "column": 9
+                },
+                {
+                  "title": "audit logs should capture changes in JSONB format",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-audit",
+                      "projectName": "api-audit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "45efdff6a4d2e1f7e786-ba560a8b9777595b4459",
+                  "file": "audit.spec.ts",
+                  "line": 131,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "Failed Operations Logging",
+              "file": "audit.spec.ts",
+              "line": 140,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "should log failed operations with error messages",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-audit",
+                      "projectName": "api-audit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "45efdff6a4d2e1f7e786-566e22754d8d6ec9a062",
+                  "file": "audit.spec.ts",
+                  "line": 141,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "Audit Retention",
+              "file": "audit.spec.ts",
+              "line": 159,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "cleanup function should be available",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-audit",
+                      "projectName": "api-audit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "45efdff6a4d2e1f7e786-071e7db33095d365ba97",
+                  "file": "audit.spec.ts",
+                  "line": 160,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "Audit Trail Queries",
+              "file": "audit.spec.ts",
+              "line": 169,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "should support querying by user",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-audit",
+                      "projectName": "api-audit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "45efdff6a4d2e1f7e786-2c4888b6fd01ebf612e7",
+                  "file": "audit.spec.ts",
+                  "line": 170,
+                  "column": 9
+                },
+                {
+                  "title": "should support querying by entity type",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-audit",
+                      "projectName": "api-audit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "45efdff6a4d2e1f7e786-146067771c39650f57af",
+                  "file": "audit.spec.ts",
+                  "line": 175,
+                  "column": 9
+                },
+                {
+                  "title": "should support querying by action",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-audit",
+                      "projectName": "api-audit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "45efdff6a4d2e1f7e786-051433d0ceb679787164",
+                  "file": "audit.spec.ts",
+                  "line": 180,
+                  "column": 9
+                },
+                {
+                  "title": "should support querying by date range",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-audit",
+                      "projectName": "api-audit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "45efdff6a4d2e1f7e786-65a195101508a2527952",
+                  "file": "audit.spec.ts",
+                  "line": 185,
+                  "column": 9
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "full-lifecycle.spec.ts",
+      "file": "full-lifecycle.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Full System Lifecycle",
+          "file": "full-lifecycle.spec.ts",
+          "line": 8,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Step 1: Admin registers and sets up company",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api-full-lifecycle",
+                  "projectName": "api-full-lifecycle",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "2639a88ddc4afd209b13-760d70dd6f81e406f4ba",
+              "file": "full-lifecycle.spec.ts",
+              "line": 30,
+              "column": 7
+            },
+            {
+              "title": "Step 2: Admin creates employee records",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api-full-lifecycle",
+                  "projectName": "api-full-lifecycle",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "2639a88ddc4afd209b13-fa650993d3a452ce4c11",
+              "file": "full-lifecycle.spec.ts",
+              "line": 57,
+              "column": 7
+            },
+            {
+              "title": "Step 3: Admin creates supplier for project resources",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api-full-lifecycle",
+                  "projectName": "api-full-lifecycle",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "2639a88ddc4afd209b13-4077bdb4c6164003266b",
+              "file": "full-lifecycle.spec.ts",
+              "line": 97,
+              "column": 7
+            },
+            {
+              "title": "Step 4: Admin adds external professional consultant",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api-full-lifecycle",
+                  "projectName": "api-full-lifecycle",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "2639a88ddc4afd209b13-021ad81f358718dcd0c0",
+              "file": "full-lifecycle.spec.ts",
+              "line": 118,
+              "column": 7
+            },
+            {
+              "title": "Step 5: Manager registers and creates project",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api-full-lifecycle",
+                  "projectName": "api-full-lifecycle",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "2639a88ddc4afd209b13-37464a67c72eee5909e6",
+              "file": "full-lifecycle.spec.ts",
+              "line": 137,
+              "column": 7
+            },
+            {
+              "title": "Step 6: Manager creates project tasks",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api-full-lifecycle",
+                  "projectName": "api-full-lifecycle",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "2639a88ddc4afd209b13-2ae3ecbefb2679f2188d",
+              "file": "full-lifecycle.spec.ts",
+              "line": 182,
+              "column": 7
+            },
+            {
+              "title": "Step 7: Employee registers and views assigned tasks",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api-full-lifecycle",
+                  "projectName": "api-full-lifecycle",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "2639a88ddc4afd209b13-e9d9417cfa97c366c87d",
+              "file": "full-lifecycle.spec.ts",
+              "line": 233,
+              "column": 7
+            },
+            {
+              "title": "Step 8: Employee updates task status",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api-full-lifecycle",
+                  "projectName": "api-full-lifecycle",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "2639a88ddc4afd209b13-00d372624451995fb602",
+              "file": "full-lifecycle.spec.ts",
+              "line": 257,
+              "column": 7
+            },
+            {
+              "title": "Step 9: Manager reviews project progress",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api-full-lifecycle",
+                  "projectName": "api-full-lifecycle",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "2639a88ddc4afd209b13-2fce0cb097d936b049f6",
+              "file": "full-lifecycle.spec.ts",
+              "line": 278,
+              "column": 7
+            },
+            {
+              "title": "Step 10: Admin generates reports and reviews audit logs",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api-full-lifecycle",
+                  "projectName": "api-full-lifecycle",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "2639a88ddc4afd209b13-523ad361d33e7271bf8f",
+              "file": "full-lifecycle.spec.ts",
+              "line": 302,
+              "column": 7
+            },
+            {
+              "title": "Step 11: Manager marks project as completed",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api-full-lifecycle",
+                  "projectName": "api-full-lifecycle",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "2639a88ddc4afd209b13-2f394c6a6b7972eeda82",
+              "file": "full-lifecycle.spec.ts",
+              "line": 318,
+              "column": 7
+            },
+            {
+              "title": "Step 12: Verify all entities were created successfully",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api-full-lifecycle",
+                  "projectName": "api-full-lifecycle",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "2639a88ddc4afd209b13-7d9a1558fd418ada2726",
+              "file": "full-lifecycle.spec.ts",
+              "line": 341,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-01-26T15:07:34.114Z",
+    "duration": 566.8820000000001,
+    "expected": 0,
+    "skipped": 81,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}
