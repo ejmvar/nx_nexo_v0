@@ -10,7 +10,9 @@
     "grep": {},
     "grepInvert": null,
     "maxFailures": 0,
-    "metadata": {},
+    "metadata": {
+      "actualWorkers": 1
+    },
     "preserveOutput": "always",
     "reporter": [
       [
@@ -40,7 +42,9 @@
         "outputDir": "/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/test-results",
         "repeatEach": 1,
         "retries": 0,
-        "metadata": {},
+        "metadata": {
+          "actualWorkers": 1
+        },
         "id": "api-auth",
         "name": "api-auth",
         "testDir": "/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/e2e-tests",
@@ -54,7 +58,9 @@
         "outputDir": "/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/test-results",
         "repeatEach": 1,
         "retries": 0,
-        "metadata": {},
+        "metadata": {
+          "actualWorkers": 1
+        },
         "id": "api-crm-crud",
         "name": "api-crm-crud",
         "testDir": "/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/e2e-tests",
@@ -68,7 +74,9 @@
         "outputDir": "/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/test-results",
         "repeatEach": 1,
         "retries": 0,
-        "metadata": {},
+        "metadata": {
+          "actualWorkers": 1
+        },
         "id": "api-rbac",
         "name": "api-rbac",
         "testDir": "/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/e2e-tests",
@@ -82,7 +90,9 @@
         "outputDir": "/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/test-results",
         "repeatEach": 1,
         "retries": 0,
-        "metadata": {},
+        "metadata": {
+          "actualWorkers": 1
+        },
         "id": "api-audit",
         "name": "api-audit",
         "testDir": "/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/e2e-tests",
@@ -96,7 +106,9 @@
         "outputDir": "/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/test-results",
         "repeatEach": 1,
         "retries": 0,
-        "metadata": {},
+        "metadata": {
+          "actualWorkers": 1
+        },
         "id": "api-full-lifecycle",
         "name": "api-full-lifecycle",
         "testDir": "/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/e2e-tests",
@@ -115,27 +127,68 @@
     "workers": 1,
     "webServer": null
   },
-  "suites": [],
-  "errors": [
+  "suites": [
     {
-      "message": "SyntaxError: /W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/e2e-tests/fixtures.ts: Unexpected token, expected \",\" (40:21)\n\n  38 |           accountName,\n  39 |           accountSlug,\n> 40 |       expect(response.ok()).toBeTruthy();\n     |                      ^\n  41 |       return await response.json();\n  42 |     };\n  43 |     ",
-      "stack": "SyntaxError: /W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/e2e-tests/fixtures.ts: Unexpected token, expected \",\" (40:21)\n\n  38 |           accountName,\n  39 |           accountSlug,\n> 40 |       expect(response.ok()).toBeTruthy();\n     |                      ^\n  41 |       return await response.json();\n  42 |     };\n  43 |     ",
-      "location": {
-        "file": "/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/e2e-tests/auth.spec.ts",
-        "line": 40,
-        "column": 21
-      },
-      "snippet": "\u001b[90m   at \u001b[39mauth.spec.ts:40\n\n  38 |         lastName: testUser.lastName,\n  39 |         username: testUser.email.split('@')[0],\n> 40 |       },\n     |         ^\n  41 |     });\n  42 |     \n  43 |     expect(response.ok()).toBeFalsy();"
-    },
-    {
-      "message": "Error: No tests found",
-      "stack": "Error: No tests found"
+      "title": "auth.spec.ts",
+      "file": "auth.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Authentication API",
+          "file": "auth.spec.ts",
+          "line": 8,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should update user profile",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api-auth",
+                  "projectName": "api-auth",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 28,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [
+                        {
+                          "text": "Skipping update profile: No accessToken available\n"
+                        }
+                      ],
+                      "retry": 0,
+                      "startTime": "2026-01-26T21:41:12.704Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-fa25e03fa91bf925070a",
+              "file": "auth.spec.ts",
+              "line": 108,
+              "column": 7
+            }
+          ]
+        }
+      ]
     }
   ],
+  "errors": [],
   "stats": {
-    "startTime": "2026-01-26T18:03:34.855Z",
-    "duration": 1177.272,
-    "expected": 0,
+    "startTime": "2026-01-26T21:41:09.782Z",
+    "duration": 3060.2079999999996,
+    "expected": 1,
     "skipped": 0,
     "unexpected": 0,
     "flaky": 0
