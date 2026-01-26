@@ -139,6 +139,10 @@ export class UpdateEmployeeDto {
   full_name?: string;
 
   @IsOptional()
+  @IsEmail()
+  email?: string;
+
+  @IsOptional()
   @IsString()
   phone?: string;
 
@@ -237,17 +241,11 @@ export class CreateProfessionalDto {
   email: string;
 
   @IsString()
-  username: string;
-
-  @IsString()
   full_name: string;
 
   @IsOptional()
   @IsString()
   phone?: string;
-
-  @IsString()
-  professional_code: string;
 
   @IsOptional()
   @IsString()
@@ -264,15 +262,16 @@ export class CreateProfessionalDto {
   rating?: number;
 
   @IsOptional()
-  @IsNumber()
-  years_experience?: number;
+  @IsString()
+  portfolio_url?: string;
 
   @IsOptional()
-  certifications?: string[];
+  @IsString()
+  certifications?: string;
 
   @IsOptional()
-  @IsBoolean()
-  available?: boolean;
+  @IsString()
+  notes?: string;
 }
 
 export class UpdateProfessionalDto {
@@ -281,6 +280,10 @@ export class UpdateProfessionalDto {
   full_name?: string;
 
   @IsOptional()
+  @IsEmail()
+  email?: string;
+
+  @IsOptional()
   @IsString()
   phone?: string;
 
@@ -299,15 +302,20 @@ export class UpdateProfessionalDto {
   rating?: number;
 
   @IsOptional()
-  @IsNumber()
-  years_experience?: number;
+  @IsString()
+  availability_status?: string;
 
   @IsOptional()
-  certifications?: string[];
+  @IsString()
+  portfolio_url?: string;
 
   @IsOptional()
-  @IsBoolean()
-  available?: boolean;
+  @IsString()
+  certifications?: string;
+
+  @IsOptional()
+  @IsString()
+  notes?: string;
 
   @IsOptional()
   @IsEnum(['active', 'inactive', 'suspended'])

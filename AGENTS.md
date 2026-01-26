@@ -31,3 +31,22 @@
 - Ensures consistent development environment across all developers
 - Allows for easy cleanup and recreation of database state
 - Prevents conflicts with system-level PostgreSQL installations
+
+## Git Workflow
+
+**CRITICAL: ALWAYS work in feature branches. NEVER work directly on main or dev.**
+
+- **MUST ALWAYS** create and work in feature branches: `ft/{phase-name}/{description}/{timestamp}`
+  - Example: `ft/phase5/additional-services/20260125-202917`
+  - Example: `ft/phase6/rbac-implementation/20260126-141500`
+- **NEVER EVER** commit directly to `main` branch
+- **NEVER EVER** commit directly to `dev` branch
+- Before starting ANY work:
+  1. Check current branch: `git branch --show-current`
+  2. If on `main` or `dev`, create feature branch: `git checkout -b ft/{phase}/{description}/{timestamp}`
+  3. Only then proceed with changes
+- Merge to protected branches only after:
+  1. All changes committed to feature branch
+  2. Testing completed successfully
+  3. Documentation updated
+  4. Use `--no-ff` merges to preserve history
