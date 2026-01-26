@@ -151,36 +151,37 @@ export class CrmService {
     const limit = parseInt(query.limit) || 10;
     const offset = (page - 1) * limit;
 
-    let whereClause = 'WHERE u.role = $1';
-    const params: any[] = ['employee'];
-    let paramCount = 1;
+    let whereClause = '';
+    const params: any[] = [];
+    let paramCount = 0;
 
     if (query.search) {
       paramCount++;
-      whereClause += ` AND (u.full_name ILIKE $${paramCount} OR u.email ILIKE $${paramCount} OR e.employee_code ILIKE $${paramCount})`;
+      whereClause += whereClause ? ' AND' : ' WHERE';
+      whereClause += ` (name ILIKE $${paramCount} OR email ILIKE $${paramCount} OR employee_code ILIKE $${paramCount})`;
       params.push(`%${query.search}%`);
     }
 
     if (query.department) {
       paramCount++;
-      whereClause += ` AND e.department = $${paramCount}`;
+      whereClause += whereClause ? ' AND' : ' WHERE';
+      whereClause += ` department = $${paramCount}`;
       params.push(query.department);
     }
 
     const countResult = await this.db.queryWithAccount(
       accountId,
-      `SELECT COUNT(*) FROM users u INNER JOIN employees e ON e.user_id = u.id ${whereClause}`,
+      `SELECT COUNT(*) FROM employees ${whereClause}`,
       params
     );
 
     const result = await this.db.queryWithAccount(
       accountId,
-      `SELECT u.id as user_id, u.email, u.username, u.full_name, u.phone, u.status, u.created_at,
-              e.id, e.employee_code, e.department, e.position, e.hire_date, e.salary_level, e.manager_id
-       FROM users u
-       INNER JOIN employees e ON e.user_id = u.id
+      `SELECT id, name, email, phone, position, department, hire_date, 
+              employee_code, salary_level, manager_id, status, created_at, updated_at
+       FROM employees
        ${whereClause}
-       ORDER BY u.created_at DESC
+       ORDER BY created_at DESC
        LIMIT $${paramCount + 1} OFFSET $${paramCount + 2}`,
       [...params, limit, offset]
     );
@@ -196,11 +197,10 @@ export class CrmService {
   async getEmployee(accountId: string, id: string) {
     const result = await this.db.queryWithAccount(
       accountId,
-      `SELECT u.id as user_id, u.email, u.username, u.full_name, u.phone, u.status, u.created_at,
-              e.id, e.employee_code, e.department, e.position, e.hire_date, e.salary_level, e.manager_id
-       FROM users u
-       INNER JOIN employees e ON e.user_id = u.id
-       WHERE e.id = $1`,
+      `SELECT id, name, email, phone, position, department, hire_date,
+              employee_code, salary_level, manager_id, status, created_at, updated_at
+       FROM employees
+       WHERE id = $1`,
       [id]
     );
 
@@ -212,135 +212,100 @@ export class CrmService {
   }
 
   async createEmployee(accountId: string, employeeData: CreateEmployeeDto) {
-    const client = await this.db.getClient();
-    try {
-      await client.query('BEGIN');
-      await client.query('SET LOCAL app.current_account_id = $1', [accountId]);
+    // Auto-generate employee_code if not provided
+    const employee_code = employeeData.employee_code || `EMP${Date.now().toString().slice(-8)}`;
+    
+    // Auto-set hire_date if not provided
+    const hire_date = employeeData.hire_date || new Date().toISOString().split('T')[0];
 
-      // Auto-generate username if not provided
-      const username = employeeData.username || employeeData.email.split('@')[0];
-      
-      // Auto-generate employee_code if not provided
-      const employee_code = employeeData.employee_code || `EMP${Date.now().toString().slice(-8)}`;
-      
-      // Auto-set hire_date if not provided
-      const hire_date = employeeData.hire_date || new Date().toISOString().split('T')[0];
+    const result = await this.db.queryWithAccount(
+      accountId,
+      `INSERT INTO employees (
+        account_id, name, email, phone, position, department, 
+        hire_date, employee_code, salary_level, manager_id, status
+      )
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+       RETURNING *`,
+      [
+        accountId,
+        employeeData.full_name,
+        employeeData.email,
+        employeeData.phone || null,
+        employeeData.position || null,
+        employeeData.department || null,
+        hire_date,
+        employee_code,
+        employeeData.salary_level || null,
+        employeeData.manager_id || null,
+        'active',
+      ]
+    );
 
-      const userResult = await client.query(
-        `INSERT INTO users (account_id, email, username, password_hash, full_name, phone, role, status)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-         RETURNING id`,
-        [
-          accountId,
-          employeeData.email,
-          username,
-          employeeData.password ? `temp_${employeeData.password}` : 'temporary_hash',
-          employeeData.full_name,
-          employeeData.phone || null,
-          'employee',
-          'active',
-        ]
-      );
-
-      const userId = userResult.rows[0].id;
-
-      const employeeResult = await client.query(
-        `INSERT INTO employees (user_id, employee_code, department, position, hire_date, salary_level, manager_id)
-         VALUES ($1, $2, $3, $4, $5, $6, $7)
-         RETURNING id`,
-        [
-          userId,
-          employee_code,
-          employeeData.department || null,
-          employeeData.position || null,
-          hire_date,
-          employeeData.salary_level || null,
-          employeeData.manager_id || null,
-        ]
-      );
-
-      await client.query('COMMIT');
-
-      return this.getEmployee(accountId, employeeResult.rows[0].id);
-    } catch (error) {
-      await client.query('ROLLBACK');
-      throw new BadRequestException(`Failed to create employee: ${error.message}`);
-    } finally {
-      await client.query('RESET app.current_account_id').catch(() => {});
-      client.release();
-    }
+    return result.rows[0];
   }
 
   async updateEmployee(accountId: string, id: string, employeeData: UpdateEmployeeDto) {
-    const result = await this.db.queryWithAccount(accountId, 'SELECT user_id FROM employees WHERE id = $1', [id]);
+    const updates: string[] = [];
+    const params: any[] = [];
+    let paramCount = 0;
+
+    if (employeeData.full_name !== undefined) {
+      updates.push(`name = $${++paramCount}`);
+      params.push(employeeData.full_name);
+    }
+    if (employeeData.email !== undefined) {
+      updates.push(`email = $${++paramCount}`);
+      params.push(employeeData.email);
+    }
+    if (employeeData.phone !== undefined) {
+      updates.push(`phone = $${++paramCount}`);
+      params.push(employeeData.phone);
+    }
+    if (employeeData.position !== undefined) {
+      updates.push(`position = $${++paramCount}`);
+      params.push(employeeData.position);
+    }
+    if (employeeData.department !== undefined) {
+      updates.push(`department = $${++paramCount}`);
+      params.push(employeeData.department);
+    }
+    if (employeeData.salary_level !== undefined) {
+      updates.push(`salary_level = $${++paramCount}`);
+      params.push(employeeData.salary_level);
+    }
+    if (employeeData.manager_id !== undefined) {
+      updates.push(`manager_id = $${++paramCount}`);
+      params.push(employeeData.manager_id);
+    }
+
+    if (updates.length === 0) {
+      return this.getEmployee(accountId, id);
+    }
+
+    params.push(id);
+    const result = await this.db.queryWithAccount(
+      accountId,
+      `UPDATE employees SET ${updates.join(', ')} WHERE id = $${++paramCount} RETURNING *`,
+      params
+    );
+
     if (result.rows.length === 0) {
       throw new NotFoundException('Employee not found');
     }
 
-    const client = await this.db.getClient();
-    try {
-      await client.query('BEGIN');
-      await client.query('SET LOCAL app.current_account_id = $1', [accountId]);
-
-      const userId = result.rows[0].user_id;
-      const userUpdates: string[] = [];
-      const userParams: any[] = [];
-      let paramCount = 0;
-
-      if (employeeData.full_name) {
-        userUpdates.push(`full_name = $${++paramCount}`);
-        userParams.push(employeeData.full_name);
-      }
-      if (employeeData.phone !== undefined) {
-        userUpdates.push(`phone = $${++paramCount}`);
-        userParams.push(employeeData.phone);
-      }
-
-      if (userUpdates.length > 0) {
-        userParams.push(userId);
-        await client.query(`UPDATE users SET ${userUpdates.join(', ')} WHERE id = $${++paramCount}`, userParams);
-      }
-
-      const employeeUpdates: string[] = [];
-      const employeeParams: any[] = [];
-      paramCount = 0;
-
-      if (employeeData.department !== undefined) {
-        employeeUpdates.push(`department = $${++paramCount}`);
-        employeeParams.push(employeeData.department);
-      }
-      if (employeeData.position !== undefined) {
-        employeeUpdates.push(`position = $${++paramCount}`);
-        employeeParams.push(employeeData.position);
-      }
-      if (employeeData.salary_level !== undefined) {
-        employeeUpdates.push(`salary_level = $${++paramCount}`);
-        employeeParams.push(employeeData.salary_level);
-      }
-
-      if (employeeUpdates.length > 0) {
-        employeeParams.push(id);
-        await client.query(`UPDATE employees SET ${employeeUpdates.join(', ')} WHERE id = $${++paramCount}`, employeeParams);
-      }
-
-      await client.query('COMMIT');
-      return this.getEmployee(accountId, id);
-    } catch (error) {
-      await client.query('ROLLBACK');
-      throw new BadRequestException(`Failed to update employee: ${error.message}`);
-    } finally {
-      await client.query('RESET app.current_account_id').catch(() => {});
-      client.release();
-    }
+    return result.rows[0];
   }
 
   async deleteEmployee(accountId: string, id: string) {
-    const result = await this.db.queryWithAccount(accountId, 'SELECT user_id FROM employees WHERE id = $1', [id]);
+    const result = await this.db.queryWithAccount(
+      accountId,
+      'DELETE FROM employees WHERE id = $1 RETURNING id',
+      [id]
+    );
+
     if (result.rows.length === 0) {
       throw new NotFoundException('Employee not found');
     }
-
-    await this.db.queryWithAccount(accountId, 'DELETE FROM users WHERE id = $1', [result.rows[0].user_id]);
   }
 
   // ==================== SUPPLIERS ====================
@@ -552,43 +517,40 @@ export class CrmService {
     const limit = parseInt(query.limit) || 10;
     const offset = (page - 1) * limit;
 
-    let whereClause = 'WHERE 1=1';
+    let whereClause = '';
     const params: any[] = [];
     let paramCount = 0;
 
     if (query.status) {
       paramCount++;
-      whereClause += ` AND p.status = $${paramCount}`;
+      whereClause += whereClause ? ' AND' : ' WHERE';
+      whereClause += ` status = $${paramCount}`;
       params.push(query.status);
     }
 
     if (query.search) {
       paramCount++;
-      whereClause += ` AND (u.full_name ILIKE $${paramCount} OR p.specialty ILIKE $${paramCount} OR u.email ILIKE $${paramCount})`;
+      whereClause += whereClause ? ' AND' : ' WHERE';
+      whereClause += ` (full_name ILIKE $${paramCount} OR specialty ILIKE $${paramCount} OR email ILIKE $${paramCount})`;
       params.push(`%${query.search}%`);
     }
 
     const countResult = await this.db.queryWithAccount(
       accountId,
-      `SELECT COUNT(*) as total FROM professionals p JOIN users u ON p.user_id = u.id ${whereClause}`,
+      `SELECT COUNT(*) as total FROM professionals ${whereClause}`,
       params
     );
     const total = parseInt(countResult.rows[0].total);
 
-    paramCount++;
-    params.push(limit);
-    paramCount++;
-    params.push(offset);
-
     const result = await this.db.queryWithAccount(
       accountId,
-      `SELECT p.*, u.full_name as name, u.email, u.username
-       FROM professionals p
-       JOIN users u ON p.user_id = u.id
+      `SELECT id, name, full_name, email, phone, specialty, hourly_rate, 
+              availability_status, portfolio_url, rating, certifications, notes, status, created_at, updated_at
+       FROM professionals
        ${whereClause}
-       ORDER BY u.created_at DESC
-       LIMIT $${paramCount - 1} OFFSET $${paramCount}`,
-      params
+       ORDER BY created_at DESC
+       LIMIT $${paramCount + 1} OFFSET $${paramCount + 2}`,
+      [...params, limit, offset]
     );
 
     return {
@@ -602,10 +564,10 @@ export class CrmService {
   async getProfessional(accountId: string, id: string) {
     const result = await this.db.queryWithAccount(
       accountId,
-      `SELECT p.*, u.full_name as name, u.email, u.username
-       FROM professionals p
-       JOIN users u ON p.user_id = u.id
-       WHERE p.id = $1`,
+      `SELECT id, name, full_name, email, phone, specialty, hourly_rate,
+              availability_status, portfolio_url, rating, certifications, notes, status, created_at, updated_at
+       FROM professionals
+       WHERE id = $1`,
       [id]
     );
 
@@ -617,139 +579,114 @@ export class CrmService {
   }
 
   async createProfessional(accountId: string, professionalData: CreateProfessionalDto) {
-    const client = await this.db.getClient();
-    try {
-      await client.query('BEGIN');
+    const result = await this.db.queryWithAccount(
+      accountId,
+      `INSERT INTO professionals (
+        account_id, name, full_name, email, phone, specialty, 
+        hourly_rate, availability_status, portfolio_url, rating, 
+        certifications, notes, status
+      )
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+       RETURNING *`,
+      [
+        accountId,
+        professionalData.full_name, // Use full_name for both name and full_name
+        professionalData.full_name,
+        professionalData.email,
+        professionalData.phone || null,
+        professionalData.specialty || null,
+        professionalData.hourly_rate || null,
+        'available',
+        professionalData.portfolio_url || null,
+        professionalData.rating || null,
+        professionalData.certifications || null,
+        professionalData.notes || null,
+        'active',
+      ]
+    );
 
-      const userResult = await client.query(
-        `INSERT INTO users (account_id, full_name, username, email, password_hash, role)
-         VALUES ($1, $2, $3, $4, $5, 'professional')
-         RETURNING id`,
-        [accountId, professionalData.full_name, professionalData.username, professionalData.email, 'placeholder_hash']
-      );
-
-      const userId = userResult.rows[0].id;
-
-      const professionalResult = await client.query(
-        `INSERT INTO professionals (
-          user_id, professional_code, specialty, phone, 
-          hourly_rate, rating, years_experience, 
-          certifications, available, status
-        )
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-         RETURNING id`,
-        [
-          userId,
-          professionalData.professional_code,
-          professionalData.specialty || null,
-          professionalData.phone || null,
-          professionalData.hourly_rate || null,
-          professionalData.rating || null,
-          professionalData.years_experience || null,
-          professionalData.certifications ? JSON.stringify(professionalData.certifications) : null,
-          professionalData.available !== undefined ? professionalData.available : true,
-          'active',
-        ]
-      );
-
-      await client.query('COMMIT');
-
-      return this.getProfessional(accountId, professionalResult.rows[0].id);
-    } catch (error) {
-      await client.query('ROLLBACK');
-      throw new BadRequestException(`Failed to create professional: ${error.message}`);
-    } finally {
-      client.release();
-    }
+    return result.rows[0];
   }
 
   async updateProfessional(accountId: string, id: string, professionalData: UpdateProfessionalDto) {
-    const result = await this.db.queryWithAccount(accountId, 'SELECT user_id FROM professionals WHERE id = $1', [id]);
+    const updates: string[] = [];
+    const params: any[] = [];
+    let paramCount = 0;
+
+    if (professionalData.full_name !== undefined) {
+      updates.push(`full_name = $${++paramCount}`);
+      updates.push(`name = $${paramCount}`); // Update both
+      params.push(professionalData.full_name);
+    }
+    if (professionalData.email !== undefined) {
+      updates.push(`email = $${++paramCount}`);
+      params.push(professionalData.email);
+    }
+    if (professionalData.phone !== undefined) {
+      updates.push(`phone = $${++paramCount}`);
+      params.push(professionalData.phone);
+    }
+    if (professionalData.specialty !== undefined) {
+      updates.push(`specialty = $${++paramCount}`);
+      params.push(professionalData.specialty);
+    }
+    if (professionalData.hourly_rate !== undefined) {
+      updates.push(`hourly_rate = $${++paramCount}`);
+      params.push(professionalData.hourly_rate);
+    }
+    if (professionalData.availability_status !== undefined) {
+      updates.push(`availability_status = $${++paramCount}`);
+      params.push(professionalData.availability_status);
+    }
+    if (professionalData.portfolio_url !== undefined) {
+      updates.push(`portfolio_url = $${++paramCount}`);
+      params.push(professionalData.portfolio_url);
+    }
+    if (professionalData.rating !== undefined) {
+      updates.push(`rating = $${++paramCount}`);
+      params.push(professionalData.rating);
+    }
+    if (professionalData.certifications !== undefined) {
+      updates.push(`certifications = $${++paramCount}`);
+      params.push(professionalData.certifications);
+    }
+    if (professionalData.notes !== undefined) {
+      updates.push(`notes = $${++paramCount}`);
+      params.push(professionalData.notes);
+    }
+    if (professionalData.status !== undefined) {
+      updates.push(`status = $${++paramCount}`);
+      params.push(professionalData.status);
+    }
+
+    if (updates.length === 0) {
+      return this.getProfessional(accountId, id);
+    }
+
+    params.push(id);
+    const result = await this.db.queryWithAccount(
+      accountId,
+      `UPDATE professionals SET ${updates.join(', ')} WHERE id = $${++paramCount} RETURNING *`,
+      params
+    );
+
     if (result.rows.length === 0) {
       throw new NotFoundException('Professional not found');
     }
 
-    const client = await this.db.getClient();
-    try {
-      await client.query('BEGIN');
-      await client.query('SET LOCAL app.current_account_id = $1', [accountId]);
-
-      if (professionalData.full_name) {
-        const updateFields = [];
-        const params = [];
-        let paramCount = 0;
-
-        if (professionalData.full_name) {
-          paramCount++;
-          updateFields.push(`full_name = $${paramCount}`);
-          params.push(professionalData.full_name);
-        }
-
-        paramCount++;
-        params.push(result.rows[0].user_id);
-
-        await client.query(
-          `UPDATE users SET ${updateFields.join(', ')}, updated_at = NOW() WHERE id = $${paramCount}`,
-          params
-        );
-      }
-
-      const professionalFields = [];
-      const professionalParams = [];
-      let professionalParamCount = 0;
-
-      if (professionalData.specialty !== undefined) {
-        professionalParamCount++;
-        professionalFields.push(`specialty = $${professionalParamCount}`);
-        professionalParams.push(professionalData.specialty);
-      }
-
-      if (professionalData.phone !== undefined) {
-        professionalParamCount++;
-        professionalFields.push(`phone = $${professionalParamCount}`);
-        professionalParams.push(professionalData.phone);
-      }
-
-      if (professionalData.hourly_rate !== undefined) {
-        professionalParamCount++;
-        professionalFields.push(`hourly_rate = $${professionalParamCount}`);
-        professionalParams.push(professionalData.hourly_rate);
-      }
-
-      if (professionalData.status !== undefined) {
-        professionalParamCount++;
-        professionalFields.push(`status = $${professionalParamCount}`);
-        professionalParams.push(professionalData.status);
-      }
-
-      if (professionalFields.length > 0) {
-        professionalParamCount++;
-        professionalParams.push(id);
-        await client.query(
-          `UPDATE professionals SET ${professionalFields.join(', ')}, updated_at = NOW() WHERE id = $${professionalParamCount}`,
-          professionalParams
-        );
-      }
-
-      await client.query('COMMIT');
-
-      return this.getProfessional(accountId, id);
-    } catch (error) {
-      await client.query('ROLLBACK');
-      throw new BadRequestException(`Failed to update professional: ${error.message}`);
-    } finally {
-      await client.query('RESET app.current_account_id').catch(() => {});
-      client.release();
-    }
+    return result.rows[0];
   }
 
   async deleteProfessional(accountId: string, id: string) {
-    const result = await this.db.queryWithAccount(accountId, 'SELECT user_id FROM professionals WHERE id = $1', [id]);
+    const result = await this.db.queryWithAccount(
+      accountId,
+      'DELETE FROM professionals WHERE id = $1 RETURNING id',
+      [id]
+    );
+
     if (result.rows.length === 0) {
       throw new NotFoundException('Professional not found');
     }
-
-    await this.db.queryWithAccount(accountId, 'DELETE FROM users WHERE id = $1', [result.rows[0].user_id]);
   }
 
   // ==================== PROJECTS ====================
