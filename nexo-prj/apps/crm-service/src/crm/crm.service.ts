@@ -738,18 +738,19 @@ export class CrmService {
   async createProject(accountId: string, projectData: CreateProjectDto) {
     const result = await this.db.queryWithAccount(
       accountId,
-      `INSERT INTO projects (name, description, status, client_id, budget, start_date, deadline, completion_percentage)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      `INSERT INTO projects (account_id, name, description, status, client_id, budget, start_date, end_date, progress)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING *`,
       [
+        accountId,
         projectData.name,
         projectData.description || null,
         projectData.status || 'planning',
         projectData.client_id || null,
         projectData.budget || null,
         projectData.start_date || null,
-        projectData.deadline || null,
-        projectData.completion_percentage || 0,
+        projectData.deadline || null, // DTO uses deadline, map to end_date
+        projectData.completion_percentage || 0, // DTO uses completion_percentage, map to progress
       ]
     );
 
@@ -844,10 +845,11 @@ export class CrmService {
   async createTask(accountId: string, taskData: CreateTaskDto) {
     const result = await this.db.queryWithAccount(
       accountId,
-      `INSERT INTO tasks (title, description, status, priority, assigned_to, project_id, due_date)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
+      `INSERT INTO tasks (account_id, title, description, status, priority, assigned_to, project_id, due_date)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        RETURNING *`,
       [
+        accountId,
         taskData.title,
         taskData.description || null,
         taskData.status || 'pending',
