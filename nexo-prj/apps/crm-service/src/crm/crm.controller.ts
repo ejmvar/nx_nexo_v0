@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, HttpCode, HttpStatus, UseGuards, UseInterceptors } from '@nestjs/common';
 import { CrmService } from './crm.service.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { PermissionsGuard } from '../common/guards/permissions.guard.js';
 import { RequirePermissions } from '../common/decorators/permissions.decorator.js';
+import { AuditLoggerInterceptor } from '../common/interceptors/audit-logger.interceptor.js';
 import { AccountId } from '../decorators/account-id.decorator.js';
 import {
   CreateClientDto,
@@ -21,6 +22,7 @@ import {
 
 @Controller()
 @UseGuards(JwtAuthGuard, PermissionsGuard) // Protect all CRM routes with auth + permissions
+@UseInterceptors(AuditLoggerInterceptor) // Log all CRUD operations
 export class CrmController {
   constructor(private crmService: CrmService) {}
 
