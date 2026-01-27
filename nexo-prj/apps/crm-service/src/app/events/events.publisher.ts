@@ -39,8 +39,8 @@ export class EventsPublisher implements OnModuleInit, OnModuleDestroy {
         process.env.RABBITMQ_URL || 'amqp://nexo_user:nexo_password@localhost:5672';
 
       this.logger.log(`🔌 Connecting to RabbitMQ: ${rabbitmqUrl.replace(/\/\/.*@/, '//***@')}`);
-      this.connection = await amqplib.connect(rabbitmqUrl);
-      this.channel = await this.connection.createChannel();
+      this.connection = await amqplib.connect(rabbitmqUrl) as any;
+      this.channel = await (this.connection as any).createChannel();
 
       // Declare exchange for events (fanout - broadcast to all consumers)
       await this.channel.assertExchange(this.exchangeName, 'topic', {
@@ -73,11 +73,11 @@ export class EventsPublisher implements OnModuleInit, OnModuleDestroy {
   private async disconnect() {
     try {
       if (this.channel) {
-        await this.channel.close();
+        await (this.channel as any).close();
         this.channel = null;
       }
       if (this.connection) {
-        await this.connection.close();
+        await (this.connection as any).close();
         this.connection = null;
       }
       this.logger.log('🔌 RabbitMQ disconnected');
