@@ -5,6 +5,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { ProxyModule } from '../proxy/proxy.module.js';
+import { WebSocketModule } from '../websocket/websocket.module.js';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { ProxyModule } from '../proxy/proxy.module.js';
       ]),
     }),
     ProxyModule,
+    WebSocketModule,
   ],
   controllers: [AppController],
   providers: [
