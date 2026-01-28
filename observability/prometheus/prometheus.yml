@@ -1,0 +1,257 @@
+# ============================================================================
+# Prometheus Configuration for NEXO CRM
+# ============================================================================
+# This configuration defines:
+# - Global settings (scrape interval, evaluation interval)
+# - AlertManager integration
+# - Scrape targets for all services
+# - Alert rule files
+# ============================================================================
+
+global:
+  scrape_interval: 15s       # Default: scrape targets every 15 seconds
+  evaluation_interval: 15s   # Evaluate alert rules every 15 seconds
+  scrape_timeout: 10s        # Timeout for each scrape request
+  
+  # External labels attached to all metrics
+  external_labels:
+    cluster: 'nexo-dev'
+    environment: 'development'
+    project: 'nexo-crm'
+
+# ============================================================================
+# AlertManager Configuration
+# ============================================================================
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - 'alertmanager:9093'
+      timeout: 10s
+      api_version: v2
+
+# ============================================================================
+# Alert Rule Files
+# ============================================================================
+rule_files:
+  - '/etc/prometheus/alerts/*.yml'
+
+# ============================================================================
+# Scrape Configurations
+# ============================================================================
+scrape_configs:
+  # --------------------------------------------------------------------------
+  # Prometheus Self-Monitoring
+  # --------------------------------------------------------------------------
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          service: 'prometheus'
+          component: 'metrics-server'
+
+  # --------------------------------------------------------------------------
+  # Node Exporter - System/Host Metrics
+  # --------------------------------------------------------------------------
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+        labels:
+          service: 'node-exporter'
+          component: 'system-metrics'
+    # Collect CPU, memory, disk, network metrics from host
+
+  # --------------------------------------------------------------------------
+  # cAdvisor - Container Metrics
+  # --------------------------------------------------------------------------
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+        labels:
+          service: 'cadvisor'
+          component: 'container-metrics'
+    # Collect per-container resource usage (CPU, memory, network, disk I/O)
+
+  # --------------------------------------------------------------------------
+  # Auth Service - /metrics endpoint
+  # --------------------------------------------------------------------------
+  - job_name: 'auth-service'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['auth-service:3001']
+        labels:
+          service: 'auth-service'
+          component: 'backend'
+          team: 'platform'
+    # Expected metrics:
+    # - http_requests_total (by method, route, status)
+    # - http_request_duration_seconds (histogram)
+    # - jwt_tokens_issued_total
+    # - jwt_tokens_validated_total
+    # - auth_failures_total
+    # - db_connections_active
+    # - db_query_duration_seconds
+
+  # --------------------------------------------------------------------------
+  # CRM Service - /metrics endpoint
+  # --------------------------------------------------------------------------
+  - job_name: 'crm-service'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['crm-service:3003']
+        labels:
+          service: 'crm-service'
+          component: 'backend'
+          team: 'product'
+    # Expected metrics:
+    # - http_requests_total (by method, route, status)
+    # - http_request_duration_seconds (histogram)
+    # - crm_entities_total (by type: company, contact, deal, task)
+    # - crm_operations_total (by operation: create, update, delete)
+    # - db_connections_active
+    # - db_query_duration_seconds
+    # - cache_hits_total
+    # - cache_misses_total
+    # - websocket_connections_active
+
+  # --------------------------------------------------------------------------
+  # API Gateway - /metrics endpoint
+  # --------------------------------------------------------------------------
+  - job_name: 'gateway-service'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['gateway-service:3002']
+        labels:
+          service: 'gateway-service'
+          component: 'backend'
+          team: 'platform'
+    # Expected metrics:
+    # - http_requests_total (by method, route, status, upstream)
+    # - http_request_duration_seconds (histogram)
+    # - gateway_routing_failures_total
+    # - gateway_upstream_latency_seconds
+    # - rate_limit_hits_total
+    # - rate_limit_rejections_total
+
+  # --------------------------------------------------------------------------
+  # PostgreSQL Database - postgres_exporter
+  # --------------------------------------------------------------------------
+  - job_name: 'postgresql'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+        labels:
+          service: 'postgresql'
+          component: 'database'
+          team: 'platform'
+    # Optional: Deploy postgres_exporter container for detailed DB metrics
+    # Metrics: connections, transactions, locks, query performance
+
+  # --------------------------------------------------------------------------
+  # Redis Cache - redis_exporter
+  # --------------------------------------------------------------------------
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+        labels:
+          service: 'redis'
+          component: 'cache'
+          team: 'platform'
+    # Optional: Deploy redis_exporter container for cache metrics
+    # Metrics: memory usage, key statistics, eviction rate, hit rate
+
+  # --------------------------------------------------------------------------
+  # RabbitMQ Message Queue - rabbitmq_prometheus plugin
+  # --------------------------------------------------------------------------
+  - job_name: 'rabbitmq'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['rabbitmq:15692']
+        labels:
+          service: 'rabbitmq'
+          component: 'message-queue'
+          team: 'platform'
+    # Optional: Enable rabbitmq_prometheus plugin
+    # Metrics: queue depth, message rate, consumer count, connections
+
+  # --------------------------------------------------------------------------
+  # AlertManager - Self-monitoring
+  # --------------------------------------------------------------------------
+  - job_name: 'alertmanager'
+    static_configs:
+      - targets: ['alertmanager:9093']
+        labels:
+          service: 'alertmanager'
+          component: 'alerting'
+
+# ============================================================================
+# Service Discovery (Advanced - Optional)
+# ============================================================================
+# Uncomment for dynamic service discovery in Kubernetes or Docker Swarm:
+#
+# - job_name: 'kubernetes-pods'
+#   kubernetes_sd_configs:
+#     - role: pod
+#   relabel_configs:
+#     - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+#       action: keep
+#       regex: true
+#     - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+#       action: replace
+#       target_label: __metrics_path__
+#       regex: (.+)
+#     - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+#       action: replace
+#       regex: ([^:]+)(?::\d+)?;(\d+)
+#       replacement: $1:$2
+#       target_label: __address__
+
+# ============================================================================
+# Remote Storage (Production - Optional)
+# ============================================================================
+# For long-term storage and federation:
+#
+# remote_write:
+#   - url: "https://prometheus-remote-storage.example.com/api/v1/write"
+#     basic_auth:
+#       username: nexo
+#       password_file: /etc/prometheus/remote_password
+#
+# remote_read:
+#   - url: "https://prometheus-remote-storage.example.com/api/v1/read"
+#     basic_auth:
+#       username: nexo
+#       password_file: /etc/prometheus/remote_password
+
+# ============================================================================
+# Configuration Notes
+# ============================================================================
+# 1. Metrics Endpoints:
+#    Each service must expose /metrics endpoint in Prometheus format
+#    Use prom-client for Node.js/NestJS applications
+#
+# 2. Labels:
+#    - service: Identifies the application/service
+#    - component: Categorizes by layer (backend, database, cache, etc.)
+#    - team: Ownership for alerting routing
+#
+# 3. Scrape Intervals:
+#    - Default: 15s (good balance between freshness and overhead)
+#    - High-frequency: 5s (for critical services)
+#    - Low-frequency: 60s (for slow-changing metrics like disk space)
+#
+# 4. Metric Types:
+#    - Counter: Cumulative values (requests_total, errors_total)
+#    - Gauge: Current values (connections_active, memory_usage)
+#    - Histogram: Distributions (request_duration_seconds)
+#    - Summary: Quantiles (similar to histogram)
+#
+# 5. Storage:
+#    - Retention: 30 days (configurable via --storage.tsdb.retention.time)
+#    - Size limit: 50GB (configurable via --storage.tsdb.retention.size)
+#    - Location: /prometheus volume (persistent)
+#
+# 6. Hot-reload:
+#    Reload configuration without restart:
+#    curl -X POST http://localhost:9090/-/reload
+#
+# ============================================================================

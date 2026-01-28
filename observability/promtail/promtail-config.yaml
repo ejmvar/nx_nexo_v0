@@ -1,0 +1,389 @@
+# ============================================================================
+# Promtail Configuration for NEXO CRM
+# ============================================================================
+# Promtail is an agent that ships logs to Loki. It discovers log sources
+# (files, Docker containers, systemd journals) and streams them to Loki.
+#
+# Reference: https://grafana.com/docs/loki/latest/send-data/promtail/
+# ============================================================================
+
+# ============================================================================
+# Server Configuration
+# ============================================================================
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+  log_level: info
+  log_format: json
+
+# ============================================================================
+# Client Configuration (where to send logs)
+# ============================================================================
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+    tenant_id: nexo-crm
+    batchwait: 1s        # Wait up to 1s to batch logs
+    batchsize: 1048576   # Send batch when it reaches 1MB
+    timeout: 10s
+    backoff_config:
+      min_period: 500ms
+      max_period: 5m
+      max_retries: 10
+    # External labels applied to all logs
+    external_labels:
+      cluster: nexo-dev
+      environment: development
+
+# ============================================================================
+# Positions (track which logs have been read)
+# ============================================================================
+positions:
+  filename: /tmp/positions.yaml  # Track read positions to avoid duplicates
+  sync_period: 10s
+  ignore_invalid_yaml: false
+
+# ============================================================================
+# Target Configuration (where to find logs)
+# ============================================================================
+scrape_configs:
+  # --------------------------------------------------------------------------
+  # Docker Container Logs (via file discovery)
+  # --------------------------------------------------------------------------
+  - job_name: docker-containers
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 5s
+        filters:
+          - name: label
+            values: ["nexo.service=backend"]  # Only NEXO backend services
+    
+    # Relabeling to extract metadata from Docker labels
+    relabel_configs:
+      # Container name
+      - source_labels: ['__meta_docker_container_name']
+        regex: '/(.*)'
+        target_label: 'container_name'
+      
+      # Container ID (short version)
+      - source_labels: ['__meta_docker_container_id']
+        regex: '([0-9a-f]{12}).*'
+        target_label: 'container_id'
+      
+      # Service name from container label
+      - source_labels: ['__meta_docker_container_label_nexo_service']
+        target_label: 'service'
+      
+      # Component from container label
+      - source_labels: ['__meta_docker_container_label_nexo_component']
+        target_label: 'component'
+      
+      # Team from container label
+      - source_labels: ['__meta_docker_container_label_nexo_team']
+        target_label: 'team'
+      
+      # Docker container log path
+      - source_labels: ['__meta_docker_container_id']
+        target_label: '__path__'
+        replacement: '/var/lib/docker/containers/$1/*-json.log'
+    
+    # Pipeline stages to process log lines
+    pipeline_stages:
+      # Parse Docker JSON log format
+      - docker: {}
+      
+      # Parse application JSON logs (structured logging)
+      - json:
+          expressions:
+            timestamp: timestamp
+            level: level
+            message: message
+            service: service
+            context: context
+            account_id: account_id
+            user_id: user_id
+            request_id: request_id
+            method: method
+            url: url
+            status: status
+            duration: duration
+            error: error
+      
+      # Extract labels from parsed JSON
+      - labels:
+          level:
+          account_id:
+          method:
+          status:
+      
+      # Set timestamp from log entry (if available)
+      - timestamp:
+          source: timestamp
+          format: RFC3339
+      
+      # Drop health check logs (too noisy)
+      - drop:
+          source: url
+          expression: '.*/health.*'
+      
+      # Sample high-volume logs (keep 10%)
+      - match:
+          selector: '{url=~".*/metrics.*"}'
+          stages:
+            - sampling:
+                rate: 0.1  # Keep only 10% of metrics endpoint logs
+      
+      # Add output message format
+      - output:
+          source: message
+
+  # --------------------------------------------------------------------------
+  # Auth Service Logs (specific configuration)
+  # --------------------------------------------------------------------------
+  - job_name: auth-service
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 5s
+        filters:
+          - name: name
+            values: ["nexo-auth"]  # Container name filter
+    
+    relabel_configs:
+      - source_labels: ['__meta_docker_container_name']
+        regex: '/(.*)'
+        target_label: 'container_name'
+      - source_labels: ['__meta_docker_container_id']
+        target_label: '__path__'
+        replacement: '/var/lib/docker/containers/$1/*-json.log'
+      - replacement: 'auth-service'
+        target_label: 'service'
+      - replacement: 'backend'
+        target_label: 'component'
+    
+    pipeline_stages:
+      - docker: {}
+      - json:
+          expressions:
+            timestamp: timestamp
+            level: level
+            message: message
+            user_id: user_id
+            account_id: account_id
+            action: context
+      - labels:
+          level:
+          action:
+      - timestamp:
+          source: timestamp
+          format: RFC3339
+
+  # --------------------------------------------------------------------------
+  # CRM Service Logs (specific configuration)
+  # --------------------------------------------------------------------------
+  - job_name: crm-service
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 5s
+        filters:
+          - name: name
+            values: ["nexo-crm"]
+    
+    relabel_configs:
+      - source_labels: ['__meta_docker_container_name']
+        regex: '/(.*)'
+        target_label: 'container_name'
+      - source_labels: ['__meta_docker_container_id']
+        target_label: '__path__'
+        replacement: '/var/lib/docker/containers/$1/*-json.log'
+      - replacement: 'crm-service'
+        target_label: 'service'
+      - replacement: 'backend'
+        target_label: 'component'
+    
+    pipeline_stages:
+      - docker: {}
+      - json:
+          expressions:
+            timestamp: timestamp
+            level: level
+            message: message
+            account_id: account_id
+            user_id: user_id
+            entity_type: entity_type
+            entity_id: entity_id
+            operation: operation
+      - labels:
+          level:
+          entity_type:
+          operation:
+      - timestamp:
+          source: timestamp
+          format: RFC3339
+      # Drop verbose websocket heartbeat logs
+      - drop:
+          source: message
+          expression: '.*websocket.*heartbeat.*'
+
+  # --------------------------------------------------------------------------
+  # PostgreSQL Logs
+  # --------------------------------------------------------------------------
+  - job_name: postgresql
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 5s
+        filters:
+          - name: name
+            values: ["nexo-postgres"]
+    
+    relabel_configs:
+      - source_labels: ['__meta_docker_container_name']
+        regex: '/(.*)'
+        target_label: 'container_name'
+      - source_labels: ['__meta_docker_container_id']
+        target_label: '__path__'
+        replacement: '/var/lib/docker/containers/$1/*-json.log'
+      - replacement: 'postgresql'
+        target_label: 'service'
+      - replacement: 'database'
+        target_label: 'component'
+    
+    pipeline_stages:
+      - docker: {}
+      # PostgreSQL log format: timestamp [pid] level: message
+      - regex:
+          expression: '^(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3} \w+) \[(?P<pid>\d+)\] (?P<level>\w+):  (?P<message>.*)$'
+      - labels:
+          level:
+      - timestamp:
+          source: timestamp
+          format: '2006-01-02 15:04:05.000 MST'
+
+  # --------------------------------------------------------------------------
+  # Redis Logs
+  # --------------------------------------------------------------------------
+  - job_name: redis
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 5s
+        filters:
+          - name: name
+            values: ["nexo-redis"]
+    
+    relabel_configs:
+      - source_labels: ['__meta_docker_container_name']
+        regex: '/(.*)'
+        target_label: 'container_name'
+      - source_labels: ['__meta_docker_container_id']
+        target_label: '__path__'
+        replacement: '/var/lib/docker/containers/$1/*-json.log'
+      - replacement: 'redis'
+        target_label: 'service'
+      - replacement: 'cache'
+        target_label: 'component'
+    
+    pipeline_stages:
+      - docker: {}
+
+  # --------------------------------------------------------------------------
+  # RabbitMQ Logs
+  # --------------------------------------------------------------------------
+  - job_name: rabbitmq
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 5s
+        filters:
+          - name: name
+            values: ["nexo-rabbitmq"]
+    
+    relabel_configs:
+      - source_labels: ['__meta_docker_container_name']
+        regex: '/(.*)'
+        target_label: 'container_name'
+      - source_labels: ['__meta_docker_container_id']
+        target_label: '__path__'
+        replacement: '/var/lib/docker/containers/$1/*-json.log'
+      - replacement: 'rabbitmq'
+        target_label: 'service'
+      - replacement: 'message-queue'
+        target_label: 'component'
+    
+    pipeline_stages:
+      - docker: {}
+
+  # --------------------------------------------------------------------------
+  # System Logs (optional - host logs)
+  # --------------------------------------------------------------------------
+  - job_name: system-logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: varlogs
+          service: system
+          component: host
+          __path__: /var/log/*.log
+    
+    pipeline_stages:
+      # Sample to reduce volume (keep 5% of syslog)
+      - sampling:
+          rate: 0.05
+
+# ============================================================================
+# Configuration Notes
+# ============================================================================
+# 1. Log Discovery:
+#    Promtail uses Docker service discovery to automatically find containers
+#    Filters can be applied using Docker labels (nexo.service, nexo.component)
+#
+# 2. Pipeline Stages (executed in order):
+#    a) docker: Parse Docker JSON log wrapper
+#    b) json/regex: Parse application log format
+#    c) labels: Extract fields as Loki labels (for indexing)
+#    d) timestamp: Extract timestamp from log
+#    e) drop: Filter out unwanted logs
+#    f) sampling: Keep only a percentage of logs
+#    g) output: Format the final log message
+#
+# 3. Label Strategy:
+#    Keep cardinality low! Good labels:
+#    - service: auth-service, crm-service, postgresql
+#    - level: debug, info, warn, error, fatal
+#    - component: backend, database, cache
+#    - method: GET, POST, PUT, DELETE
+#    - status: 200, 404, 500
+#    
+#    Avoid high-cardinality labels:
+#    - user_id, request_id, ip_address (too many unique values)
+#    Store these in log message instead, search with LogQL filters
+#
+# 4. Performance:
+#    - batch_size: 1MB - sends logs in batches for efficiency
+#    - batch_wait: 1s - max wait time before sending partial batch
+#    - Sampling: Reduces volume of high-frequency logs
+#    - Drop: Completely ignores matching logs
+#
+# 5. Structured Logging:
+#    Application logs should be JSON format:
+#    {
+#      "timestamp": "2024-01-15T10:30:00Z",
+#      "level": "error",
+#      "service": "crm-service",
+#      "message": "Failed to create company",
+#      "account_id": "uuid",
+#      "user_id": "uuid",
+#      "error": "Database connection timeout"
+#    }
+#    Promtail extracts fields automatically with json{} stage
+#
+# 6. Testing:
+#    Verify Promtail is reading logs:
+#    curl http://localhost:9080/metrics | grep promtail
+#    
+#    Check for scrape errors:
+#    curl http://localhost:9080/metrics | grep promtail_file_bytes_total
+#
+# 7. Troubleshooting:
+#    - Check positions file: cat /tmp/positions.yaml
+#    - View targets: curl http://localhost:9080/targets
+#    - Check Promtail logs: docker logs nexo-promtail
+#
+# ============================================================================

@@ -1,0 +1,325 @@
+version: '3.9'
+
+# ============================================================================
+# NEXO CRM - Observability Stack
+# ============================================================================
+# Separate compose file for observability to avoid interfering with main app
+# This stack includes: Prometheus, Loki, Promtail, Grafana, AlertManager
+#
+# Usage:
+#   Start: docker compose -f docker-compose.observability.yml up -d
+#   Stop:  docker compose -f docker-compose.observability.yml down
+#   Logs:  docker compose -f docker-compose.observability.yml logs -f
+# ============================================================================
+
+networks:
+  observability-network:
+    name: nexo-observability
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+  # Bridge to application network (read-only access)
+  backend-network:
+    external: true
+    name: nexo-backend
+
+volumes:
+  prometheus-data:
+    driver: local
+  loki-data:
+    driver: local
+  grafana-data:
+    driver: local
+  alertmanager-data:
+    driver: local
+
+services:
+  # ==========================================================================
+  # Prometheus - Metrics Collection & Storage
+  # ==========================================================================
+  prometheus:
+    image: prom/prometheus:v2.48.0
+    container_name: nexo-prometheus
+    hostname: prometheus
+    restart: unless-stopped
+    user: "1000:1000"  # Run as non-root
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+      - '--storage.tsdb.retention.size=50GB'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+      - '--web.enable-admin-api'
+    ports:
+      - "9090:9090"  # Prometheus UI (internal only in production)
+    volumes:
+      - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./observability/prometheus/alerts:/etc/prometheus/alerts:ro
+      - prometheus-data:/prometheus
+    networks:
+      - observability-network
+      - backend-network  # Access to scrape application services
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '1.0'
+          memory: 1G
+    labels:
+      - "nexo.service=observability"
+      - "nexo.component=metrics"
+
+  # ==========================================================================
+  # Loki - Log Aggregation Server
+  # ==========================================================================
+  loki:
+    image: grafana/loki:2.9.3
+    container_name: nexo-loki
+    hostname: loki
+    restart: unless-stopped
+    user: "1000:1000"
+    command: -config.file=/etc/loki/loki-config.yaml
+    ports:
+      - "3100:3100"  # Loki API (internal only in production)
+    volumes:
+      - ./observability/loki/loki-config.yaml:/etc/loki/loki-config.yaml:ro
+      - ./observability/loki/rules:/etc/loki/rules:ro
+      - loki-data:/loki
+    networks:
+      - observability-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3100/ready"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    labels:
+      - "nexo.service=observability"
+      - "nexo.component=logs"
+
+  # ==========================================================================
+  # Promtail - Log Collection Agent
+  # ==========================================================================
+  promtail:
+    image: grafana/promtail:2.9.3
+    container_name: nexo-promtail
+    hostname: promtail
+    restart: unless-stopped
+    user: "0:0"  # Must run as root to access Docker socket
+    command: -config.file=/etc/promtail/promtail-config.yaml
+    volumes:
+      - ./observability/promtail/promtail-config.yaml:/etc/promtail/promtail-config.yaml:ro
+      - /var/log:/var/log:ro  # Host logs
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro  # Container logs
+      - /var/run/docker.sock:/var/run/docker.sock:ro  # Docker API for metadata
+    networks:
+      - observability-network
+      - backend-network  # Access to read container logs
+    depends_on:
+      - loki
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
+    labels:
+      - "nexo.service=observability"
+      - "nexo.component=log-collector"
+
+  # ==========================================================================
+  # Grafana - Visualization & Dashboards
+  # ==========================================================================
+  grafana:
+    image: grafana/grafana:10.2.2
+    container_name: nexo-grafana
+    hostname: grafana
+    restart: unless-stopped
+    user: "1000:1000"
+    ports:
+      - "3300:3000"  # Grafana UI (port 3300 to avoid conflicts)
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      - GF_SERVER_ROOT_URL=http://localhost:3300
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_USERS_ALLOW_ORG_CREATE=false
+      - GF_AUTH_ANONYMOUS_ENABLED=false
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+      - GF_LOG_LEVEL=info
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./observability/grafana/grafana.ini:/etc/grafana/grafana.ini:ro
+    networks:
+      - observability-network
+    depends_on:
+      - prometheus
+      - loki
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    labels:
+      - "nexo.service=observability"
+      - "nexo.component=visualization"
+
+  # ==========================================================================
+  # AlertManager - Alert Routing & Management
+  # ==========================================================================
+  alertmanager:
+    image: prom/alertmanager:v0.26.0
+    container_name: nexo-alertmanager
+    hostname: alertmanager
+    restart: unless-stopped
+    user: "1000:1000"
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+      - '--web.external-url=http://localhost:9093'
+    ports:
+      - "9093:9093"  # AlertManager UI (internal only in production)
+    volumes:
+      - ./observability/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager-data:/alertmanager
+    networks:
+      - observability-network
+    depends_on:
+      - prometheus
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9093/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
+    labels:
+      - "nexo.service=observability"
+      - "nexo.component=alerting"
+
+  # ==========================================================================
+  # Node Exporter - System/Host Metrics
+  # ==========================================================================
+  node-exporter:
+    image: prom/node-exporter:v1.7.0
+    container_name: nexo-node-exporter
+    hostname: node-exporter
+    restart: unless-stopped
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    ports:
+      - "9100:9100"  # Node Exporter metrics (internal only)
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    networks:
+      - observability-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: 128M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+    labels:
+      - "nexo.service=observability"
+      - "nexo.component=system-metrics"
+
+  # ==========================================================================
+  # cAdvisor - Container Metrics
+  # ==========================================================================
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.47.2
+    container_name: nexo-cadvisor
+    hostname: cadvisor
+    restart: unless-stopped
+    privileged: true  # Required for container metrics
+    ports:
+      - "8080:8080"  # cAdvisor UI (internal only in production)
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker:/var/lib/docker:ro
+      - /dev/disk:/dev/disk:ro
+    devices:
+      - /dev/kmsg
+    networks:
+      - observability-network
+      - backend-network  # Monitor application containers
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.2'
+          memory: 256M
+    labels:
+      - "nexo.service=observability"
+      - "nexo.component=container-metrics"
+
+# ==========================================================================
+# Health Check Summary (after all services are up)
+# ==========================================================================
+# Service          | Port | URL                                    | Status
+# -----------------|------|----------------------------------------|--------
+# Grafana          | 3300 | http://localhost:3300                  | UI
+# Prometheus       | 9090 | http://localhost:9090                  | UI
+# Loki             | 3100 | http://localhost:3100/ready            | API
+# AlertManager     | 9093 | http://localhost:9093                  | UI
+# Node Exporter    | 9100 | http://localhost:9100/metrics          | Metrics
+# cAdvisor         | 8080 | http://localhost:8080                  | UI
+#
+# Default Credentials:
+# - Grafana: admin / admin (change on first login)
+#
+# Data Persistence:
+# - All volumes are persistent and stored locally
+# - Data survives container restarts
+# - Backup scripts available in observability/scripts/
+# ==========================================================================

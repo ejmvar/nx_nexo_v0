@@ -1,0 +1,82 @@
+# ============================================================================
+# Grafana Datasource: Prometheus
+# ============================================================================
+# This configuration file automatically provisions Prometheus as a datasource
+# in Grafana when the container starts. No manual configuration needed.
+#
+# File location: observability/grafana/provisioning/datasources/prometheus.yaml
+# Reference: https://grafana.com/docs/grafana/latest/administration/provisioning/
+# ============================================================================
+
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    uid: prometheus-uid
+    isDefault: true
+    editable: false
+    version: 1
+    
+    jsonData:
+      httpMethod: POST
+      timeInterval: 15s
+      queryTimeout: 60s
+      
+      # Enable metrics browser
+      disableMetricsLookup: false
+      
+      # Exemplars (link metrics to traces)
+      exemplarTraceIdDestinations:
+        - name: trace_id
+          datasourceUid: loki-uid
+      
+      # Custom query hints
+      customQueryParameters: ''
+      
+      # Prometheus type (Prometheus, Cortex, Mimir, Thanos)
+      prometheusType: Prometheus
+      prometheusVersion: 2.48.0
+      
+      # Cache settings
+      cacheLevel: 'High'
+      
+      # Query splitting
+      incrementalQuerying: true
+      incrementalQueryOverlapWindow: 10m
+    
+    # Default editor mode for queries
+    jsonData:
+      defaultEditor: 'builder'  # or 'code' for PromQL directly
+
+# ============================================================================
+# Configuration Notes
+# ============================================================================
+# 1. URL: Internal Docker network URL (prometheus:9090)
+#    Not accessible from outside - Grafana proxies all requests
+#
+# 2. Access Mode: 'proxy'
+#    - proxy: Grafana backend makes requests (recommended for security)
+#    - direct: Browser makes requests directly (requires CORS)
+#
+# 3. UID: prometheus-uid
+#    Unique identifier used in dashboards to reference this datasource
+#
+# 4. Default: true
+#    This datasource is selected by default in new panels
+#
+# 5. Editable: false
+#    Prevents users from modifying this datasource through UI
+#    Change to 'true' for development environments
+#
+# 6. Query Timeout: 60s
+#    Maximum time for a query to complete
+#    Increase for complex queries over large time ranges
+#
+# 7. Time Interval: 15s
+#    Default scrape interval (matches Prometheus config)
+#    Used for rate() and increase() calculations
+#
+# ============================================================================
