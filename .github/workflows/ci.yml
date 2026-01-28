@@ -274,3 +274,6 @@ jobs:
             echo "❌ Tests failed!"
             exit 1
           fi
+
+      - run: npx nx fix-ci
+      if: always()
