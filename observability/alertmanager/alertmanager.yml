@@ -1,0 +1,190 @@
+# ============================================================================
+# AlertManager Configuration for NEXO CRM
+# ============================================================================
+# Manages alert routing, grouping, silencing, and notifications
+# Reference: https://prometheus.io/docs/alerting/latest/configuration/
+# ============================================================================
+
+global:
+  # How long to wait before sending notification about new group of alerts
+  resolve_timeout: 5m
+  
+  # Slack configuration (optional - uncomment and configure when ready)
+  # slack_api_url: '${SLACK_WEBHOOK_URL}'
+  
+  # Email configuration (optional - uncomment and configure when ready)
+  # smtp_smarthost: '${SMTP_HOST}:${SMTP_PORT}'
+  # smtp_from: '${ALERT_EMAIL_FROM}'
+  # smtp_auth_username: '${SMTP_USER}'
+  # smtp_auth_password: '${SMTP_PASSWORD}'
+  # smtp_require_tls: true
+
+# ============================================================================
+# Templates (for customizing alert messages)
+# ============================================================================
+# templates:
+#   - '/etc/alertmanager/templates/*.tmpl'
+
+# ============================================================================
+# Route Configuration (how to route alerts to receivers)
+# ============================================================================
+route:
+  # Default receiver for all alerts
+  receiver: 'default-receiver'
+  
+  # Group alerts by these labels
+  group_by: ['alertname', 'service', 'severity']
+  
+  # Wait time before sending first notification for new group
+  group_wait: 30s
+  
+  # Wait time before sending notification about new alerts in existing group
+  group_interval: 5m
+  
+  # Wait time before re-sending notification if alert is still firing
+  repeat_interval: 4h
+  
+  # Child routes (more specific routing rules)
+  routes:
+    # Critical alerts - immediate notification
+    - match:
+        severity: critical
+      receiver: 'critical-alerts'
+      group_wait: 10s
+      repeat_interval: 1h
+      continue: false
+    
+    # Warning alerts - less urgent
+    - match:
+        severity: warning
+      receiver: 'warning-alerts'
+      group_wait: 1m
+      repeat_interval: 12h
+      continue: false
+    
+    # Infrastructure alerts (database, cache, queue)
+    - match:
+        component: database
+      receiver: 'infrastructure-alerts'
+      group_wait: 30s
+      repeat_interval: 2h
+    
+    - match:
+        component: cache
+      receiver: 'infrastructure-alerts'
+    
+    - match:
+        component: message-queue
+      receiver: 'infrastructure-alerts'
+
+# ============================================================================
+# Inhibit Rules (suppress certain alerts when other alerts are firing)
+# ============================================================================
+inhibit_rules:
+  # If service is down, don't alert on high error rate (obvious consequence)
+  - source_match:
+      alertname: 'ServiceDown'
+    target_match:
+      alertname: 'HighErrorRate'
+    equal: ['service']
+  
+  # If disk is full, don't alert on database slow (likely cause)
+  - source_match:
+      alertname: 'DiskSpaceLow'
+    target_match:
+      alertname: 'DatabaseSlow'
+    equal: ['instance']
+
+# ============================================================================
+# Receivers (notification destinations)
+# ============================================================================
+receivers:
+  # Default receiver (logs only, no external notification)
+  - name: 'default-receiver'
+    # No webhook/slack/email configured - alerts will be visible in AlertManager UI only
+  
+  # Critical alerts receiver
+  - name: 'critical-alerts'
+    # Uncomment and configure when Slack integration is ready:
+    # slack_configs:
+    #   - channel: '#alerts-critical'
+    #     title: '🚨 CRITICAL: {{ .CommonLabels.alertname }}'
+    #     text: |-
+    #       *Service:* {{ .CommonLabels.service }}
+    #       *Severity:* {{ .CommonLabels.severity }}
+    #       *Description:* {{ range .Alerts }}{{ .Annotations.description }}{{ end }}
+    #       *Runbook:* {{ .CommonAnnotations.runbook_url }}
+    #     send_resolved: true
+    
+    # Uncomment and configure when Email is ready:
+    # email_configs:
+    #   - to: '${ALERT_EMAIL_TO}'
+    #     subject: '🚨 CRITICAL: {{ .CommonLabels.alertname }}'
+    #     html: |
+    #       <h2>Critical Alert</h2>
+    #       <p><strong>Service:</strong> {{ .CommonLabels.service }}</p>
+    #       <p><strong>Description:</strong> {{ range .Alerts }}{{ .Annotations.description }}{{ end }}</p>
+  
+  # Warning alerts receiver
+  - name: 'warning-alerts'
+    # slack_configs:
+    #   - channel: '#alerts-warnings'
+    #     title: '⚠️  Warning: {{ .CommonLabels.alertname }}'
+    #     text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+    #     send_resolved: true
+  
+  # Infrastructure alerts receiver
+  - name: 'infrastructure-alerts'
+    # slack_configs:
+    #   - channel: '#alerts-infrastructure'
+    #     title: '🔧 Infrastructure: {{ .CommonLabels.alertname }}'
+    #     text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+    #     send_resolved: true
+
+# ============================================================================
+# Configuration Notes
+# ============================================================================
+# 1. Alert Lifecycle:
+#    Firing → AlertManager → Routing → Grouping → Notification → Resolved
+#
+# 2. Grouping:
+#    Combines multiple similar alerts into single notification
+#    Example: 5 pods of same service down = 1 notification (not 5)
+#
+# 3. Inhibition:
+#    Prevents duplicate/obvious alerts
+#    Example: If service is down, don't alert on "no metrics" (duh!)
+#
+# 4. Silencing:
+#    Temporarily mute alerts via UI (during maintenance)
+#    CLI: amtool silence add alertname="HighCPU" --duration=1h
+#
+# 5. Testing Alerts:
+#    Send test alert to AlertManager:
+#    curl -X POST http://localhost:9093/api/v1/alerts -d '[{
+#      "labels": {"alertname":"TestAlert","severity":"warning"},
+#      "annotations": {"description":"This is a test alert"}
+#    }]'
+#
+# 6. Notification Integrations:
+#    - Slack: webhook URL from Slack app
+#    - Email: SMTP settings (Gmail, SendGrid, Mailgun)
+#    - PagerDuty: integration key
+#    - Webhook: custom HTTP endpoint
+#    - OpsGenie, VictorOps, WeChat, Telegram, etc.
+#
+# 7. Best Practices:
+#    - Use severity labels: critical, warning, info
+#    - Group related alerts together
+#    - Set appropriate repeat_interval (don't spam!)
+#    - Use inhibit rules to reduce noise
+#    - Document runbook URLs in alert annotations
+#    - Test notification channels before production
+#
+# 8. Enable Notifications (when ready):
+#    - Set environment variables in .env file
+#    - Uncomment receiver configs above
+#    - Restart AlertManager: docker compose restart alertmanager
+#    - Send test alert to verify
+#
+# ============================================================================

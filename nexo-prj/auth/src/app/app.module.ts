@@ -18,10 +18,12 @@ import {
   DelegationPermission,
   AuditLog,
 } from '@nexo-prj/shared';
+import { MetricsModule } from '@nexo-prj/shared/metrics';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
+    MetricsModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DB_HOST || 'localhost',

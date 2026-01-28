@@ -1,4 +1,4 @@
-import { IsString, IsEmail, IsOptional, IsNumber, IsEnum, IsBoolean, IsUUID, IsDate, Min, Max } from 'class-validator';
+import { IsString, IsEmail, IsOptional, IsNumber, IsEnum, IsUUID, Min, Max } from 'class-validator';
 
 // Client DTOs
 export class CreateClientDto {

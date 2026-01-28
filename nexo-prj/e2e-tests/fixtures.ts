@@ -23,13 +23,20 @@ export const test = base.extend<TestFixtures>({
   // Helper to register a new user
   registerUser: async ({ request }, use) => {
     const registerFn = async (email: string, password: string, firstName: string, lastName: string) => {
-      const response = await request.post('/auth/register', {
+      const timestamp = Date.now();
+      const username = `user_${timestamp}`;
+      const accountName = `Test Account ${timestamp}`;
+      const accountSlug = `test-account-${timestamp}`;
+      
+      const response = await request.post('/api/auth/register', {
         data: {
           email,
-password,
+          password,
           firstName,
           lastName,
-          username: email.split('@')[0],
+          username,
+          accountName,
+          accountSlug,
         },
       });
       
@@ -43,13 +50,13 @@ password,
   // Helper to login and get JWT token
   loginUser: async ({ request }, use) => {
     const loginFn = async (email: string, password: string) => {
-      const response = await request.post('/auth/login', {
+      const response = await request.post('/api/auth/login', {
         data: { email, password },
       });
       
       expect(response.ok()).toBeTruthy();
       const data = await response.json();
-      return data.access_token || data.token;
+      return data.accessToken || data.access_token || data.token;
     };
     
     await use(loginFn);

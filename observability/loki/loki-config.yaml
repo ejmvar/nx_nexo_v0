@@ -1,0 +1,252 @@
+# ============================================================================
+# Loki Configuration for NEXO CRM
+# ============================================================================
+# Loki is a horizontally-scalable, highly-available log aggregation system
+# inspired by Prometheus. It indexes metadata (labels) instead of full-text,
+# making it much more efficient than Elasticsearch.
+#
+# Reference: https://grafana.com/docs/loki/latest/configuration/
+# ============================================================================
+
+# Authentication (disabled for internal use)
+auth_enabled: false
+
+# ============================================================================
+# Server Configuration
+# ============================================================================
+server:
+  http_listen_port: 3100
+  grpc_listen_port: 9096
+  log_level: info
+  log_format: json
+
+# ============================================================================
+# Common Configuration (shared by all components)
+# ============================================================================
+common:
+  path_prefix: /loki
+  storage:
+    filesystem:
+      chunks_directory: /loki/chunks
+      rules_directory: /loki/rules
+  replication_factor: 1
+  ring:
+    instance_addr: 127.0.0.1
+    kvstore:
+      store: inmemory
+
+# ============================================================================
+# Ingester Configuration (writes incoming log streams to storage)
+# ============================================================================
+ingester:
+  # Chunk configuration
+  chunk_idle_period: 5m        # Flush chunks after 5 minutes of inactivity
+  chunk_block_size: 262144     # 256KB per block
+  chunk_retain_period: 30s     # Keep chunks in memory for late writes
+  max_chunk_age: 1h            # Force chunk flush after 1 hour
+  
+  # WAL (Write-Ahead Log) for durability
+  wal:
+    enabled: true
+    dir: /loki/wal
+    checkpoint_duration: 5m
+    flush_on_shutdown: true
+  
+  # Lifecycler (manages ingester registration)
+  lifecycler:
+    address: 127.0.0.1
+    ring:
+      kvstore:
+        store: inmemory
+      replication_factor: 1
+    final_sleep: 0s
+
+# ============================================================================
+# Schema Configuration (defines how logs are stored and indexed)
+# ============================================================================
+schema_config:
+  configs:
+    - from: 2024-01-01
+      store: tsdb                # Use Time-Series Database index
+      object_store: filesystem   # Store chunks on filesystem
+      schema: v13                # Latest schema version
+      index:
+        prefix: index_
+        period: 24h              # Create new index every 24 hours
+
+# ============================================================================
+# Storage Configuration
+# ============================================================================
+storage_config:
+  tsdb_shipper:
+    active_index_directory: /loki/tsdb-index
+    cache_location: /loki/tsdb-cache
+    shared_store: filesystem
+  
+  filesystem:
+    directory: /loki/chunks
+
+# ============================================================================
+# Chunk Store Configuration
+# ============================================================================
+chunk_store_config:
+  max_look_back_period: 30d      # Maximum time range for queries (matches retention)
+  chunk_cache_config:
+    enable_fifocache: true
+    fifocache:
+      max_size_bytes: 500MB      # Cache up to 500MB of chunks in memory
+      ttl: 24h
+
+# ============================================================================
+# Query Configuration (controls log query behavior)
+# ============================================================================
+query_range:
+  align_queries_with_step: true
+  max_retries: 5
+  cache_results: true
+  results_cache:
+    cache:
+      enable_fifocache: true
+      fifocache:
+        max_size_bytes: 500MB
+        ttl: 24h
+
+limits_config:
+  # Ingestion limits (prevent abuse)
+  ingestion_rate_mb: 10                  # Max 10MB/s per tenant
+  ingestion_burst_size_mb: 20            # Allow bursts up to 20MB
+  max_streams_per_user: 10000            # Max unique label combinations
+  max_global_streams_per_user: 100000    # Global limit across all ingesters
+  
+  # Query limits
+  max_entries_limit_per_query: 10000     # Max log lines returned per query
+  max_query_series: 10000                # Max number of streams to query
+  max_query_lookback: 30d                # Maximum query time range
+  max_query_length: 721h                 # Max 30 days query duration
+  
+  # Label limits
+  max_label_names_per_series: 30         # Max labels per log stream
+  max_label_value_length: 2048           # Max label value length
+  
+  # Chunk limits
+  per_stream_rate_limit: 3MB             # Max rate per stream
+  per_stream_rate_limit_burst: 15MB      # Burst allowance per stream
+  
+  # Retention (must also be configured in compactor)
+  retention_period: 30d                  # Keep logs for 30 days
+  
+  # Split queries for better performance
+  split_queries_by_interval: 24h
+
+# ============================================================================
+# Compactor Configuration (manages chunk compaction and retention)
+# ============================================================================
+compactor:
+  working_directory: /loki/compactor
+  shared_store: filesystem
+  compaction_interval: 10m
+  retention_enabled: true          # Enable automatic deletion of old logs
+  retention_delete_delay: 2h       # Wait 2h before deleting to allow query completion
+  retention_delete_worker_count: 150
+  delete_request_cancel_period: 24h
+
+# ============================================================================
+# Table Manager Configuration (manages index tables)
+# ============================================================================
+table_manager:
+  retention_deletes_enabled: true
+  retention_period: 30d
+
+# ============================================================================
+# Ruler Configuration (evaluates LogQL alert rules)
+# ============================================================================
+ruler:
+  storage:
+    type: local
+    local:
+      directory: /loki/rules
+  rule_path: /loki/rules-temp
+  alertmanager_url: http://alertmanager:9093
+  ring:
+    kvstore:
+      store: inmemory
+  enable_api: true
+  enable_alertmanager_v2: true
+
+# ============================================================================
+# Analytics Configuration
+# ============================================================================
+analytics:
+  reporting_enabled: false  # Disable analytics telemetry
+
+# ============================================================================
+# Configuration Notes
+# ============================================================================
+# 1. Labels Strategy:
+#    Loki uses labels for indexing (similar to Prometheus). Keep label
+#    cardinality LOW to maintain performance. Good labels:
+#    - service, environment, container_name, level, account_id
+#    Bad labels (too high cardinality):
+#    - user_id, request_id, timestamp, IP address
+#
+# 2. Log Format:
+#    Loki works best with structured logs (JSON). Promtail can parse
+#    JSON logs and extract fields as labels. Example:
+#    {
+#      "timestamp": "2024-01-15T10:30:00Z",
+#      "level": "error",
+#      "service": "crm-service",
+#      "account_id": "uuid",
+#      "message": "Database connection failed"
+#    }
+#
+# 3. Query Examples (LogQL):
+#    - All logs from CRM service:
+#      {service="crm-service"}
+#    
+#    - Error logs only:
+#      {service="crm-service", level="error"}
+#    
+#    - Logs containing "upload":
+#      {service="crm-service"} |= "upload"
+#    
+#    - Parse JSON and filter by field:
+#      {service="crm-service"} | json | account_id="uuid"
+#    
+#    - Count errors per minute:
+#      sum(rate({service="crm-service", level="error"}[1m]))
+#    
+#    - Top error messages:
+#      topk(10, sum by (message) (count_over_time({level="error"}[1h])))
+#
+# 4. Performance Tips:
+#    - Use narrow time ranges (avoid querying >7 days at once)
+#    - Add as many label filters as possible
+#    - Use streaming (tail) for real-time logs
+#    - Enable caching for repeated queries
+#
+# 5. Storage:
+#    - Chunks: Compressed log data (stored as files)
+#    - Index: Label index (TSDB format)
+#    - WAL: Write-ahead log for durability
+#    - Retention: Automatically deletes logs older than 30 days
+#
+# 6. Scaling:
+#    For production with high log volume:
+#    - Use S3/GCS for chunk storage (instead of filesystem)
+#    - Run multiple ingesters (increase replication_factor)
+#    - Use memcached for distributed caching
+#    - Deploy read/write split architecture
+#
+# 7. Resource Usage:
+#    - Memory: ~512MB baseline + cache
+#    - CPU: ~0.5-1.0 cores
+#    - Disk: ~50GB+ (depends on log volume and retention)
+#    - Network: Receive logs from Promtail (typically <10MB/s)
+#
+# 8. Integration:
+#    - Promtail: Ships logs to Loki (push model)
+#    - Grafana: Visualizes logs (Explore and Dashboards)
+#    - AlertManager: Receives alerts from Loki Ruler
+#
+# ============================================================================

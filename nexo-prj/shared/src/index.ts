@@ -11,3 +11,9 @@ export * from './lib/entities/account-permission.entity';
 export * from './lib/entities/delegation.entity';
 export * from './lib/entities/delegation-permission.entity';
 export * from './lib/entities/audit-log.entity';
+
+// Metrics
+export * from './lib/metrics/metrics.module';
+export * from './lib/metrics/metrics.service';
+export * from './lib/metrics/metrics.controller';
+export * from './lib/metrics/metrics.interceptor';

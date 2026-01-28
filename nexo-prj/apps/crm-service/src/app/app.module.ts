@@ -1,18 +1,33 @@
 import { Module } from '@nestjs/common';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+import { PrometheusModule } from '@willsoto/nestjs-prometheus';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { CrmModule } from '../crm/crm.module.js';
 import { DatabaseModule } from '../database/database.module.js';
 import { JwtStrategy } from '../auth/jwt.strategy.js';
+import { CacheModule } from './cache/cache.module.js';
+import { HttpCacheInterceptor } from './cache/http-cache.interceptor.js';
+import { EventsModule } from './events/events.module.js';
+import { EventsInterceptor } from './events/events.interceptor.js';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env.local',
+    }),
+    PrometheusModule.register({
+      defaultMetrics: {
+        enabled: true,
+      },
+      path: '/metrics',
+      defaultLabels: {
+        app: process.env.SERVICE_NAME || 'crm-service',
+      },
     }),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
@@ -24,9 +39,22 @@ import { JwtStrategy } from '../auth/jwt.strategy.js';
       }),
     }),
     DatabaseModule,
+    CacheModule,
+    EventsModule,
     CrmModule,
   ],
   controllers: [AppController],
-  providers: [AppService, JwtStrategy],
+  providers: [
+    AppService, 
+    JwtStrategy,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: HttpCacheInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: EventsInterceptor,
+    },
+  ],
 })
 export class AppModule {}

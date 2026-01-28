@@ -1,0 +1,111 @@
+# ============================================================================
+# Grafana Datasource: Loki
+# ============================================================================
+# This configuration file automatically provisions Loki as a datasource
+# in Grafana when the container starts. No manual configuration needed.
+#
+# File location: observability/grafana/provisioning/datasources/loki.yaml
+# Reference: https://grafana.com/docs/grafana/latest/datasources/loki/
+# ============================================================================
+
+apiVersion: 1
+
+datasources:
+  - name: Loki
+    type: loki
+    access: proxy
+    url: http://loki:3100
+    uid: loki-uid
+    isDefault: false  # Prometheus is default for metrics
+    editable: false
+    version: 1
+    
+    jsonData:
+      maxLines: 1000
+      
+      # Derived fields (extract values from logs to link to other datasources)
+      derivedFields:
+        # Extract trace_id and link to Tempo (if using distributed tracing)
+        - name: trace_id
+          matcherRegex: '"trace_id":"(\w+)"'
+          url: '$${__value.raw}'
+          datasourceUid: tempo-uid  # Change if using Tempo
+          urlDisplayLabel: 'View Trace'
+        
+        # Extract account_id for filtering
+        - name: account_id
+          matcherRegex: '"account_id":"([^"]+)"'
+          url: ''
+        
+        # Extract user_id for user activity analysis
+        - name: user_id
+          matcherRegex: '"user_id":"([^"]+)"'
+          url: ''
+        
+        # Extract request_id for request correlation
+        - name: request_id
+          matcherRegex: '"request_id":"([^"]+)"'
+          url: ''
+      
+      # Timeout for log queries
+      timeout: 60
+      
+      # HTTP method for queries
+      httpMethod: POST
+      
+      # Alert query type
+      alertmanager: true
+
+# ============================================================================
+# Configuration Notes
+# ============================================================================
+# 1. URL: Internal Docker network URL (loki:3100)
+#    Grafana proxies all requests for security
+#
+# 2. Max Lines: 1000
+#    Default limit for log lines returned per query
+#    Prevents overwhelming the UI with too many logs
+#    Override in individual queries: {service="crm"} | limit 5000
+#
+# 3. Derived Fields:
+#    Automatically extract values from log messages using regex
+#    Makes it easy to filter logs by account, user, or trace
+#    Click extracted values to filter or navigate to related data
+#
+# 4. Example Queries (LogQL):
+#
+#    Basic filtering:
+#    {service="crm-service"}
+#    {service="crm-service", level="error"}
+#    
+#    Text search:
+#    {service="crm-service"} |= "upload"
+#    {service="crm-service"} |~ "error|failure"
+#    
+#    JSON parsing:
+#    {service="crm-service"} | json | account_id="uuid"
+#    {service="crm-service"} | json | status_code >= 400
+#    
+#    Metrics from logs:
+#    rate({service="crm-service", level="error"}[5m])
+#    sum by (service) (count_over_time({level="error"}[1h]))
+#    
+#    Pattern extraction:
+#    {service="crm-service"} | pattern `<method> <url> <status> <duration>`
+#
+# 5. Integration with Prometheus:
+#    Use split view in Grafana Explore:
+#    - Top panel: Prometheus metrics (e.g., error rate)
+#    - Bottom panel: Loki logs (filtered to same time range)
+#    Perfect for investigating metric anomalies
+#
+# 6. Log Levels:
+#    Loki automatically recognizes common log levels:
+#    - error, err, fatal, critical
+#    - warn, warning
+#    - info, information
+#    - debug, trace
+#    
+#    Filter by level: {level="error"}
+#
+# ============================================================================
