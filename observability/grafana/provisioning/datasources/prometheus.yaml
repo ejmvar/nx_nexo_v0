@@ -46,9 +46,8 @@ datasources:
       # Query splitting
       incrementalQuerying: true
       incrementalQueryOverlapWindow: 10m
-    
-    # Default editor mode for queries
-    jsonData:
+      
+      # Default editor mode for queries
       defaultEditor: 'builder'  # or 'code' for PromQL directly
 
 # ============================================================================

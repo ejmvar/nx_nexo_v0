@@ -18,12 +18,12 @@ networks:
     driver: bridge
     ipam:
       config:
-        - subnet: 172.20.0.0/16
+        - subnet: 172.21.0.0/16
 
   # Bridge to application network (read-only access)
   backend-network:
     external: true
-    name: nexo-backend
+    name: nexo-network
 
 volumes:
   prometheus-data:
@@ -57,8 +57,8 @@ services:
     ports:
       - "9090:9090"  # Prometheus UI (internal only in production)
     volumes:
-      - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - ./observability/prometheus/alerts:/etc/prometheus/alerts:ro
+      - ../observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ../observability/prometheus/alerts:/etc/prometheus/alerts:ro
       - prometheus-data:/prometheus
     networks:
       - observability-network
@@ -94,8 +94,8 @@ services:
     ports:
       - "3100:3100"  # Loki API (internal only in production)
     volumes:
-      - ./observability/loki/loki-config.yaml:/etc/loki/loki-config.yaml:ro
-      - ./observability/loki/rules:/etc/loki/rules:ro
+      - ../observability/loki/loki-config.yaml:/etc/loki/loki-config.yaml:ro
+      - ../observability/loki/rules:/etc/loki/rules:ro
       - loki-data:/loki
     networks:
       - observability-network
@@ -128,7 +128,7 @@ services:
     user: "0:0"  # Must run as root to access Docker socket
     command: -config.file=/etc/promtail/promtail-config.yaml
     volumes:
-      - ./observability/promtail/promtail-config.yaml:/etc/promtail/promtail-config.yaml:ro
+      - ../observability/promtail/promtail-config.yaml:/etc/promtail/promtail-config.yaml:ro
       - /var/log:/var/log:ro  # Host logs
       - /var/lib/docker/containers:/var/lib/docker/containers:ro  # Container logs
       - /var/run/docker.sock:/var/run/docker.sock:ro  # Docker API for metadata
@@ -171,8 +171,8 @@ services:
       - GF_LOG_LEVEL=info
     volumes:
       - grafana-data:/var/lib/grafana
-      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
-      - ./observability/grafana/grafana.ini:/etc/grafana/grafana.ini:ro
+      - ../observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ../observability/grafana/grafana.ini:/etc/grafana/grafana.ini:ro
     networks:
       - observability-network
     depends_on:
@@ -212,7 +212,7 @@ services:
     ports:
       - "9093:9093"  # AlertManager UI (internal only in production)
     volumes:
-      - ./observability/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - ../observability/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
       - alertmanager-data:/alertmanager
     networks:
       - observability-network
