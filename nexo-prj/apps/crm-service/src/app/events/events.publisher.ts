@@ -62,7 +62,7 @@ export class EventsPublisher implements OnModuleInit, OnModuleDestroy {
         this.channel = null;
       });
     } catch (error) {
-      this.logger.error(`Failed to connect to RabbitMQ: ${error.message}`);
+      this.logger.error(`Failed to connect to RabbitMQ: ${error instanceof Error ? error.message : String(error)}`);
       this.connection = null;
       this.channel = null;
     } finally {
@@ -129,7 +129,7 @@ export class EventsPublisher implements OnModuleInit, OnModuleDestroy {
         `📤 Published event: ${routingKey} to account ${event.accountId}`
       );
     } catch (error) {
-      this.logger.error(`Failed to publish event: ${error.message}`, error.stack);
+      this.logger.error(`Failed to publish event: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
     }
   }
 }

@@ -416,7 +416,7 @@ export class CrmService {
       return this.getSupplier(accountId, supplierResult.rows[0].id);
     } catch (error) {
       await client.query('ROLLBACK');
-      throw new BadRequestException(`Failed to create supplier: ${error.message}`);
+      throw new BadRequestException(`Failed to create supplier: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
       await client.query('RESET app.current_account_id').catch(() => {});
       client.release();
@@ -495,7 +495,7 @@ export class CrmService {
       return this.getSupplier(accountId, id);
     } catch (error) {
       await client.query('ROLLBACK');
-      throw new BadRequestException(`Failed to update supplier: ${error.message}`);
+      throw new BadRequestException(`Failed to update supplier: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
       await client.query('RESET app.current_account_id').catch(() => {});
       client.release();
