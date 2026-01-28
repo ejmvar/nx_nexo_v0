@@ -1,0 +1,460 @@
+# ============================================================================
+# Prometheus Alert Rules for NEXO CRM
+# ============================================================================
+# This file defines alerting rules for production monitoring
+# Alerts are evaluated every 15 seconds (evaluation_interval in prometheus.yml)
+# ============================================================================
+
+groups:
+  # ==========================================================================
+  # SERVICE HEALTH ALERTS
+  # ==========================================================================
+  - name: service_health
+    interval: 30s
+    rules:
+      # Service is down for more than 1 minute
+      - alert: ServiceDown
+        expr: up{job=~".*-service"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          category: availability
+          team: platform
+        annotations:
+          summary: "Service {{ $labels.job }} is down"
+          description: "Service {{ $labels.job }} on {{ $labels.instance }} has been down for more than 1 minute.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+          runbook: "https://docs.nexo-crm.com/runbooks/service-down"
+          dashboard: "http://localhost:3300/d/nexo-overview/system-overview"
+
+      # Target is unreachable (scrape failed)
+      - alert: TargetUnreachable
+        expr: up == 0
+        for: 2m
+        labels:
+          severity: warning
+          category: availability
+          team: platform
+        annotations:
+          summary: "Target {{ $labels.job }} is unreachable"
+          description: "Prometheus cannot scrape {{ $labels.job }} at {{ $labels.instance }} for more than 2 minutes.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+          runbook: "https://docs.nexo-crm.com/runbooks/target-unreachable"
+
+      # Service restarting frequently
+      - alert: HighRestartRate
+        expr: rate(process_start_time_seconds[5m]) > 0.01
+        for: 5m
+        labels:
+          severity: warning
+          category: availability
+          team: platform
+        annotations:
+          summary: "Service {{ $labels.job }} is restarting frequently"
+          description: "Service {{ $labels.job }} has restarted multiple times in the last 5 minutes.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+          runbook: "https://docs.nexo-crm.com/runbooks/high-restart-rate"
+
+  # ==========================================================================
+  # ERROR RATE ALERTS
+  # ==========================================================================
+  - name: error_rates
+    interval: 30s
+    rules:
+      # High 5xx error rate (>5% for 5 minutes)
+      - alert: HighServerErrorRate
+        expr: |
+          (
+            sum(rate(http_requests_total{status=~"5.."}[5m])) by (service)
+            /
+            sum(rate(http_requests_total[5m])) by (service)
+          ) * 100 > 5
+        for: 5m
+        labels:
+          severity: critical
+          category: errors
+          team: platform
+        annotations:
+          summary: "High 5xx error rate for {{ $labels.service }}"
+          description: "Service {{ $labels.service }} has {{ $value | humanizePercentage }} 5xx error rate (threshold: 5%).\n  LABELS = {{ $labels }}"
+          runbook: "https://docs.nexo-crm.com/runbooks/high-error-rate"
+          dashboard: "http://localhost:3300/d/nexo-{{ $labels.service }}"
+
+      # High 4xx error rate (>10% for 10 minutes)
+      - alert: HighClientErrorRate
+        expr: |
+          (
+            sum(rate(http_requests_total{status=~"4.."}[5m])) by (service)
+            /
+            sum(rate(http_requests_total[5m])) by (service)
+          ) * 100 > 10
+        for: 10m
+        labels:
+          severity: warning
+          category: errors
+          team: platform
+        annotations:
+          summary: "High 4xx error rate for {{ $labels.service }}"
+          description: "Service {{ $labels.service }} has {{ $value | humanizePercentage }} 4xx error rate (threshold: 10%).\n  LABELS = {{ $labels }}"
+          runbook: "https://docs.nexo-crm.com/runbooks/high-client-error-rate"
+
+      # Spike in error count
+      - alert: ErrorSpike
+        expr: |
+          (
+            sum(rate(http_requests_total{status=~"[45].."}[2m])) by (service)
+            >
+            sum(rate(http_requests_total{status=~"[45].."}[10m])) by (service) * 2
+          )
+        for: 3m
+        labels:
+          severity: warning
+          category: errors
+          team: platform
+        annotations:
+          summary: "Error spike detected for {{ $labels.service }}"
+          description: "Service {{ $labels.service }} is experiencing a sudden spike in errors (2x baseline).\n  CURRENT = {{ $value }}\n  LABELS = {{ $labels }}"
+          runbook: "https://docs.nexo-crm.com/runbooks/error-spike"
+
+  # ==========================================================================
+  # PERFORMANCE / LATENCY ALERTS
+  # ==========================================================================
+  - name: performance
+    interval: 30s
+    rules:
+      # High p95 latency (>500ms for 5 minutes)
+      - alert: HighLatencyP95
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(http_request_duration_seconds_bucket[5m])) by (le, service)
+          ) * 1000 > 500
+        for: 5m
+        labels:
+          severity: warning
+          category: performance
+          team: platform
+        annotations:
+          summary: "High p95 latency for {{ $labels.service }}"
+          description: "Service {{ $labels.service }} p95 latency is {{ $value | printf \"%.2f\" }}ms (threshold: 500ms).\n  LABELS = {{ $labels }}"
+          runbook: "https://docs.nexo-crm.com/runbooks/high-latency"
+          dashboard: "http://localhost:3300/d/nexo-{{ $labels.service }}"
+
+      # Very high p99 latency (>1s for 5 minutes)
+      - alert: HighLatencyP99
+        expr: |
+          histogram_quantile(0.99,
+            sum(rate(http_request_duration_seconds_bucket[5m])) by (le, service)
+          ) * 1000 > 1000
+        for: 5m
+        labels:
+          severity: critical
+          category: performance
+          team: platform
+        annotations:
+          summary: "Very high p99 latency for {{ $labels.service }}"
+          description: "Service {{ $labels.service }} p99 latency is {{ $value | printf \"%.2f\" }}ms (threshold: 1000ms).\n  LABELS = {{ $labels }}"
+          runbook: "https://docs.nexo-crm.com/runbooks/very-high-latency"
+
+      # Slow request rate (potential database issues)
+      - alert: SlowRequestRate
+        expr: |
+          sum(rate(http_requests_total[5m])) by (service) > 0
+          and
+          histogram_quantile(0.50,
+            sum(rate(http_request_duration_seconds_bucket[5m])) by (le, service)
+          ) * 1000 > 200
+        for: 10m
+        labels:
+          severity: warning
+          category: performance
+          team: platform
+        annotations:
+          summary: "Slow median request duration for {{ $labels.service }}"
+          description: "Service {{ $labels.service }} median (p50) latency is {{ $value | printf \"%.2f\" }}ms (threshold: 200ms). This may indicate database or backend issues.\n  LABELS = {{ $labels }}"
+          runbook: "https://docs.nexo-crm.com/runbooks/slow-requests"
+
+  # ==========================================================================
+  # RESOURCE USAGE ALERTS
+  # ==========================================================================
+  - name: resources
+    interval: 30s
+    rules:
+      # High CPU usage (>90% for 10 minutes)
+      - alert: HighCPUUsage
+        expr: rate(process_cpu_user_seconds_total[5m]) * 100 > 90
+        for: 10m
+        labels:
+          severity: warning
+          category: resources
+          team: platform
+        annotations:
+          summary: "High CPU usage for {{ $labels.job }}"
+          description: "Service {{ $labels.job }} CPU usage is {{ $value | printf \"%.2f\" }}% (threshold: 90%).\n  LABELS = {{ $labels }}"
+          runbook: "https://docs.nexo-crm.com/runbooks/high-cpu"
+          dashboard: "http://localhost:3300/d/nexo-overview"
+
+      # Critical CPU usage (>95% for 5 minutes)
+      - alert: CriticalCPUUsage
+        expr: rate(process_cpu_user_seconds_total[5m]) * 100 > 95
+        for: 5m
+        labels:
+          severity: critical
+          category: resources
+          team: platform
+        annotations:
+          summary: "CRITICAL CPU usage for {{ $labels.job }}"
+          description: "Service {{ $labels.job }} CPU usage is {{ $value | printf \"%.2f\" }}% (threshold: 95%). Immediate action required.\n  LABELS = {{ $labels }}"
+          runbook: "https://docs.nexo-crm.com/runbooks/critical-cpu"
+
+      # High memory usage (>90% of 1GB for 10 minutes)
+      - alert: HighMemoryUsage
+        expr: process_resident_memory_bytes > 966367641  # 90% of 1GB
+        for: 10m
+        labels:
+          severity: warning
+          category: resources
+          team: platform
+        annotations:
+          summary: "High memory usage for {{ $labels.job }}"
+          description: "Service {{ $labels.job }} memory usage is {{ $value | humanize }}B (threshold: 966MB).\n  LABELS = {{ $labels }}"
+          runbook: "https://docs.nexo-crm.com/runbooks/high-memory"
+          dashboard: "http://localhost:3300/d/nexo-{{ $labels.service }}"
+
+      # Critical memory usage (>95% of 1GB for 5 minutes)
+      - alert: CriticalMemoryUsage
+        expr: process_resident_memory_bytes > 1019215667  # 95% of 1GB
+        for: 5m
+        labels:
+          severity: critical
+          category: resources
+          team: platform
+        annotations:
+          summary: "CRITICAL memory usage for {{ $labels.job }}"
+          description: "Service {{ $labels.job }} memory usage is {{ $value | humanize }}B (threshold: 1019MB). Risk of OOM.\n  LABELS = {{ $labels }}"
+          runbook: "https://docs.nexo-crm.com/runbooks/critical-memory"
+
+      # Memory leak detection (steady increase over 1 hour)
+      - alert: PossibleMemoryLeak
+        expr: |
+          (
+            process_resident_memory_bytes
+            -
+            process_resident_memory_bytes offset 1h
+          ) > 104857600  # 100MB increase
+        for: 5m
+        labels:
+          severity: warning
+          category: resources
+          team: platform
+        annotations:
+          summary: "Possible memory leak in {{ $labels.job }}"
+          description: "Service {{ $labels.job }} memory increased by {{ $value | humanize }}B in the last hour.\n  LABELS = {{ $labels }}"
+          runbook: "https://docs.nexo-crm.com/runbooks/memory-leak"
+
+  # ==========================================================================
+  # SYSTEM-LEVEL ALERTS
+  # ==========================================================================
+  - name: system
+    interval: 30s
+    rules:
+      # Disk space low (<15% free)
+      - alert: DiskSpaceLow
+        expr: |
+          (
+            node_filesystem_avail_bytes{mountpoint="/",fstype!="tmpfs"}
+            /
+            node_filesystem_size_bytes{mountpoint="/",fstype!="tmpfs"}
+          ) * 100 < 15
+        for: 5m
+        labels:
+          severity: warning
+          category: resources
+          team: platform
+        annotations:
+          summary: "Low disk space on {{ $labels.instance }}"
+          description: "Disk space on {{ $labels.instance }} is {{ $value | printf \"%.2f\" }}% free (threshold: 15%).\n  LABELS = {{ $labels }}"
+          runbook: "https://docs.nexo-crm.com/runbooks/disk-space-low"
+
+      # Disk space critical (<10% free)
+      - alert: DiskSpaceCritical
+        expr: |
+          (
+            node_filesystem_avail_bytes{mountpoint="/",fstype!="tmpfs"}
+            /
+            node_filesystem_size_bytes{mountpoint="/",fstype!="tmpfs"}
+          ) * 100 < 10
+        for: 2m
+        labels:
+          severity: critical
+          category: resources
+          team: platform
+        annotations:
+          summary: "CRITICAL: Disk space on {{ $labels.instance }}"
+          description: "Disk space on {{ $labels.instance }} is {{ $value | printf \"%.2f\" }}% free (threshold: 10%). Immediate action required.\n  LABELS = {{ $labels }}"
+          runbook: "https://docs.nexo-crm.com/runbooks/disk-space-critical"
+
+      # High load average
+      - alert: HighLoadAverage
+        expr: node_load5 > 2
+        for: 10m
+        labels:
+          severity: warning
+          category: resources
+          team: platform
+        annotations:
+          summary: "High load average on {{ $labels.instance }}"
+          description: "5-minute load average on {{ $labels.instance }} is {{ $value | printf \"%.2f\" }} (threshold: 2.0).\n  LABELS = {{ $labels }}"
+          runbook: "https://docs.nexo-crm.com/runbooks/high-load"
+
+  # ==========================================================================
+  # DATABASE ALERTS (if PostgreSQL exporter is enabled)
+  # ==========================================================================
+  - name: database
+    interval: 30s
+    rules:
+      # PostgreSQL is down
+      - alert: PostgreSQLDown
+        expr: pg_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          category: database
+          team: platform
+        annotations:
+          summary: "PostgreSQL database is down"
+          description: "PostgreSQL on {{ $labels.instance }} is not responding.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+          runbook: "https://docs.nexo-crm.com/runbooks/postgresql-down"
+
+      # Too many database connections
+      - alert: HighDatabaseConnections
+        expr: |
+          (
+            sum(pg_stat_database_numbackends) by (instance)
+            /
+            pg_settings_max_connections
+          ) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          category: database
+          team: platform
+        annotations:
+          summary: "High number of database connections"
+          description: "PostgreSQL on {{ $labels.instance }} has {{ $value | printf \"%.2f\" }}% of max connections used (threshold: 80%).\n  LABELS = {{ $labels }}"
+          runbook: "https://docs.nexo-crm.com/runbooks/high-db-connections"
+
+  # ==========================================================================
+  # RABBITMQ ALERTS (if RabbitMQ exporter is enabled)
+  # ==========================================================================
+  - name: rabbitmq
+    interval: 30s
+    rules:
+      # RabbitMQ is down
+      - alert: RabbitMQDown
+        expr: rabbitmq_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          category: messaging
+          team: platform
+        annotations:
+          summary: "RabbitMQ is down"
+          description: "RabbitMQ on {{ $labels.instance }} is not responding.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+          runbook: "https://docs.nexo-crm.com/runbooks/rabbitmq-down"
+
+      # Too many unacked messages
+      - alert: HighUnackedMessages
+        expr: rabbitmq_queue_messages_unacked > 1000
+        for: 10m
+        labels:
+          severity: warning
+          category: messaging
+          team: platform
+        annotations:
+          summary: "High number of unacked messages in RabbitMQ"
+          description: "Queue {{ $labels.queue }} has {{ $value }} unacked messages (threshold: 1000).\n  LABELS = {{ $labels }}"
+          runbook: "https://docs.nexo-crm.com/runbooks/high-unacked-messages"
+
+  # ==========================================================================
+  # REDIS ALERTS (if Redis exporter is enabled)
+  # ==========================================================================
+  - name: redis
+    interval: 30s
+    rules:
+      # Redis is down
+      - alert: RedisDown
+        expr: redis_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          category: cache
+          team: platform
+        annotations:
+          summary: "Redis cache is down"
+          description: "Redis on {{ $labels.instance }} is not responding.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+          runbook: "https://docs.nexo-crm.com/runbooks/redis-down"
+
+      # High memory usage in Redis
+      - alert: RedisHighMemory
+        expr: |
+          (
+            redis_memory_used_bytes
+            /
+            redis_memory_max_bytes
+          ) * 100 > 90
+        for: 5m
+        labels:
+          severity: warning
+          category: cache
+          team: platform
+        annotations:
+          summary: "Redis memory usage is high"
+          description: "Redis on {{ $labels.instance }} is using {{ $value | printf \"%.2f\" }}% of max memory (threshold: 90%).\n  LABELS = {{ $labels }}"
+          runbook: "https://docs.nexo-crm.com/runbooks/redis-high-memory"
+
+  # ==========================================================================
+  # PROMETHEUS SELF-MONITORING
+  # ==========================================================================
+  - name: prometheus
+    interval: 30s
+    rules:
+      # Too many time series
+      - alert: PrometheusTooManyTimeSeries
+        expr: prometheus_tsdb_head_series > 100000
+        for: 10m
+        labels:
+          severity: warning
+          category: monitoring
+          team: platform
+        annotations:
+          summary: "Prometheus has too many time series"
+          description: "Prometheus has {{ $value }} time series (threshold: 100000). Consider reducing scrape targets or retention.\n  LABELS = {{ $labels }}"
+          runbook: "https://docs.nexo-crm.com/runbooks/prometheus-cardinality"
+
+      # Prometheus target scrape failures
+      - alert: PrometheusTargetScrapeFailed
+        expr: up{job="prometheus"} == 0
+        for: 5m
+        labels:
+          severity: warning
+          category: monitoring
+          team: platform
+        annotations:
+          summary: "Prometheus target scrape failed"
+          description: "Prometheus failed to scrape {{ $labels.job }} on {{ $labels.instance }}.\n  LABELS = {{ $labels }}"
+          runbook: "https://docs.nexo-crm.com/runbooks/scrape-failed"
+
+      # Prometheus is running out of storage
+      - alert: PrometheusStorageLow
+        expr: |
+          (
+            prometheus_tsdb_storage_blocks_bytes
+            /
+            (prometheus_tsdb_storage_blocks_bytes + prometheus_tsdb_wal_size_bytes)
+          ) * 100 > 80
+        for: 10m
+        labels:
+          severity: warning
+          category: monitoring
+          team: platform
+        annotations:
+          summary: "Prometheus storage is running low"
+          description: "Prometheus storage usage is {{ $value | printf \"%.2f\" }}% (threshold: 80%).\n  LABELS = {{ $labels }}"
+          runbook: "https://docs.nexo-crm.com/runbooks/prometheus-storage"
