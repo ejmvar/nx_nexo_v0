@@ -88,8 +88,8 @@ export class EventsInterceptor implements NestInterceptor {
           );
         } catch (error) {
           this.logger.error(
-            `Failed to emit event: ${error.message}`,
-            error.stack
+            `Failed to emit event: ${error instanceof Error ? error.message : String(error)}`,
+            error instanceof Error ? error.stack : undefined
           );
         }
       })

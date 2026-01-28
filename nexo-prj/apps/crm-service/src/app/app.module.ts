@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { APP_INTERCEPTOR } from '@nestjs/core';
+import { PrometheusModule } from '@willsoto/nestjs-prometheus';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { CrmModule } from '../crm/crm.module.js';
@@ -18,6 +19,15 @@ import { EventsInterceptor } from './events/events.interceptor.js';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env.local',
+    }),
+    PrometheusModule.register({
+      defaultMetrics: {
+        enabled: true,
+      },
+      path: '/metrics',
+      defaultLabels: {
+        app: process.env.SERVICE_NAME || 'crm-service',
+      },
     }),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({

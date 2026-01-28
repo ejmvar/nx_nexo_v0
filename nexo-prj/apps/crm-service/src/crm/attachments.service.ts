@@ -55,7 +55,7 @@ export class AttachmentsService {
         this.logger.log(`📁 Created upload directory: ${this.uploadDir}`);
       }
     } catch (error) {
-      this.logger.error(`Failed to create upload directory: ${error.message}`);
+      this.logger.error(`Failed to create upload directory: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -126,14 +126,14 @@ export class AttachmentsService {
     } catch (error) {
       // Clean up file if database save fails
       this.logger.error(
-        `❌ Upload failed for "${file.originalname}": ${error.message} - Rolling back file write`
+        `❌ Upload failed for "${file.originalname}": ${error instanceof Error ? error.message : String(error)} - Rolling back file write`
       );
       try {
         await fs.unlink(filePath);
         this.logger.log(`🧹 Cleaned up orphaned file: ${filePath}`);
       } catch (unlinkError) {
         this.logger.error(
-          `⚠️  Failed to clean up orphaned file ${filePath}: ${unlinkError.message}`
+          `⚠️  Failed to clean up orphaned file ${filePath}: ${unlinkError instanceof Error ? unlinkError.message : String(unlinkError)}`
         );
       }
       throw error;
@@ -202,7 +202,7 @@ export class AttachmentsService {
       return { buffer, attachment };
     } catch (error) {
       this.logger.error(
-        `Failed to read file ${attachment.file_path}: ${error.message}`
+        `Failed to read file ${attachment.file_path}: ${error instanceof Error ? error.message : String(error)}`
       );
       throw new NotFoundException('File not found on disk');
     }
@@ -222,7 +222,7 @@ export class AttachmentsService {
       this.logger.log(`✅ File deleted from disk: ${attachment.file_path}`);
     } catch (error) {
       this.logger.warn(
-        `⚠️  File not found on disk: ${attachment.file_path} - ${error.message}. ` +
+        `⚠️  File not found on disk: ${attachment.file_path} - ${error instanceof Error ? error.message : String(error)}. ` +
         `Proceeding with database deletion.`
       );
     }

@@ -220,7 +220,7 @@ export class AuditLoggerInterceptor implements NestInterceptor {
     } catch (error) {
       // Log audit failures to console but don't throw
       // (we don't want audit logging failures to break the application)
-      console.error('[AuditLogger] Failed to log audit:', error.message);
+      console.error('[AuditLogger] Failed to log audit:', error instanceof Error ? error.message : String(error));
     }
   }
 }
