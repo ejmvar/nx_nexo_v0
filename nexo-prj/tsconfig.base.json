@@ -21,6 +21,7 @@
     "paths": {
       "@nexo-prj/shared-ui": ["dist/libs/shared-ui/src/index.d.ts"],
       "@nexo-prj/shared-ui/*": ["dist/libs/shared-ui/src/*"],
+      "@nexo-prj/shared": ["shared/src/index.ts"],
       "@nexo-prj/shared/logger": ["libs/shared/logger/src/index.ts"],
       "@nexo-prj/shared/health": ["libs/shared/health/src/index.ts"],
       "@nexo-prj/shared/metrics": ["libs/shared/metrics/src/index.ts"]
