@@ -67,8 +67,17 @@ export class AttachmentsService {
     userId: string,
     description?: string,
   ): Promise<Attachment> {
+    this.logger.log(
+      `📤 Upload request: file="${file.originalname}" size=${file.size} mime="${file.mimetype}" ` +
+      `entity=${entityType}:${entityId} account=${accountId} user=${userId}`
+    );
+
     // Validate file size
     if (file.size > this.maxFileSize) {
+      this.logger.warn(
+        `❌ File size validation failed: ${file.size} bytes exceeds limit of ${this.maxFileSize} bytes ` +
+        `(${this.maxFileSize / 1024 / 1024}MB) for file "${file.originalname}"`
+      );
       throw new BadRequestException(
         `File size exceeds maximum allowed size of ${this.maxFileSize / 1024 / 1024}MB`
       );
@@ -76,6 +85,9 @@ export class AttachmentsService {
 
     // Validate MIME type
     if (!this.allowedMimeTypes.includes(file.mimetype)) {
+      this.logger.warn(
+        `❌ MIME type validation failed: "${file.mimetype}" not in allowed list for file "${file.originalname}"`
+      );
       throw new BadRequestException(
         `File type ${file.mimetype} is not allowed. Allowed types: ${this.allowedMimeTypes.join(', ')}`
       );
@@ -105,16 +117,24 @@ export class AttachmentsService {
       );
 
       this.logger.log(
-        `📎 File uploaded: ${file.originalname} (${file.size} bytes) for ${entityType}:${entityId}`
+        `✅ File uploaded successfully: id=${result.rows[0].id} file="${file.originalname}" ` +
+        `stored_as="${fileName}" size=${file.size} bytes mime="${file.mimetype}" ` +
+        `entity=${entityType}:${entityId} account=${accountId}`
       );
 
       return result.rows[0];
     } catch (error) {
       // Clean up file if database save fails
+      this.logger.error(
+        `❌ Upload failed for "${file.originalname}": ${error.message} - Rolling back file write`
+      );
       try {
         await fs.unlink(filePath);
+        this.logger.log(`🧹 Cleaned up orphaned file: ${filePath}`);
       } catch (unlinkError) {
-        this.logger.error(`Failed to clean up file: ${unlinkError.message}`);
+        this.logger.error(
+          `⚠️  Failed to clean up orphaned file ${filePath}: ${unlinkError.message}`
+        );
       }
       throw error;
     }
@@ -144,6 +164,10 @@ export class AttachmentsService {
     query += ' ORDER BY created_at DESC';
 
     const result = await this.db.queryWithAccount(accountId, query, params);
+    this.logger.log(
+      `📋 Listed ${result.rows.length} attachments for account=${accountId} ` +
+      `filters: entityType=${entityType || 'all'} entityId=${entityId || 'all'}`
+    );
     return result.rows;
   }
 
@@ -167,8 +191,14 @@ export class AttachmentsService {
   }> {
     const attachment = await this.findOne(id, accountId);
 
+    this.logger.log(
+      `⬇️  Downloading attachment: id=${id} file="${attachment.original_name}" ` +
+      `size=${attachment.file_size} account=${accountId}`
+    );
+
     try {
       const buffer = await fs.readFile(attachment.file_path);
+      this.logger.log(`✅ Download successful: id=${id} bytes=${buffer.length}`);
       return { buffer, attachment };
     } catch (error) {
       this.logger.error(
@@ -181,13 +211,19 @@ export class AttachmentsService {
   async delete(id: string, accountId: string): Promise<void> {
     const attachment = await this.findOne(id, accountId);
 
+    this.logger.log(
+      `🗑️  Deleting attachment: id=${id} file="${attachment.original_name}" ` +
+      `size=${attachment.file_size} account=${accountId}`
+    );
+
     try {
       // Delete file from disk
       await fs.unlink(attachment.file_path);
-      this.logger.log(`🗑️  Deleted file: ${attachment.file_path}`);
+      this.logger.log(`✅ File deleted from disk: ${attachment.file_path}`);
     } catch (error) {
       this.logger.warn(
-        `File not found on disk: ${attachment.file_path}. Proceeding with database deletion.`
+        `⚠️  File not found on disk: ${attachment.file_path} - ${error.message}. ` +
+        `Proceeding with database deletion.`
       );
     }
 
@@ -197,7 +233,9 @@ export class AttachmentsService {
       'DELETE FROM attachments WHERE id = $1',
       [id]
     );
-    this.logger.log(`🗑️  Deleted attachment record: ${id}`);
+    this.logger.log(
+      `✅ Attachment deleted successfully: id=${id} file="${attachment.original_name}"`
+    );
   }
 
   async getStats(accountId: string): Promise<{
