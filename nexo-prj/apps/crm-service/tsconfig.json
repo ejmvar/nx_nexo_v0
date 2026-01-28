@@ -1,8 +1,10 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "composite": false,
-    "module": "Node16",
-    "moduleResolution": "node16",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "customConditions": [],
     "declaration": true,
     "emitDeclarationOnly": false,
     "emitDecoratorMetadata": true,
@@ -19,7 +21,8 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "lib": ["es2021"],
-    "noEmitOnError": false
+    "noEmitOnError": false,
+    "isolatedModules": false
   },
   "include": ["src/**/*"],
   "exclude": ["src/**/*.spec.ts", "src/**/*.test.ts"]

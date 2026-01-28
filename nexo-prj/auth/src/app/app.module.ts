@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { APP_INTERCEPTOR } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
@@ -18,9 +17,8 @@ import {
   Delegation,
   DelegationPermission,
   AuditLog,
-  MetricsModule,
-  MetricsInterceptor,
 } from '@nexo-prj/shared';
+import { MetricsModule } from '@nexo-prj/shared/metrics';
 
 @Module({
   imports: [
@@ -55,12 +53,6 @@ import {
     }),
   ],
   controllers: [AppController],
-  providers: [
-    AppService,
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: MetricsInterceptor,
-    },
-  ],
+  providers: [AppService],
 })
 export class AppModule {}
