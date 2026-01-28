@@ -92,6 +92,99 @@ This document outlines the remaining tasks and next steps for the NEXO ERP backe
 - [ ] Load testing
 - [ ] Code coverage reports
 
+### Phase 14: Observability & Monitoring (90% Complete)
+
+#### Metrics Collection
+- [x] Prometheus server deployment (port 9090)
+- [x] Auth Service metrics integration (@willsoto/nestjs-prometheus)
+- [x] Gateway Service metrics integration
+- [x] CRM Service metrics integration
+- [x] Default Node.js metrics (CPU, memory, GC, event loop)
+- [x] HTTP request metrics (count, duration histograms)
+- [x] Prometheus scraping configuration
+- [ ] Wait for CRM service compilation to complete
+- [ ] Verify all 3 services "UP" in Prometheus targets
+- [ ] Test metrics endpoint accessibility
+
+#### Visualization & Dashboards
+- [x] Grafana deployment (port 3300)
+- [x] Loki deployment (port 3100)
+- [x] Prometheus datasource configuration
+- [x] System Overview Dashboard (4 panels)
+- [x] Auth Service Dashboard (6 panels)
+- [x] Gateway Service Dashboard (5 panels)
+- [ ] CRM Service Dashboard (5-6 panels)
+- [ ] Business Metrics Dashboards:
+  - [ ] User Activity Dashboard (registrations, logins, active users)
+  - [ ] CRM Operations Dashboard (deals, contacts, companies, pipeline)
+  - [ ] System Performance Dashboard (latency percentiles, throughput)
+  - [ ] Resource Usage Dashboard (CPU, memory, disk, network)
+
+#### Custom Business Metrics
+- [ ] Auth Service metrics:
+  - [ ] User registration counter
+  - [ ] Login attempts (success/failure)
+  - [ ] Active sessions gauge
+  - [ ] Password reset requests
+  - [ ] Token refresh rate
+- [ ] CRM Service metrics:
+  - [ ] Deals created/updated/closed
+  - [ ] Contacts added/updated
+  - [ ] Companies managed
+  - [ ] Pipeline value gauge
+  - [ ] Conversion rates
+- [ ] Gateway Service metrics:
+  - [ ] Route-specific request counts
+  - [ ] Proxy error rates
+  - [ ] Backend service latency
+  - [ ] Rate limit hits
+
+#### Alerting & Notifications
+- [ ] Prometheus alerting rules:
+  - [ ] Service health alert (target down > 1 minute)
+  - [ ] High error rate alert (5xx > 5% for 5 minutes)
+  - [ ] High latency alert (p95 > 500ms for 5 minutes)
+  - [ ] High CPU alert (> 90% for 10 minutes)
+  - [ ] High memory alert (> 90% for 10 minutes)
+  - [ ] Disk space alert (> 85% used)
+- [ ] Alertmanager configuration
+- [ ] Notification channels:
+  - [ ] Email notifications
+  - [ ] Slack integration
+  - [ ] PagerDuty (optional)
+- [ ] Alert testing and validation
+- [ ] Alert runbooks (incident response procedures)
+
+#### Log Management
+- [x] Loki server deployed
+- [ ] Service log shipping to Loki
+- [ ] Structured logging implementation:
+  - [ ] Request/response logging
+  - [ ] Error logging with stack traces
+  - [ ] Audit logging for sensitive operations
+- [ ] Grafana log panel integration:
+  - [ ] Add log panels to service dashboards
+  - [ ] Create log-metric correlation views
+  - [ ] Set up log pattern detection
+- [ ] Log-based alerts:
+  - [ ] Error spike detection
+  - [ ] Security event detection
+  - [ ] Anomaly detection
+- [ ] Log retention policies
+
+#### Documentation
+- [x] Phase 14 completion report
+- [x] Grafana dashboard JSON files
+- [x] Prometheus configuration
+- [ ] Alerting runbook
+- [ ] Dashboard usage guide
+- [ ] Metrics reference documentation
+- [ ] Troubleshooting guide
+
+**Phase 14 Progress**: 90%  
+**Estimated Time Remaining**: 4-6 hours  
+**Priority**: HIGH (production readiness)
+
 ### DevOps & Deployment
 - [ ] Docker containerization
 - [ ] Docker Compose setup
