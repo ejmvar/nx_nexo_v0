@@ -205,6 +205,8 @@ services:
     hostname: alertmanager
     restart: unless-stopped
     user: "1000:1000"
+    env_file:
+      - ../observability/.env
     command:
       - '--config.file=/etc/alertmanager/alertmanager.yml'
       - '--storage.path=/alertmanager'
