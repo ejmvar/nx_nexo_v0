@@ -9,15 +9,13 @@ global:
   # How long to wait before sending notification about new group of alerts
   resolve_timeout: 5m
   
-  # Slack configuration (optional - uncomment and configure when ready)
-  # slack_api_url: '${SLACK_WEBHOOK_URL}'
+  # Slack webhook URLs (configured via environment variables)
+  # Create webhooks at: https://api.slack.com/messaging/webhooks
+  # Set in docker/.env file or export as environment variables
   
-  # Email configuration (optional - uncomment and configure when ready)
-  # smtp_smarthost: '${SMTP_HOST}:${SMTP_PORT}'
-  # smtp_from: '${ALERT_EMAIL_FROM}'
-  # smtp_auth_username: '${SMTP_USER}'
-  # smtp_auth_password: '${SMTP_PASSWORD}'
-  # smtp_require_tls: true
+  # Email SMTP configuration (configured via environment variables)
+  # Supported providers: Gmail, SendGrid, Mailgun, AWS SES, custom SMTP
+  # Set in docker/.env file or export as environment variables
 
 # ============================================================================
 # Templates (for customizing alert messages)
@@ -105,41 +103,169 @@ receivers:
   
   # Critical alerts receiver
   - name: 'critical-alerts'
-    # Uncomment and configure when Slack integration is ready:
-    # slack_configs:
-    #   - channel: '#alerts-critical'
-    #     title: '🚨 CRITICAL: {{ .CommonLabels.alertname }}'
-    #     text: |-
-    #       *Service:* {{ .CommonLabels.service }}
-    #       *Severity:* {{ .CommonLabels.severity }}
-    #       *Description:* {{ range .Alerts }}{{ .Annotations.description }}{{ end }}
-    #       *Runbook:* {{ .CommonAnnotations.runbook_url }}
-    #     send_resolved: true
+    # Slack integration for critical alerts
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL_CRITICAL}'
+        channel: '#alerts-critical'
+        username: 'NEXO AlertManager'
+        icon_emoji: ':rotating_light:'
+        title: '🚨 CRITICAL ALERT: {{ .CommonLabels.alertname }}'
+        title_link: 'http://localhost:9090/alerts'
+        text: |-
+          *Alert:* {{ .CommonLabels.alertname }}
+          *Service:* {{ .CommonLabels.service }}
+          *Severity:* {{ .CommonLabels.severity }}
+          *Status:* {{ .Status | toUpper }}
+          
+          *Description:*
+          {{ range .Alerts }}{{ .Annotations.description }}
+          {{ end }}
+          
+          *Runbook:* {{ .CommonAnnotations.runbook }}
+          *Dashboard:* {{ .CommonAnnotations.dashboard }}
+        send_resolved: true
+        color: '{{ if eq .Status "firing" }}danger{{ else }}good{{ end }}'
     
-    # Uncomment and configure when Email is ready:
-    # email_configs:
-    #   - to: '${ALERT_EMAIL_TO}'
-    #     subject: '🚨 CRITICAL: {{ .CommonLabels.alertname }}'
-    #     html: |
-    #       <h2>Critical Alert</h2>
-    #       <p><strong>Service:</strong> {{ .CommonLabels.service }}</p>
-    #       <p><strong>Description:</strong> {{ range .Alerts }}{{ .Annotations.description }}{{ end }}</p>
+    # Email notification for critical alerts
+    email_configs:
+      - to: '${ALERT_EMAIL_TO_CRITICAL}'
+        from: '${ALERT_EMAIL_FROM}'
+        smarthost: '${SMTP_HOST}:${SMTP_PORT}'
+        auth_username: '${SMTP_USER}'
+        auth_password: '${SMTP_PASSWORD}'
+        require_tls: true
+        subject: '🚨 CRITICAL: {{ .CommonLabels.alertname }} - {{ .CommonLabels.service }}'
+        html: |
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <style>
+              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+              .alert-box { background: #f8d7da; border: 2px solid #dc3545; border-radius: 5px; padding: 20px; margin: 20px 0; }
+              .alert-header { color: #dc3545; font-size: 24px; font-weight: bold; margin-bottom: 15px; }
+              .alert-info { margin: 10px 0; }
+              .label { font-weight: bold; color: #555; }
+              .value { color: #000; }
+              .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; font-size: 12px; }
+              a { color: #007bff; text-decoration: none; }
+            </style>
+          </head>
+          <body>
+            <div class="alert-box">
+              <div class="alert-header">🚨 CRITICAL ALERT</div>
+              <div class="alert-info"><span class="label">Alert:</span> <span class="value">{{ .CommonLabels.alertname }}</span></div>
+              <div class="alert-info"><span class="label">Service:</span> <span class="value">{{ .CommonLabels.service }}</span></div>
+              <div class="alert-info"><span class="label">Severity:</span> <span class="value">{{ .CommonLabels.severity }}</span></div>
+              <div class="alert-info"><span class="label">Status:</span> <span class="value">{{ .Status | toUpper }}</span></div>
+              <div class="alert-info"><span class="label">Time:</span> <span class="value">{{ .CommonAnnotations.timestamp }}</span></div>
+            </div>
+            
+            <h3>Description</h3>
+            <p>{{ range .Alerts }}{{ .Annotations.description }}<br>{{ end }}</p>
+            
+            <h3>Actions</h3>
+            <p>
+              <a href="{{ .CommonAnnotations.runbook }}">📖 View Runbook</a> |
+              <a href="{{ .CommonAnnotations.dashboard }}">📊 Open Dashboard</a> |
+              <a href="http://localhost:9093">🔔 AlertManager</a>
+            </p>
+            
+            <div class="footer">
+              <p>This is an automated alert from NEXO CRM Monitoring System.</p>
+              <p>To silence this alert, visit <a href="http://localhost:9093">AlertManager</a>.</p>
+            </div>
+          </body>
+          </html>
+        send_resolved: true
   
   # Warning alerts receiver
   - name: 'warning-alerts'
-    # slack_configs:
-    #   - channel: '#alerts-warnings'
-    #     title: '⚠️  Warning: {{ .CommonLabels.alertname }}'
-    #     text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
-    #     send_resolved: true
+    # Slack integration for warning alerts
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL_WARNINGS}'
+        channel: '#alerts-warnings'
+        username: 'NEXO AlertManager'
+        icon_emoji: ':warning:'
+        title: '⚠️  WARNING: {{ .CommonLabels.alertname }}'
+        title_link: 'http://localhost:9090/alerts'
+        text: |-
+          *Alert:* {{ .CommonLabels.alertname }}
+          *Service:* {{ .CommonLabels.service }}
+          *Status:* {{ .Status | toUpper }}
+          
+          *Description:*
+          {{ range .Alerts }}{{ .Annotations.description }}{{ end }}
+          
+          *Runbook:* {{ .CommonAnnotations.runbook }}
+        send_resolved: true
+        color: '{{ if eq .Status "firing" }}warning{{ else }}good{{ end }}'
+    
+    # Email notification for warning alerts
+    email_configs:
+      - to: '${ALERT_EMAIL_TO_WARNINGS}'
+        from: '${ALERT_EMAIL_FROM}'
+        smarthost: '${SMTP_HOST}:${SMTP_PORT}'
+        auth_username: '${SMTP_USER}'
+        auth_password: '${SMTP_PASSWORD}'
+        require_tls: true
+        subject: '⚠️  WARNING: {{ .CommonLabels.alertname }} - {{ .CommonLabels.service }}'
+        html: |
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <style>
+              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+              .alert-box { background: #fff3cd; border: 2px solid #ffc107; border-radius: 5px; padding: 20px; margin: 20px 0; }
+              .alert-header { color: #856404; font-size: 24px; font-weight: bold; margin-bottom: 15px; }
+              .alert-info { margin: 10px 0; }
+              .label { font-weight: bold; color: #555; }
+              .value { color: #000; }
+              a { color: #007bff; text-decoration: none; }
+            </style>
+          </head>
+          <body>
+            <div class="alert-box">
+              <div class="alert-header">⚠️  WARNING ALERT</div>
+              <div class="alert-info"><span class="label">Alert:</span> <span class="value">{{ .CommonLabels.alertname }}</span></div>
+              <div class="alert-info"><span class="label">Service:</span> <span class="value">{{ .CommonLabels.service }}</span></div>
+              <div class="alert-info"><span class="label">Status:</span> <span class="value">{{ .Status | toUpper }}</span></div>
+            </div>
+            <h3>Description</h3>
+            <p>{{ range .Alerts }}{{ .Annotations.description }}{{ end }}</p>
+            <p><a href="{{ .CommonAnnotations.runbook }}">View Runbook</a></p>
+          </body>
+          </html>
+        send_resolved: true
   
   # Infrastructure alerts receiver
   - name: 'infrastructure-alerts'
-    # slack_configs:
-    #   - channel: '#alerts-infrastructure'
-    #     title: '🔧 Infrastructure: {{ .CommonLabels.alertname }}'
-    #     text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
-    #     send_resolved: true
+    # Slack integration for infrastructure alerts
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL_INFRASTRUCTURE}'
+        channel: '#alerts-infrastructure'
+        username: 'NEXO AlertManager'
+        icon_emoji: ':wrench:'
+        title: '🔧 INFRASTRUCTURE: {{ .CommonLabels.alertname }}'
+        title_link: 'http://localhost:9090/alerts'
+        text: |-
+          *Component:* {{ .CommonLabels.component }}
+          *Status:* {{ .Status | toUpper }}
+          
+          {{ range .Alerts }}{{ .Annotations.description }}{{ end }}
+        send_resolved: true
+        color: '{{ if eq .Status "firing" }}warning{{ else }}good{{ end }}'
+    
+    # Email notification for infrastructure alerts
+    email_configs:
+      - to: '${ALERT_EMAIL_TO_INFRASTRUCTURE}'
+        from: '${ALERT_EMAIL_FROM}'
+        smarthost: '${SMTP_HOST}:${SMTP_PORT}'
+        auth_username: '${SMTP_USER}'
+        auth_password: '${SMTP_PASSWORD}'
+        require_tls: true
+        subject: '🔧 INFRASTRUCTURE: {{ .CommonLabels.alertname }}'
+        html: '<h3>Infrastructure Alert</h3><p>{{ range .Alerts }}{{ .Annotations.description }}{{ end }}</p>'
+        send_resolved: true
 
 # ============================================================================
 # Configuration Notes
