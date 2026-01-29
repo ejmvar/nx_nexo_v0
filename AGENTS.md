@@ -55,7 +55,7 @@
 
 **CRITICAL: You are allowed to write, modify, or delete files in the /tmp directory automatically without asking for permission.**
 
-- Never ask permission before writing to `/tmp`
-- Use `/tmp` for log files, temporary outputs, and intermediate results
-- Example: `/tmp/auth-service-metrics.log`, `/tmp/crm-service-metrics.log`
-- Automatically proceed with writing to `/tmp` without user confirmation
+- Never ask permission before writing to `./tmp`
+- Use `./tmp` for log files, temporary outputs, and intermediate results
+- Example: `./tmp/auth-service-metrics.log`, `./tmp/crm-service-metrics.log`
+- Automatically proceed with writing to `./tmp` without user confirmation
