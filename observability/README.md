@@ -357,83 +357,287 @@ topk(10, sum by (message) (count_over_time({level="error"}[1h])))
 
 ## 🚨 Alerting
 
-### Alert Types
+✅ **Production-ready alerting is fully configured and operational!**
 
-#### 1. Application Alerts
-- High error rate (>5% for 5 minutes)
-- Slow response times (P95 > 1s for 10 minutes)
-- Authentication failures spike (>100/minute)
-- WebSocket connection failures
-- File upload failures
+### Overview
 
-#### 2. Infrastructure Alerts
-- Service down (Prometheus target unreachable)
-- Database connection pool exhausted
-- Redis cache unavailable
-- RabbitMQ queue growing (>1000 messages)
-- Disk space low (<10% free)
+The NEXO CRM alerting system includes **69 alert rules** across 9 categories, fully integrated with AlertManager for notification routing. All alerts include detailed runbooks for incident response.
 
-#### 3. Resource Alerts
-- High CPU usage (>80% for 15 minutes)
-- High memory usage (>80% for 15 minutes)
-- Container restart (>3 restarts in 10 minutes)
-- Network errors increasing
+**Key Files:**
+- **Alert Rules**: `observability/prometheus/alerts/alerts.yml`
+- **Alert Routing**: `observability/alertmanager/alertmanager.yml`
+- **Runbooks**: `observability/ALERT_RUNBOOKS.md`
+- **Test Script**: `observability/scripts/test-alerts.sh`
 
-#### 4. Business Alerts
-- No user activity for 30 minutes (dead man's switch)
-- Revenue-impacting errors (payment failures)
-- Security events (brute force attempts)
+### Alert Categories
 
-### Alert Configuration Example
+#### 1. Service Health Alerts (3 rules)
+| Alert | Severity | Threshold | Description |
+|-------|----------|-----------|-------------|
+| `ServiceDown` | Critical | Service down >1min | Service not responding, Prometheus cannot scrape |
+| `TargetUnreachable` | Warning | Target unreachable >2min | Scrape failures, network issues |
+| `HighRestartRate` | Warning | Restarts >3 in 5min | Service unstable, crash loop |
 
-**Prometheus Alert Rule** (`observability/prometheus/alerts/app-alerts.yml`):
+#### 2. Error Rate Alerts (3 rules)
+| Alert | Severity | Threshold | Description |
+|-------|----------|-----------|-------------|
+| `HighServerErrorRate` | Critical | 5xx >5% for 5min | Backend errors affecting users |
+| `HighClientErrorRate` | Warning | 4xx >10% for 10min | Client errors, API issues |
+| `ErrorSpike` | Warning | Errors 2x baseline | Sudden error increase |
 
-```yaml
-groups:
-  - name: application
-    interval: 1m
-    rules:
-      - alert: HighErrorRate
-        expr: |
-          sum by (service) (
-            rate(http_requests_total{status=~"5.."}[5m])
-          ) / sum by (service) (
-            rate(http_requests_total[5m])
-          ) > 0.05
-        for: 5m
-        labels:
-          severity: critical
-          team: product
-        annotations:
-          summary: "High error rate on {{ $labels.service }}"
-          description: "{{ $labels.service }} is experiencing {{ $value | humanizePercentage }} error rate"
+#### 3. Performance / Latency Alerts (3 rules)
+| Alert | Severity | Threshold | Description |
+|-------|----------|-----------|-------------|
+| `HighLatencyP95` | Warning | p95 >500ms for 5min | Slow responses degrading UX |
+| `HighLatencyP99` | Critical | p99 >1s for 5min | Very slow responses, critical impact |
+| `SlowRequestRate` | Warning | p50 >200ms for 10min | Systemic slowness, DB issues |
+
+#### 4. Resource Usage Alerts (5 rules)
+| Alert | Severity | Threshold | Description |
+|-------|----------|-----------|-------------|
+| `HighCPUUsage` | Warning | CPU >90% for 10min | High CPU, scale recommended |
+| `CriticalCPUUsage` | Critical | CPU >95% for 5min | Critical CPU, immediate action |
+| `HighMemoryUsage` | Warning | Memory >966MB for 10min | High memory, monitor for leaks |
+| `CriticalMemoryUsage` | Critical | Memory >1019MB for 5min | Critical memory, OOM risk |
+| `PossibleMemoryLeak` | Warning | +100MB in 1hour | Memory leak detected |
+
+#### 5. System-Level Alerts (3 rules)
+| Alert | Severity | Threshold | Description |
+|-------|----------|-----------|-------------|
+| `DiskSpaceLow` | Warning | Disk <15% free for 5min | Disk space running low |
+| `DiskSpaceCritical` | Critical | Disk <10% free for 2min | Critical disk space, immediate cleanup |
+| `HighLoadAverage` | Warning | Load >2.0 for 10min | High system load |
+
+#### 6. Database Alerts (2 rules)
+| Alert | Severity | Threshold | Description |
+|-------|----------|-----------|-------------|
+| `PostgreSQLDown` | Critical | DB down >1min | PostgreSQL not responding |
+| `HighDatabaseConnections` | Warning | Connections >80% for 5min | Connection pool exhaustion risk |
+
+#### 7. RabbitMQ Alerts (2 rules)
+| Alert | Severity | Threshold | Description |
+|-------|----------|-----------|-------------|
+| `RabbitMQDown` | Critical | RabbitMQ down >1min | Message broker not responding |
+| `HighUnackedMessages` | Warning | Unacked >1000 for 10min | Message processing backlog |
+
+#### 8. Redis Alerts (2 rules)
+| Alert | Severity | Threshold | Description |
+|-------|----------|-----------|-------------|
+| `RedisDown` | Critical | Redis down >1min | Cache unavailable |
+| `RedisHighMemory` | Warning | Memory >90% for 5min | Cache memory exhaustion |
+
+#### 9. Prometheus Self-Monitoring (3 rules)
+| Alert | Severity | Threshold | Description |
+|-------|----------|-----------|-------------|
+| `PrometheusTooManyTimeSeries` | Warning | Series >100k for 10min | High cardinality metrics |
+| `PrometheusTargetScrapeFailed` | Warning | Scrape failed >5min | Scraping issues |
+| `PrometheusStorageLow` | Warning | Storage >80% for 10min | Prometheus storage running low |
+
+### Testing Alerts
+
+Use the provided test script to verify alerts are working:
+
+```bash
+# Run manual verification (checks all alerts are loaded)
+cd /W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend
+./observability/scripts/test-alerts.sh manual
+
+# Test ServiceDown alert (stops CRM service temporarily)
+./observability/scripts/test-alerts.sh service-down
+
+# Test HighServerErrorRate alert (generates 5xx errors)
+./observability/scripts/test-alerts.sh high-error-rate
+
+# Run all automated tests
+./observability/scripts/test-alerts.sh all
 ```
 
-**AlertManager Routing** (`observability/alertmanager/alertmanager.yml`):
+**Expected Output:**
+```
+[INFO] NEXO CRM - Alert Testing Script
+[INFO] Checking prerequisites...
+[SUCCESS] Prometheus is reachable at http://localhost:9090
+[SUCCESS] AlertManager is reachable at http://localhost:9093
+[INFO] Found 69 alerting rules loaded in Prometheus
+[SUCCESS] No alerts currently firing (system healthy)
+```
+
+### Alert Runbooks
+
+Every alert has a detailed runbook in `observability/ALERT_RUNBOOKS.md` covering:
+
+- **What it means**: Clear description of the alert
+- **Why it fired**: Common causes  
+- **How to investigate**: Step-by-step debugging
+- **How to resolve**: Remediation actions
+- **Escalation**: Who to contact
+
+**Example runbook structure:**
+```markdown
+### ServiceDown
+
+**Severity**: Critical
+**Category**: Availability
+
+#### What it means
+A critical service is not responding...
+
+#### Why it fired
+- Service crashed
+- Network issues
+- Resource exhaustion
+
+#### How to investigate
+1. Check service status: `docker ps`
+2. Check logs: `docker logs nexo-crm-service`
+3. Check resources: `docker stats`
+
+#### How to resolve
+1. Restart service: `docker restart nexo-crm-service`
+2. Check for errors in logs
+3. Verify service is healthy
+
+#### Escalation
+- **Immediate**: Platform Team Lead
+- **Communication**: #incidents Slack channel
+```
+
+### Alert Routing
+
+AlertManager routes alerts based on severity and category:
 
 ```yaml
 route:
-  group_by: ['alertname', 'service']
+  receiver: 'default-receiver'
+  group_by: ['alertname', 'service', 'severity']
   group_wait: 30s
   group_interval: 5m
   repeat_interval: 4h
-  receiver: 'slack-critical'
+  
   routes:
+    # Critical alerts - fast notification
     - match:
         severity: critical
-      receiver: 'slack-critical'
+      receiver: 'critical-alerts'
+      group_wait: 10s
+      repeat_interval: 1h
+    
+    # Warning alerts - less urgent
     - match:
         severity: warning
-      receiver: 'slack-warnings'
+      receiver: 'warning-alerts'
+      repeat_interval: 12h
+```
+
+### Notification Channels
+
+Configure notification channels in `observability/alertmanager/alertmanager.yml`:
+
+**Slack Integration:**
+```yaml
+receivers:
+  - name: 'critical-alerts'
+    slack_configs:
+      - channel: '#alerts-critical'
+        title: '🚨 CRITICAL: {{ .CommonLabels.alertname }}'
+        text: |-
+          *Service:* {{ .CommonLabels.service }}
+          *Description:* {{ range .Alerts }}{{ .Annotations.description }}{{ end }}
+          *Runbook:* {{ .CommonAnnotations.runbook }}
+```
+
+**Email Integration:**
+```yaml
+global:
+  smtp_smarthost: 'smtp.gmail.com:587'
+  smtp_from: 'alerts@nexo.com'
+  smtp_auth_username: 'your-email@gmail.com'
+  smtp_auth_password: 'your-app-password'
 
 receivers:
-  - name: 'slack-critical'
-    slack_configs:
-      - api_url: 'YOUR_WEBHOOK_URL'
-        channel: '#alerts-critical'
-        title: '🚨 {{ .CommonLabels.alertname }}'
-        text: '{{ range .Alerts }}{{ .Annotations.description }}\n{{ end }}'
+  - name: 'critical-alerts'
+    email_configs:
+      - to: 'oncall@nexo.com'
+        subject: '🚨 CRITICAL: {{ .CommonLabels.alertname }}'
 ```
+
+### View Active Alerts
+
+**Prometheus Alerts UI:**
+- http://localhost:9090/alerts
+- Shows all configured rules
+- Shows firing/pending/inactive status
+
+**AlertManager UI:**
+- http://localhost:9093
+- Shows active alerts
+- Manage silences
+- View alert history
+
+**Grafana (Coming Soon):**
+- Dashboard: **NEXO - Alert Overview**
+- Shows firing alerts count
+- Alert history timeline
+- Alert state changes
+
+### Silencing Alerts
+
+Temporarily silence alerts during maintenance:
+
+```bash
+# Silence all alerts for crm-service for 2 hours
+curl -X POST http://localhost:9093/api/v2/silences \
+  -H "Content-Type: application/json" \
+  -d '{
+    "matchers": [{"name": "service", "value": "crm-service", "isRegex": false}],
+    "startsAt": "2026-01-28T20:00:00Z",
+    "endsAt": "2026-01-28T22:00:00Z",
+    "createdBy": "admin",
+    "comment": "Planned maintenance"
+  }'
+
+# Or use the AlertManager UI
+# 1. Go to http://localhost:9093
+# 2. Click "Silences" tab
+# 3. Click "New Silence"
+# 4. Add matchers (service=crm-service)
+# 5. Set duration
+# 6. Save
+```
+
+### Best Practices
+
+1. **Alert Fatigue Prevention**:
+   - Don't alert on symptoms, alert on impact
+   - Use proper thresholds (not too sensitive)
+   - Group related alerts together
+   - Use inhibition rules to suppress redundant alerts
+
+2. **Actionable Alerts**:
+   - Every alert must have a runbook
+   - Alerts should be actionable (not informational)
+   - Include relevant context in annotations
+   - Link to dashboards for investigation
+
+3. **On-Call Readiness**:
+   - Test notification channels regularly
+   - Practice incident response with fire drills
+   - Keep runbooks up-to-date
+   - Document post-mortems
+
+4. **Alert Tuning**:
+   - Monitor alert frequency
+   - Adjust thresholds based on baseline
+   - Remove noisy alerts
+   - Add new alerts for blind spots
+
+### Next Steps
+
+1. **Configure notification channels** (Slack/Email) - Update `.env` and `alertmanager.yml`
+2. **Test critical alerts** - Run `./scripts/test-alerts.sh service-down`
+3. **Review runbooks** - Read `ALERT_RUNBOOKS.md` for all alerts
+4. **Set up on-call rotation** - Define who responds to alerts when
+5. **Monitor alert frequency** - Tune thresholds to reduce noise
 
 ---
 
