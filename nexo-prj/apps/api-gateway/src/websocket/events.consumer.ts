@@ -74,7 +74,8 @@ export class EventsConsumer implements OnModuleInit, OnModuleDestroy {
         setTimeout(() => this.connect(), 5000);
       });
     } catch (error) {
-      this.logger.error(`Failed to connect to RabbitMQ: ${error.message}`);
+      const err = error as Error;
+      this.logger.error(`Failed to connect to RabbitMQ: ${err.message}`);
       // Retry connection after delay
       setTimeout(() => this.connect(), 5000);
     }
@@ -114,9 +115,10 @@ export class EventsConsumer implements OnModuleInit, OnModuleDestroy {
         this.channel.ack(msg);
       }
     } catch (error) {
+      const err = error as Error;
       this.logger.error(
-        `Failed to handle message: ${error.message}`,
-        error.stack
+        `Failed to handle message: ${err.message}`,
+        err.stack
       );
 
       // Reject message and requeue

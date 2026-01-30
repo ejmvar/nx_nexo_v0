@@ -5,11 +5,10 @@ import {
   OnGatewayConnection,
   OnGatewayDisconnect,
   SubscribeMessage,
-  MessageBody,
   ConnectedSocket,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { Logger, Injectable, UnauthorizedException } from '@nestjs/common';
+import { Logger, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 interface AuthenticatedSocket extends Socket {
@@ -82,8 +81,9 @@ export class EventsGateway
         accountId: client.accountId,
       });
     } catch (error) {
+      const err = error as Error;
       this.logger.error(
-        `❌ Client ${client.id} authentication failed: ${error.message}`
+        `❌ Client ${client.id} authentication failed: ${err.message}`
       );
       client.emit('error', { message: 'Authentication failed' });
       client.disconnect();
