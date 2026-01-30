@@ -56,8 +56,8 @@ export class PermissionsGuard implements CanActivate {
     requiredPermissions: string[]
   ): Promise<boolean> {
     try {
-      // Query to check if user has any of the required permissions
-      // Uses the wildcard permission logic (e.g., 'client:*' grants all client permissions)
+      // Query WITHOUT RLS to check permissions (permissions are global, not account-specific)
+      // Use a connection that bypasses RLS for this system-level check
       const result = await this.db.query(
         `SELECT EXISTS (
           SELECT 1
@@ -70,6 +70,12 @@ export class PermissionsGuard implements CanActivate {
             OR p.name = ANY(
               SELECT SPLIT_PART(perm, ':', 1) || ':*'
               FROM unnest($2::varchar[]) AS perm
+            )
+            OR p.name = '*:*'
+            OR EXISTS (
+              SELECT 1 FROM roles r
+              WHERE r.id = ur.role_id
+              AND r.name = 'Admin'
             )
           )
         ) as has_permission`,

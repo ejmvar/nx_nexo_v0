@@ -583,24 +583,18 @@ export class CrmService {
       accountId,
       `INSERT INTO professionals (
         account_id, name, full_name, email, phone, specialty, 
-        hourly_rate, availability_status, portfolio_url, rating, 
-        certifications, notes, status
+        hourly_rate, status
       )
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        RETURNING *`,
       [
         accountId,
-        professionalData.full_name, // Use full_name for both name and full_name
-        professionalData.full_name,
+        professionalData.full_name, // Use for name column
+        professionalData.full_name, // Use for full_name column
         professionalData.email,
         professionalData.phone || null,
         professionalData.specialty || null,
         professionalData.hourly_rate || null,
-        'available',
-        professionalData.portfolio_url || null,
-        professionalData.rating || null,
-        professionalData.certifications || null,
-        professionalData.notes || null,
         'active',
       ]
     );
@@ -614,8 +608,7 @@ export class CrmService {
     let paramCount = 0;
 
     if (professionalData.full_name !== undefined) {
-      updates.push(`full_name = $${++paramCount}`);
-      updates.push(`name = $${paramCount}`); // Update both
+      updates.push(`name = $${++paramCount}`); // Map full_name to name column
       params.push(professionalData.full_name);
     }
     if (professionalData.email !== undefined) {
@@ -633,26 +626,6 @@ export class CrmService {
     if (professionalData.hourly_rate !== undefined) {
       updates.push(`hourly_rate = $${++paramCount}`);
       params.push(professionalData.hourly_rate);
-    }
-    if (professionalData.availability_status !== undefined) {
-      updates.push(`availability_status = $${++paramCount}`);
-      params.push(professionalData.availability_status);
-    }
-    if (professionalData.portfolio_url !== undefined) {
-      updates.push(`portfolio_url = $${++paramCount}`);
-      params.push(professionalData.portfolio_url);
-    }
-    if (professionalData.rating !== undefined) {
-      updates.push(`rating = $${++paramCount}`);
-      params.push(professionalData.rating);
-    }
-    if (professionalData.certifications !== undefined) {
-      updates.push(`certifications = $${++paramCount}`);
-      params.push(professionalData.certifications);
-    }
-    if (professionalData.notes !== undefined) {
-      updates.push(`notes = $${++paramCount}`);
-      params.push(professionalData.notes);
     }
     if (professionalData.status !== undefined) {
       updates.push(`status = $${++paramCount}`);
@@ -762,9 +735,20 @@ export class CrmService {
     const params: any[] = [];
     let paramCount = 0;
 
+    // Map DTO fields to database columns
+    const fieldMap = {
+      name: 'name',
+      description: 'description',
+      status: 'status',
+      budget: 'budget',
+      start_date: 'start_date',
+      deadline: 'end_date', // Map deadline to end_date
+      completion_percentage: 'progress', // Map completion_percentage to progress
+    };
+
     Object.entries(projectData).forEach(([key, value]) => {
-      if (value !== undefined) {
-        updates.push(`${key} = $${++paramCount}`);
+      if (value !== undefined && fieldMap[key]) {
+        updates.push(`${fieldMap[key]} = $${++paramCount}`);
         params.push(value);
       }
     });

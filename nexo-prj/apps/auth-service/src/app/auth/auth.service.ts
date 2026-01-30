@@ -72,6 +72,15 @@ export class AuthService {
           },
         });
 
+        // Link ALL permissions to the Admin role via role_permissions table
+        // This is required for the RBAC permissions guard to work
+        await tx.$executeRawUnsafe(`
+          INSERT INTO role_permissions (role_id, permission_id)
+          SELECT '${adminRole.id}'::uuid, p.id
+          FROM permissions p
+          ON CONFLICT DO NOTHING
+        `);
+
         // Create user
         const user = await tx.user.create({
           data: {

@@ -90,14 +90,6 @@ export class CreateEmployeeDto {
   @IsEmail()
   email: string;
 
-  @IsOptional()
-  @IsString()
-  username?: string;
-
-  @IsOptional()
-  @IsString()
-  password?: string;
-
   @IsString()
   full_name: string;
 
@@ -254,24 +246,6 @@ export class CreateProfessionalDto {
   @IsOptional()
   @IsNumber()
   hourly_rate?: number;
-
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  @Max(5)
-  rating?: number;
-
-  @IsOptional()
-  @IsString()
-  portfolio_url?: string;
-
-  @IsOptional()
-  @IsString()
-  certifications?: string;
-
-  @IsOptional()
-  @IsString()
-  notes?: string;
 }
 
 export class UpdateProfessionalDto {
@@ -294,28 +268,6 @@ export class UpdateProfessionalDto {
   @IsOptional()
   @IsNumber()
   hourly_rate?: number;
-
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  @Max(5)
-  rating?: number;
-
-  @IsOptional()
-  @IsString()
-  availability_status?: string;
-
-  @IsOptional()
-  @IsString()
-  portfolio_url?: string;
-
-  @IsOptional()
-  @IsString()
-  certifications?: string;
-
-  @IsOptional()
-  @IsString()
-  notes?: string;
 
   @IsOptional()
   @IsEnum(['active', 'inactive', 'suspended'])
