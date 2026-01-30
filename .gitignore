@@ -75,6 +75,7 @@ yarn-error.log*
 .cache/
 .temp/
 tmp/
+./tmp/
 
 # Docker
 .dockerignore

@@ -53,9 +53,10 @@
 
 ## File System Operations
 
-**CRITICAL: You are allowed to write, modify, or delete files in the /tmp directory automatically without asking for permission.**
+**CRITICAL: You are allowed to write, modify, or delete files in the ./tmp directory automatically without asking for permission.**
 
 - Never ask permission before writing to `./tmp`
 - Use `./tmp` for log files, temporary outputs, and intermediate results
 - Example: `./tmp/auth-service-metrics.log`, `./tmp/crm-service-metrics.log`
 - Automatically proceed with writing to `./tmp` without user confirmation
+- The `./tmp` directory is relative to project root: `/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/tmp`
