@@ -45,11 +45,45 @@
   1. Check current branch: `git branch --show-current`
   2. If on `main` or `dev`, create feature branch: `git checkout -b ft/{phase}/{description}/{timestamp}`
   3. Only then proceed with changes
-- Merge to protected branches only after:
-  1. All changes committed to feature branch
-  2. Testing completed successfully
-  3. Documentation updated
-  4. Use `--no-ff` merges to preserve history
+
+### Feature Branch Completion Workflow
+
+**CRITICAL: NEVER AUTOMATICALLY MERGE FEATURE BRANCHES TO DEV OR MAIN.**
+
+When work is complete:
+1. ✅ **DO**: Commit all changes to the feature branch
+2. ✅ **DO**: Run all tests and verify everything works
+3. ✅ **DO**: Stage and commit with descriptive message
+4. ✅ **DO**: Report completion to user and STOP
+5. ❌ **DO NOT**: Merge to `dev` or `main` branches automatically
+6. ❌ **DO NOT**: Push to remote repositories
+7. ❌ **DO NOT**: Delete feature branches
+
+**The USER decides when to merge, not the agent.**
+
+After committing to feature branch:
+- Report the feature branch name
+- Summarize what was accomplished
+- **WAIT for user approval** before any merge operations
+
+Example final message:
+```
+✅ Phase X complete and committed to: ft/phaseX/description/20260130-162242
+
+Changes:
+- [list of changes]
+
+Status: Ready for review. 
+The USER should decide when to merge this to dev/main.
+```
+
+### Merging (Only when explicitly requested by user)
+
+If user explicitly requests merge:
+- Merge to `dev` first with `--no-ff`: `git merge --no-ff <feature-branch>`
+- Then merge `dev` to `main` with `--no-ff`
+- Use `--no-ff` to preserve merge history
+- Never use fast-forward merges on protected branches
 
 ## File System Operations
 
