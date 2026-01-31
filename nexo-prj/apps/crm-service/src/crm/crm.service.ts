@@ -318,10 +318,10 @@ export class CrmService {
   async getSuppliers(accountId: string, searchDto: SearchSuppliersDto) {
     const qb = new QueryBuilder(searchDto);
 
-    // Text search fields - note suppliers uses different column names
+    // Text search fields
     qb.addTextSearch('name', searchDto.name);
     qb.addTextSearch('email', searchDto.email);
-    qb.addTextSearch('category', searchDto.category);
+    qb.addTextSearch('company', searchDto.company);
     
     // Exact match fields
     qb.addExactMatch('status', searchDto.status);

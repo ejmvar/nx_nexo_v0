@@ -94,7 +94,7 @@ export class SearchSuppliersDto extends BasePaginationDto {
 
   @IsOptional()
   @IsString()
-  category?: string;
+  company?: string;
 
   @IsOptional()
   @IsEnum(['active', 'inactive'])
