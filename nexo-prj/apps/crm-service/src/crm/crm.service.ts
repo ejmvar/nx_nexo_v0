@@ -14,47 +14,55 @@ import {
   CreateTaskDto,
   UpdateTaskDto,
 } from './dto/crm.dto.js';
+import {
+  SearchClientsDto,
+  SearchEmployeesDto,
+  SearchSuppliersDto,
+  SearchProfessionalsDto,
+  SearchProjectsDto,
+  SearchTasksDto,
+} from './dto/search.dto.js';
+import { QueryBuilder } from './utils/query-builder.js';
 
 @Injectable()
 export class CrmService {
   constructor(private db: DatabaseService) {}
 
   // ==================== CLIENTS ====================
-  async getClients(accountId: string, query: any) {
-    const page = parseInt(query.page) || 1;
-    const limit = parseInt(query.limit) || 10;
-    const offset = (page - 1) * limit;
+  async getClients(accountId: string, searchDto: SearchClientsDto) {
+    const qb = new QueryBuilder(searchDto);
 
-    let whereClause = 'WHERE 1=1';
-    const params: any[] = [];
-    let paramCount = 0;
+    // Text search fields
+    qb.addTextSearch('name', searchDto.name);
+    qb.addTextSearch('email', searchDto.email);
+    qb.addTextSearch('phone', searchDto.phone);
+    
+    // Exact match fields
+    qb.addExactMatch('status', searchDto.status);
+    
+    // Date ranges
+    qb.addDateAfter('created_at', searchDto.createdAfter);
+    qb.addDateBefore('created_at', searchDto.createdBefore);
 
-    if (query.search) {
-      paramCount++;
-      whereClause += ` AND (name ILIKE $${paramCount} OR email ILIKE $${paramCount} OR company ILIKE $${paramCount})`;
-      params.push(`%${query.search}%`);
-    }
+    const { whereClause, params, orderByClause, limitClause, offsetClause } = qb.build();
+    const { page, limit } = qb.getPaginationInfo();
 
-    if (query.status) {
-      paramCount++;
-      whereClause += ` AND status = $${paramCount}`;
-      params.push(query.status);
-    }
-
+    // Count query
     const countResult = await this.db.queryWithAccount(
       accountId,
       `SELECT COUNT(*) FROM clients ${whereClause}`,
-      params
+      params.slice(0, params.length - 2) // Exclude limit and offset params for count
     );
 
+    // Data query
     const result = await this.db.queryWithAccount(
       accountId,
       `SELECT id, name, email, phone, company, address, status, created_at, updated_at
        FROM clients
        ${whereClause}
-       ORDER BY created_at DESC
-       LIMIT $${paramCount + 1} OFFSET $${paramCount + 2}`,
-      [...params, limit, offset]
+       ${orderByClause}
+       ${limitClause} ${offsetClause}`,
+      params
     );
 
     return {
@@ -146,44 +154,42 @@ export class CrmService {
   }
 
   // ==================== EMPLOYEES ====================
-  async getEmployees(accountId: string, query: any) {
-    const page = parseInt(query.page) || 1;
-    const limit = parseInt(query.limit) || 10;
-    const offset = (page - 1) * limit;
+  async getEmployees(accountId: string, searchDto: SearchEmployeesDto) {
+    const qb = new QueryBuilder(searchDto);
 
-    let whereClause = '';
-    const params: any[] = [];
-    let paramCount = 0;
+    // Text search fields
+    qb.addTextSearch('name', searchDto.name);
+    qb.addTextSearch('email', searchDto.email);
+    qb.addTextSearch('position', searchDto.position);
+    qb.addTextSearch('department', searchDto.department);
+    
+    // Exact match fields
+    qb.addExactMatch('status', searchDto.status);
+    
+    // Date ranges for hire_date
+    qb.addDateAfter('hire_date', searchDto.hiredAfter);
+    qb.addDateBefore('hire_date', searchDto.hiredBefore);
 
-    if (query.search) {
-      paramCount++;
-      whereClause += whereClause ? ' AND' : ' WHERE';
-      whereClause += ` (name ILIKE $${paramCount} OR email ILIKE $${paramCount} OR employee_code ILIKE $${paramCount})`;
-      params.push(`%${query.search}%`);
-    }
+    const { whereClause, params, orderByClause, limitClause, offsetClause } = qb.build();
+    const { page, limit } = qb.getPaginationInfo();
 
-    if (query.department) {
-      paramCount++;
-      whereClause += whereClause ? ' AND' : ' WHERE';
-      whereClause += ` department = $${paramCount}`;
-      params.push(query.department);
-    }
-
+    // Count query
     const countResult = await this.db.queryWithAccount(
       accountId,
       `SELECT COUNT(*) FROM employees ${whereClause}`,
-      params
+      params.slice(0, params.length - 2)
     );
 
+    // Data query
     const result = await this.db.queryWithAccount(
       accountId,
       `SELECT id, name, email, phone, position, department, hire_date, 
               employee_code, salary_level, manager_id, status, created_at, updated_at
        FROM employees
        ${whereClause}
-       ORDER BY created_at DESC
-       LIMIT $${paramCount + 1} OFFSET $${paramCount + 2}`,
-      [...params, limit, offset]
+       ${orderByClause}
+       ${limitClause} ${offsetClause}`,
+      params
     );
 
     return {
@@ -309,53 +315,45 @@ export class CrmService {
   }
 
   // ==================== SUPPLIERS ====================
-  async getSuppliers(accountId: string, query: any) {
-    const page = parseInt(query.page) || 1;
-    const limit = parseInt(query.limit) || 10;
-    const offset = (page - 1) * limit;
+  async getSuppliers(accountId: string, searchDto: SearchSuppliersDto) {
+    const qb = new QueryBuilder(searchDto);
 
-    let whereClause = 'WHERE 1=1';
-    const params: any[] = [];
-    let paramCount = 0;
+    // Text search fields - note suppliers uses different column names
+    qb.addTextSearch('name', searchDto.name);
+    qb.addTextSearch('email', searchDto.email);
+    qb.addTextSearch('category', searchDto.category);
+    
+    // Exact match fields
+    qb.addExactMatch('status', searchDto.status);
+    
+    // Date ranges
+    qb.addDateAfter('created_at', searchDto.createdAfter);
+    qb.addDateBefore('created_at', searchDto.createdBefore);
 
-    if (query.status) {
-      paramCount++;
-      whereClause += ` AND s.status = $${paramCount}`;
-      params.push(query.status);
-    }
+    const { whereClause, params, orderByClause, limitClause, offsetClause } = qb.build();
+    const { page, limit } = qb.getPaginationInfo();
 
-    if (query.search) {
-      paramCount++;
-      whereClause += ` AND (u.full_name ILIKE $${paramCount} OR s.company ILIKE $${paramCount} OR u.email ILIKE $${paramCount})`;
-      params.push(`%${query.search}%`);
-    }
-
+    // Count query
     const countResult = await this.db.queryWithAccount(
       accountId,
-      `SELECT COUNT(*) as total FROM suppliers s JOIN users u ON s.user_id = u.id ${whereClause}`,
-      params
+      `SELECT COUNT(*) FROM suppliers ${whereClause}`,
+      params.slice(0, params.length - 2)
     );
-    const total = parseInt(countResult.rows[0].total);
 
-    paramCount++;
-    params.push(limit);
-    paramCount++;
-    params.push(offset);
-
+    // Data query
     const result = await this.db.queryWithAccount(
       accountId,
-      `SELECT s.*, u.full_name as name, u.email, u.username
-       FROM suppliers s
-       JOIN users u ON s.user_id = u.id
+      `SELECT id, name, email, phone, category, payment_terms, status, created_at, updated_at
+       FROM suppliers
        ${whereClause}
-       ORDER BY u.created_at DESC
-       LIMIT $${paramCount - 1} OFFSET $${paramCount}`,
+       ${orderByClause}
+       ${limitClause} ${offsetClause}`,
       params
     );
 
     return {
       data: result.rows,
-      total,
+      total: parseInt(countResult.rows[0].count),
       page,
       limit,
     };
@@ -512,50 +510,46 @@ export class CrmService {
   }
 
   // ==================== PROFESSIONALS ====================
-  async getProfessionals(accountId: string, query: any) {
-    const page = parseInt(query.page) || 1;
-    const limit = parseInt(query.limit) || 10;
-    const offset = (page - 1) * limit;
+  async getProfessionals(accountId: string, searchDto: SearchProfessionalsDto) {
+    const qb = new QueryBuilder(searchDto);
 
-    let whereClause = '';
-    const params: any[] = [];
-    let paramCount = 0;
+    // Text search fields
+    qb.addTextSearch('name', searchDto.name);
+    qb.addTextSearch('email', searchDto.email);
+    qb.addTextSearch('specialty', searchDto.specialty);
+    
+    // Exact match fields
+    qb.addExactMatch('status', searchDto.status);
+    
+    // Numeric ranges for hourly_rate
+    qb.addNumericMin('hourly_rate', searchDto.minHourlyRate);
+    qb.addNumericMax('hourly_rate', searchDto.maxHourlyRate);
 
-    if (query.status) {
-      paramCount++;
-      whereClause += whereClause ? ' AND' : ' WHERE';
-      whereClause += ` status = $${paramCount}`;
-      params.push(query.status);
-    }
+    const { whereClause, params, orderByClause, limitClause, offsetClause } = qb.build();
+    const { page, limit } = qb.getPaginationInfo();
 
-    if (query.search) {
-      paramCount++;
-      whereClause += whereClause ? ' AND' : ' WHERE';
-      whereClause += ` (full_name ILIKE $${paramCount} OR specialty ILIKE $${paramCount} OR email ILIKE $${paramCount})`;
-      params.push(`%${query.search}%`);
-    }
-
+    // Count query
     const countResult = await this.db.queryWithAccount(
       accountId,
-      `SELECT COUNT(*) as total FROM professionals ${whereClause}`,
-      params
+      `SELECT COUNT(*) FROM professionals ${whereClause}`,
+      params.slice(0, params.length - 2)
     );
-    const total = parseInt(countResult.rows[0].total);
 
+    // Data query
     const result = await this.db.queryWithAccount(
       accountId,
       `SELECT id, name, full_name, email, phone, specialty, hourly_rate, 
               availability_status, portfolio_url, rating, certifications, notes, status, created_at, updated_at
        FROM professionals
        ${whereClause}
-       ORDER BY created_at DESC
-       LIMIT $${paramCount + 1} OFFSET $${paramCount + 2}`,
-      [...params, limit, offset]
+       ${orderByClause}
+       ${limitClause} ${offsetClause}`,
+      params
     );
 
     return {
       data: result.rows,
-      total,
+      total: parseInt(countResult.rows[0].count),
       page,
       limit,
     };
@@ -663,33 +657,42 @@ export class CrmService {
   }
 
   // ==================== PROJECTS ====================
-  async getProjects(accountId: string, query: any) {
-    const page = parseInt(query.page) || 1;
-    const limit = parseInt(query.limit) || 10;
-    const offset = (page - 1) * limit;
+  async getProjects(accountId: string, searchDto: SearchProjectsDto) {
+    const qb = new QueryBuilder(searchDto);
 
-    let whereClause = 'WHERE 1=1';
-    const params: any[] = [];
-    let paramCount = 0;
+    // Text search fields
+    qb.addTextSearch('name', searchDto.name);
+    qb.addTextSearch('description', searchDto.description);
+    
+    // Exact match fields
+    qb.addExactMatch('status', searchDto.status);
+    qb.addExactMatch('client_id', searchDto.clientId);
+    
+    // Date ranges
+    qb.addDateAfter('start_date', searchDto.startDateAfter);
+    qb.addDateBefore('start_date', searchDto.startDateBefore);
+    qb.addDateAfter('end_date', searchDto.endDateAfter);
+    qb.addDateBefore('end_date', searchDto.endDateBefore);
+    
+    // Numeric ranges for budget
+    qb.addNumericMin('budget', searchDto.minBudget);
+    qb.addNumericMax('budget', searchDto.maxBudget);
 
-    if (query.status) {
-      paramCount++;
-      whereClause += ` AND status = $${paramCount}`;
-      params.push(query.status);
-    }
+    const { whereClause, params, orderByClause, limitClause, offsetClause } = qb.build();
+    const { page, limit } = qb.getPaginationInfo();
 
-    if (query.client_id) {
-      paramCount++;
-      whereClause += ` AND client_id = $${paramCount}`;
-      params.push(query.client_id);
-    }
+    // Count query
+    const countResult = await this.db.queryWithAccount(
+      accountId,
+      `SELECT COUNT(*) FROM projects ${whereClause}`,
+      params.slice(0, params.length - 2)
+    );
 
-    const countResult = await this.db.queryWithAccount(accountId, `SELECT COUNT(*) FROM projects ${whereClause}`, params);
-
+    // Data query
     const result = await this.db.queryWithAccount(
       accountId,
-      `SELECT * FROM projects ${whereClause} ORDER BY created_at DESC LIMIT $${paramCount + 1} OFFSET $${paramCount + 2}`,
-      [...params, limit, offset]
+      `SELECT * FROM projects ${whereClause} ${orderByClause} ${limitClause} ${offsetClause}`,
+      params
     );
 
     return {
@@ -775,39 +778,38 @@ export class CrmService {
   }
 
   // ==================== TASKS ====================
-  async getTasks(accountId: string, query: any) {
-    const page = parseInt(query.page) || 1;
-    const limit = parseInt(query.limit) || 10;
-    const offset = (page - 1) * limit;
+  async getTasks(accountId: string, searchDto: SearchTasksDto) {
+    const qb = new QueryBuilder(searchDto);
 
-    let whereClause = 'WHERE 1=1';
-    const params: any[] = [];
-    let paramCount = 0;
+    // Text search fields
+    qb.addTextSearch('title', searchDto.title);
+    qb.addTextSearch('description', searchDto.description);
+    
+    // Exact match fields
+    qb.addExactMatch('status', searchDto.status);
+    qb.addExactMatch('priority', searchDto.priority);
+    qb.addExactMatch('assigned_to', searchDto.assignedTo);
+    qb.addExactMatch('project_id', searchDto.projectId);
+    
+    // Date ranges for due_date
+    qb.addDateAfter('due_date', searchDto.dueDateAfter);
+    qb.addDateBefore('due_date', searchDto.dueDateBefore);
 
-    if (query.status) {
-      paramCount++;
-      whereClause += ` AND status = $${paramCount}`;
-      params.push(query.status);
-    }
+    const { whereClause, params, orderByClause, limitClause, offsetClause } = qb.build();
+    const { page, limit } = qb.getPaginationInfo();
 
-    if (query.assigned_to) {
-      paramCount++;
-      whereClause += ` AND assigned_to = $${paramCount}`;
-      params.push(query.assigned_to);
-    }
+    // Count query
+    const countResult = await this.db.queryWithAccount(
+      accountId,
+      `SELECT COUNT(*) FROM tasks ${whereClause}`,
+      params.slice(0, params.length - 2)
+    );
 
-    if (query.project_id) {
-      paramCount++;
-      whereClause += ` AND project_id = $${paramCount}`;
-      params.push(query.project_id);
-    }
-
-    const countResult = await this.db.queryWithAccount(accountId, `SELECT COUNT(*) FROM tasks ${whereClause}`, params);
-
+    // Data query
     const result = await this.db.queryWithAccount(
       accountId,
-      `SELECT * FROM tasks ${whereClause} ORDER BY created_at DESC LIMIT $${paramCount + 1} OFFSET $${paramCount + 2}`,
-      [...params, limit, offset]
+      `SELECT * FROM tasks ${whereClause} ${orderByClause} ${limitClause} ${offsetClause}`,
+      params
     );
 
     return {

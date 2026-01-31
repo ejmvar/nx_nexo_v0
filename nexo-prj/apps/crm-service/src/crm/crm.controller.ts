@@ -22,6 +22,14 @@ import {
   CreateTaskDto,
   UpdateTaskDto,
 } from './dto/crm.dto.js';
+import {
+  SearchClientsDto,
+  SearchEmployeesDto,
+  SearchSuppliersDto,
+  SearchProfessionalsDto,
+  SearchProjectsDto,
+  SearchTasksDto,
+} from './dto/search.dto.js';
 
 @Controller()
 @UseGuards(JwtAuthGuard, PermissionsGuard) // Protect all CRM routes with auth + permissions
@@ -45,8 +53,8 @@ export class CrmController {
   // ==================== CLIENTS ====================
   @Get('clients')
   @RequirePermissions('client:read')
-  getClients(@AccountId() accountId: string, @Query() query: any) {
-    return this.crmService.getClients(accountId, query);
+  getClients(@AccountId() accountId: string, @Query() searchDto: SearchClientsDto) {
+    return this.crmService.getClients(accountId, searchDto);
   }
 
   @Get('clients/:id')
@@ -115,8 +123,8 @@ export class CrmController {
   // ==================== EMPLOYEES ====================
   @Get('employees')
   @RequirePermissions('employee:read')
-  getEmployees(@AccountId() accountId: string, @Query() query: any) {
-    return this.crmService.getEmployees(accountId, query);
+  getEmployees(@AccountId() accountId: string, @Query() searchDto: SearchEmployeesDto) {
+    return this.crmService.getEmployees(accountId, searchDto);
   }
 
   @Get('employees/:id')
@@ -185,8 +193,8 @@ export class CrmController {
   // ==================== SUPPLIERS ====================
   @Get('suppliers')
   @RequirePermissions('supplier:read')
-  getSuppliers(@AccountId() accountId: string, @Query() query: any) {
-    return this.crmService.getSuppliers(accountId, query);
+  getSuppliers(@AccountId() accountId: string, @Query() searchDto: SearchSuppliersDto) {
+    return this.crmService.getSuppliers(accountId, searchDto);
   }
 
   @Get('suppliers/:id')
@@ -255,8 +263,8 @@ export class CrmController {
   // ==================== PROFESSIONALS ====================
   @Get('professionals')
   @RequirePermissions('professional:read')
-  getProfessionals(@AccountId() accountId: string, @Query() query: any) {
-    return this.crmService.getProfessionals(accountId, query);
+  getProfessionals(@AccountId() accountId: string, @Query() searchDto: SearchProfessionalsDto) {
+    return this.crmService.getProfessionals(accountId, searchDto);
   }
 
   @Get('professionals/:id')
@@ -325,8 +333,8 @@ export class CrmController {
   // ==================== PROJECTS ====================
   @Get('projects')
   @RequirePermissions('project:read')
-  getProjects(@AccountId() accountId: string, @Query() query: any) {
-    return this.crmService.getProjects(accountId, query);
+  getProjects(@AccountId() accountId: string, @Query() searchDto: SearchProjectsDto) {
+    return this.crmService.getProjects(accountId, searchDto);
   }
 
   @Get('projects/:id')
@@ -395,8 +403,8 @@ export class CrmController {
   // ==================== TASKS ====================
   @Get('tasks')
   @RequirePermissions('task:read')
-  getTasks(@AccountId() accountId: string, @Query() query: any) {
-    return this.crmService.getTasks(accountId, query);
+  getTasks(@AccountId() accountId: string, @Query() searchDto: SearchTasksDto) {
+    return this.crmService.getTasks(accountId, searchDto);
   }
 
   @Get('tasks/:id')
