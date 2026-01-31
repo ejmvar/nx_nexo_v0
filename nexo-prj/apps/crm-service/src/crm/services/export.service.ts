@@ -25,7 +25,7 @@ export class ExportService {
       path: filepath,
       header: headers,
     });
-User: follow this prompt.dockerfile
+
     await csvWriter.writeRecords(data);
     return filepath;
   }
@@ -234,6 +234,132 @@ User: follow this prompt.dockerfile
       { header: 'Salary', key: 'salary', width: 15 },
       { header: 'Hire Date', key: 'hire_date', width: 15 },
       { header: 'Status', key: 'status', width: 12 },
+      { header: 'Created At', key: 'created_at', width: 20 },
+      { header: 'Updated At', key: 'updated_at', width: 20 },
+    ];
+  }
+
+  // Suppliers
+  getSuppliersCSVHeaders() {
+    return [
+      { id: 'id', title: 'ID' },
+      { id: 'name', title: 'Name' },
+      { id: 'email', title: 'Email' },
+      { id: 'phone', title: 'Phone' },
+      { id: 'category', title: 'Category' },
+      { id: 'payment_terms', title: 'Payment Terms' },
+      { id: 'status', title: 'Status' },
+      { id: 'created_at', title: 'Created At' },
+      { id: 'updated_at', title: 'Updated At' },
+    ];
+  }
+
+  getSuppliersExcelColumns() {
+    return [
+      { header: 'ID', key: 'id', width: 36 },
+      { header: 'Name', key: 'name', width: 25 },
+      { header: 'Email', key: 'email', width: 30 },
+      { header: 'Phone', key: 'phone', width: 15 },
+      { header: 'Category', key: 'category', width: 20 },
+      { header: 'Payment Terms', key: 'payment_terms', width: 25 },
+      { header: 'Status', key: 'status', width: 12 },
+      { header: 'Created At', key: 'created_at', width: 20 },
+      { header: 'Updated At', key: 'updated_at', width: 20 },
+    ];
+  }
+
+  // Professionals
+  getProfessionalsCSVHeaders() {
+    return [
+      { id: 'id', title: 'ID' },
+      { id: 'name', title: 'Name' },
+      { id: 'full_name', title: 'Full Name' },
+      { id: 'email', title: 'Email' },
+      { id: 'phone', title: 'Phone' },
+      { id: 'specialty', title: 'Specialty' },
+      { id: 'hourly_rate', title: 'Hourly Rate' },
+      { id: 'status', title: 'Status' },
+      { id: 'created_at', title: 'Created At' },
+      { id: 'updated_at', title: 'Updated At' },
+    ];
+  }
+
+  getProfessionalsExcelColumns() {
+    return [
+      { header: 'ID', key: 'id', width: 36 },
+      { header: 'Name', key: 'name', width: 25 },
+      { header: 'Full Name', key: 'full_name', width: 30 },
+      { header: 'Email', key: 'email', width: 30 },
+      { header: 'Phone', key: 'phone', width: 15 },
+      { header: 'Specialty', key: 'specialty', width: 20 },
+      { header: 'Hourly Rate', key: 'hourly_rate', width: 15 },
+      { header: 'Status', key: 'status', width: 12 },
+      { header: 'Created At', key: 'created_at', width: 20 },
+      { header: 'Updated At', key: 'updated_at', width: 20 },
+    ];
+  }
+
+  // Projects
+  getProjectsCSVHeaders() {
+    return [
+      { id: 'id', title: 'ID' },
+      { id: 'name', title: 'Name' },
+      { id: 'description', title: 'Description' },
+      { id: 'client_id', title: 'Client ID' },
+      { id: 'status', title: 'Status' },
+      { id: 'budget', title: 'Budget' },
+      { id: 'start_date', title: 'Start Date' },
+      { id: 'end_date', title: 'End Date' },
+      { id: 'progress', title: 'Progress' },
+      { id: 'created_at', title: 'Created At' },
+      { id: 'updated_at', title: 'Updated At' },
+    ];
+  }
+
+  getProjectsExcelColumns() {
+    return [
+      { header: 'ID', key: 'id', width: 36 },
+      { header: 'Name', key: 'name', width: 30 },
+      { header: 'Description', key: 'description', width: 40 },
+      { header: 'Client ID', key: 'client_id', width: 36 },
+      { header: 'Status', key: 'status', width: 15 },
+      { header: 'Budget', key: 'budget', width: 15 },
+      { header: 'Start Date', key: 'start_date', width: 15 },
+      { header: 'End Date', key: 'end_date', width: 15 },
+      { header: 'Progress', key: 'progress', width: 10 },
+      { header: 'Created At', key: 'created_at', width: 20 },
+      { header: 'Updated At', key: 'updated_at', width: 20 },
+    ];
+  }
+
+  // Tasks
+  getTasksCSVHeaders() {
+    return [
+      { id: 'id', title: 'ID' },
+      { id: 'title', title: 'Title' },
+      { id: 'description', title: 'Description' },
+      { id: 'project_id', title: 'Project ID' },
+      { id: 'assigned_to', title: 'Assigned To' },
+      { id: 'status', title: 'Status' },
+      { id: 'priority', title: 'Priority' },
+      { id: 'due_date', title: 'Due Date' },
+      { id: 'completed_at', title: 'Completed At' },
+      { id: 'created_at', title: 'Created At' },
+      { id: 'updated_at', title: 'Updated At' },
+    ];
+  }
+
+  getTasksExcelColumns() {
+    return [
+      { header: 'ID', key: 'id', width: 36 },
+      { header: 'Title', key: 'title', width: 30 },
+      { header: 'Description', key: 'description', width: 40 },
+      { header: 'Project ID', key: 'project_id', width: 36 },
+      { header: 'Assigned To', key: 'assigned_to', width: 36 },
+      { header: 'Status', key: 'status', width: 15 },
+      { header: 'Priority', key: 'priority', width: 12 },
+      { header: 'Due Date', key: 'due_date', width: 15 },
+      { header: 'Completed At', key: 'completed_at', width: 20 },
       { header: 'Created At', key: 'created_at', width: 20 },
       { header: 'Updated At', key: 'updated_at', width: 20 },
     ];

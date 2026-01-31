@@ -214,6 +214,44 @@ export class CrmController {
     await this.crmService.deleteSupplier(accountId, id);
   }
 
+  @Get('suppliers/export')
+  @RequirePermissions('supplier:read')
+  async exportSuppliers(
+    @AccountId() accountId: string,
+    @Query() query: any,
+    @Query('format') format: 'csv' | 'excel' = 'csv',
+    @Res() res: Response,
+  ) {
+    const result = await this.crmService.getSuppliers(accountId, { ...query, limit: 10000 });
+    const data = this.exportService.formatSuppliersForExport(result.data);
+    
+    const timestamp = new Date().toISOString().replace(/:/g, '-').slice(0, 19);
+    const filename = `suppliers-${timestamp}`;
+    
+    let filepath: string;
+    if (format === 'excel') {
+      filepath = await this.exportService.exportToExcel(
+        data,
+        this.exportService.getSuppliersExcelColumns(),
+        filename,
+        'Suppliers'
+      );
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}.xlsx"`);
+    } else {
+      filepath = await this.exportService.exportToCSV(
+        data,
+        this.exportService.getSuppliersCSVHeaders(),
+        filename
+      );
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}.csv"`);
+    }
+    
+    const fileStream = createReadStream(filepath);
+    fileStream.pipe(res);
+  }
+
   // ==================== PROFESSIONALS ====================
   @Get('professionals')
   @RequirePermissions('professional:read')
@@ -244,6 +282,44 @@ export class CrmController {
   @RequirePermissions('professional:delete')
   deleteProfessional(@AccountId() accountId: string, @Param('id') id: string) {
     return this.crmService.deleteProfessional(accountId, id);
+  }
+
+  @Get('professionals/export')
+  @RequirePermissions('professional:read')
+  async exportProfessionals(
+    @AccountId() accountId: string,
+    @Query() query: any,
+    @Query('format') format: 'csv' | 'excel' = 'csv',
+    @Res() res: Response,
+  ) {
+    const result = await this.crmService.getProfessionals(accountId, { ...query, limit: 10000 });
+    const data = this.exportService.formatProfessionalsForExport(result.data);
+    
+    const timestamp = new Date().toISOString().replace(/:/g, '-').slice(0, 19);
+    const filename = `professionals-${timestamp}`;
+    
+    let filepath: string;
+    if (format === 'excel') {
+      filepath = await this.exportService.exportToExcel(
+        data,
+        this.exportService.getProfessionalsExcelColumns(),
+        filename,
+        'Professionals'
+      );
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}.xlsx"`);
+    } else {
+      filepath = await this.exportService.exportToCSV(
+        data,
+        this.exportService.getProfessionalsCSVHeaders(),
+        filename
+      );
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}.csv"`);
+    }
+    
+    const fileStream = createReadStream(filepath);
+    fileStream.pipe(res);
   }
 
   // ==================== PROJECTS ====================
@@ -278,6 +354,44 @@ export class CrmController {
     await this.crmService.deleteProject(accountId, id);
   }
 
+  @Get('projects/export')
+  @RequirePermissions('project:read')
+  async exportProjects(
+    @AccountId() accountId: string,
+    @Query() query: any,
+    @Query('format') format: 'csv' | 'excel' = 'csv',
+    @Res() res: Response,
+  ) {
+    const result = await this.crmService.getProjects(accountId, { ...query, limit: 10000 });
+    const data = this.exportService.formatProjectsForExport(result.data);
+    
+    const timestamp = new Date().toISOString().replace(/:/g, '-').slice(0, 19);
+    const filename = `projects-${timestamp}`;
+    
+    let filepath: string;
+    if (format === 'excel') {
+      filepath = await this.exportService.exportToExcel(
+        data,
+        this.exportService.getProjectsExcelColumns(),
+        filename,
+        'Projects'
+      );
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}.xlsx"`);
+    } else {
+      filepath = await this.exportService.exportToCSV(
+        data,
+        this.exportService.getProjectsCSVHeaders(),
+        filename
+      );
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}.csv"`);
+    }
+    
+    const fileStream = createReadStream(filepath);
+    fileStream.pipe(res);
+  }
+
   // ==================== TASKS ====================
   @Get('tasks')
   @RequirePermissions('task:read')
@@ -308,5 +422,43 @@ export class CrmController {
   @RequirePermissions('task:delete')
   async deleteTask(@AccountId() accountId: string, @Param('id') id: string) {
     await this.crmService.deleteTask(accountId, id);
+  }
+
+  @Get('tasks/export')
+  @RequirePermissions('task:read')
+  async exportTasks(
+    @AccountId() accountId: string,
+    @Query() query: any,
+    @Query('format') format: 'csv' | 'excel' = 'csv',
+    @Res() res: Response,
+  ) {
+    const result = await this.crmService.getTasks(accountId, { ...query, limit: 10000 });
+    const data = this.exportService.formatTasksForExport(result.data);
+    
+    const timestamp = new Date().toISOString().replace(/:/g, '-').slice(0, 19);
+    const filename = `tasks-${timestamp}`;
+    
+    let filepath: string;
+    if (format === 'excel') {
+      filepath = await this.exportService.exportToExcel(
+        data,
+        this.exportService.getTasksExcelColumns(),
+        filename,
+        'Tasks'
+      );
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}.xlsx"`);
+    } else {
+      filepath = await this.exportService.exportToCSV(
+        data,
+        this.exportService.getTasksCSVHeaders(),
+        filename
+      );
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}.csv"`);
+    }
+    
+    const fileStream = createReadStream(filepath);
+    fileStream.pipe(res);
   }
 }
