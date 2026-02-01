@@ -25,6 +25,7 @@ import { FilesService } from './files.service';
 import { UploadFileDto } from './dto/upload-file.dto';
 import { SearchFilesDto } from './dto/search-files.dto';
 import { UpdateFileDto } from './dto/update-file.dto';
+import { UploadedFile as MulterFile } from '../storage/storage.types';
 
 /**
  * Files Controller
@@ -49,7 +50,7 @@ export class FilesController {
     }),
   )
   async uploadFile(
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: MulterFile,
     @Body() dto: UploadFileDto,
     @AccountId() accountId: string,
     @UserId() userId: string,

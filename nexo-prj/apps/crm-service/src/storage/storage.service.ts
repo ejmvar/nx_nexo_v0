@@ -6,6 +6,7 @@ import {
   FileServiceType,
   UploadOptions,
   UploadResult,
+  UploadedFile,
 } from './storage.types';
 import { LocalStorageAdapter } from './adapters/local.adapter';
 
@@ -99,7 +100,7 @@ export class StorageService {
    * Upload a file using the configured storage adapter
    */
   async upload(
-    file: Express.Multer.File,
+    file: UploadedFile,
     options: UploadOptions,
   ): Promise<UploadResult> {
     return this.adapter.upload(file, options);

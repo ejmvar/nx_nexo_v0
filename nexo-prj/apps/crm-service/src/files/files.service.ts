@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
 import { StorageService } from '../storage/storage.service';
+import { UploadedFile } from '../storage/storage.types';
 import { UploadFileDto } from './dto/upload-file.dto';
 import { SearchFilesDto } from './dto/search-files.dto';
 import * as crypto from 'crypto';
@@ -20,7 +21,7 @@ export class FilesService {
    * Upload a file and store metadata in database
    */
   async uploadFile(
-    file: Express.Multer.File,
+    file: UploadedFile,
     dto: UploadFileDto,
     accountId: string,
     userId: string,

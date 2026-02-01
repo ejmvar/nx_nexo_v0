@@ -3,6 +3,18 @@
  * Supports multiple storage backends (local, S3, MinIO, RustFS, etc.)
  */
 
+/**
+ * Interface for uploaded files (compatible with Express.Multer.File)
+ */
+export interface UploadedFile {
+  originalname: string;
+  buffer: Buffer;
+  size: number;
+  mimetype: string;
+  fieldname?: string;
+  encoding?: string;
+}
+
 export type FileServiceType =
   | 'local'       // Local filesystem (./media)
   | 's3'          // Amazon S3
@@ -67,7 +79,7 @@ export interface StorageAdapter {
   /**
    * Upload a file to storage
    */
-  upload(file: Express.Multer.File, options: UploadOptions): Promise<UploadResult>;
+  upload(file: UploadedFile, options: UploadOptions): Promise<UploadResult>;
 
   /**
    * Download a file from storage

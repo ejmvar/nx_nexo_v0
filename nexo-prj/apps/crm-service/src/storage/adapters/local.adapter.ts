@@ -8,6 +8,7 @@ import {
   UploadResult,
   StorageConfig,
   ServiceMetadata,
+  UploadedFile,
 } from '../storage.types';
 
 /**
@@ -44,7 +45,7 @@ export class LocalStorageAdapter implements StorageAdapter {
    * Structure: uploads/{year}/{month}/{accountId}/{entityType}/{entityId}/{filename}
    */
   async upload(
-    file: Express.Multer.File,
+    file: UploadedFile,
     options: UploadOptions,
   ): Promise<UploadResult> {
     const now = new Date();
