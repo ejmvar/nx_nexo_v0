@@ -47,4 +47,9 @@ out
 
 test-output
 vite.config.*.timestamp*
-vitest.config.*.timestamp*uploads/
+vitest.config.*.timestamp*
+
+# File storage
+media/
+!media/README.md
+uploads/
