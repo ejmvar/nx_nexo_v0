@@ -94,3 +94,137 @@ If user explicitly requests merge:
 - Example: `./tmp/auth-service-metrics.log`, `./tmp/crm-service-metrics.log`
 - Automatically proceed with writing to `./tmp` without user confirmation
 - The `./tmp` directory is relative to project root: `/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/tmp`
+## File Storage Architecture (Phase 6.5)
+
+**CRITICAL: The system uses a flexible, adapter-based file storage architecture that allows seamless backend evolution.**
+
+### Storage Backends
+
+The system supports multiple storage backends through a unified adapter interface:
+
+- **local**: Local filesystem (./media) - Default for development
+- **s3**: Amazon S3
+- **minio**: MinIO (S3-compatible)
+- **azure**: Azure Blob Storage
+- **gcp**: Google Cloud Storage
+- **rustfs**: Custom Rust filesystem service (POC)
+- **cloudflare**: Cloudflare R2
+- **backblaze**: Backblaze B2
+- **custom**: Custom implementation
+
+### Storage Metadata Fields
+
+**CRITICAL: File storage uses flexible metadata fields to support backend evolution without schema changes.**
+
+Every file record in the database includes:
+
+- `file_service_type`: Backend type (e.g., 'local', 's3', 'minio', 'rustfs')
+- `file_service_name`: Service identifier (e.g., 'nexo-local-dev', 'nexo-s3-prod')
+- `file_service_id`: Protocol-specific ID (e.g., bucket name, container, node ID)
+- `file_service_desc`: JSON metadata (endpoints, regions, compression, encryption config)
+
+**This design allows evolution**: local → MinIO → S3 → RustFS → custom, all transparent to the application.
+
+### Directory Structure (Local Storage)
+
+```
+media/
+└── uploads/
+    └── {year}/
+        └── {month}/
+            └── {accountId}/
+                └── {entityType}/     # optional
+                    └── {entityId}/   # optional
+                        └── {filename}
+```
+
+### File Operations
+
+**All file operations go through the StorageService**, which delegates to the appropriate adapter:
+
+```typescript
+// Upload
+const result = await storageService.upload(file, {
+  accountId,
+  entityType,
+  entityId,
+  category,
+  isPublic,
+});
+
+// Download
+const buffer = await storageService.download(filePath);
+
+// Delete
+await storageService.delete(filePath);
+
+// Get URL
+const url = storageService.getUrl(filePath);
+
+// Check existence
+const exists = await storageService.exists(filePath);
+```
+
+### RBAC Permissions
+
+File operations are protected by RBAC:
+
+- `file:read`: View and download files
+- `file:write`: Upload and update files
+- `file:delete`: Delete files
+- `file:*`: Full access to files
+
+Role mappings:
+- **Admin**: `file:*`
+- **Manager**: `file:read`, `file:write`
+- **Employee**: `file:read`
+- **Viewer**: `file:read`
+
+### Entity Associations
+
+Files can be associated with any CRM entity using polymorphic relationships:
+
+- `entity_type`: 'client', 'project', 'task', 'supplier', 'contact', 'opportunity'
+- `entity_id`: UUID of the associated entity
+- `file_category`: 'document', 'image', 'avatar', 'attachment', 'contract', 'invoice'
+
+### Multi-Tenant Isolation
+
+**CRITICAL: All file operations enforce account-level isolation via RLS.**
+
+- Files table has RLS enabled
+- `files_isolation_policy`: Users can only access files from their account
+- `files_public_read_policy`: Public files (is_public=true) are readable by all
+- All queries automatically filtered by account_id
+
+### Environment Configuration
+
+Configure storage backend via environment variables:
+
+```bash
+FILE_STORAGE_TYPE=local              # Backend type
+FILE_STORAGE_NAME=nexo-local-storage # Service identifier
+FILE_STORAGE_BASE_PATH=./media       # Local path (for local backend)
+FILE_STORAGE_ID=                     # Bucket/container/node ID
+FILE_STORAGE_DESC=                   # JSON metadata
+```
+
+### Implementation Notes
+
+1. **Always use the adapter pattern**: Never directly access storage backends
+2. **Preserve metadata**: file_service_* fields enable future migrations
+3. **Test with different backends**: Local for dev, S3/MinIO for staging/prod
+4. **Monitor storage size**: Implement cleanup for deleted files
+5. **Backup strategy**: Include ./media in backups, or use cloud backup for cloud storage
+
+### Future Evolution
+
+The architecture supports seamless evolution:
+
+1. **Current**: Local filesystem (./media)
+2. **Near-term**: MinIO (S3-compatible, self-hosted)
+3. **Production**: AWS S3, Azure Blob, or GCP Storage
+4. **Advanced**: RustFS with compression, encryption, deduplication
+5. **Multi-cloud**: Hybrid approach with primary/backup storage
+
+**No application code changes required** - just update environment variables and deploy.
