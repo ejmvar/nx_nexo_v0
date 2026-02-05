@@ -228,3 +228,37 @@ The architecture supports seamless evolution:
 5. **Multi-cloud**: Hybrid approach with primary/backup storage
 
 **No application code changes required** - just update environment variables and deploy.
+
+
+
+# Database schemas and logging
+**MUST HAVE** a logging table to keep record of users and bots activities (maybe user interaction, delegated tasks to bots or queues, maybe service apis)
+**Every activity MUST be logged.
+Users, bots, api services accesed by internal or external endpoints must be logged:
+Example:
+- UserType ('user', 'bot', 'api')
+- UserId
+- Role (role used that granted access to the resource, maybe used later for audit)
+- Account (the account the user impersonates during that transaction)
+- ServiceType ('db', 'api', 'ia')
+- ServiceId (db name, api endpoint, ia model)
+- Data (db record, api headers/query/body, ia prompt)
+
+# Database schemas minimal fields
+Every table **MUST HAVE** :
+- id (uuid)
+- status ('active', 'inactive', 'deleted') Only LOGICAL deletion, maybe future archiving
+- status_cycle ('activation-pending', 'deactivation-pending', 'suspended', 'available')
+- created_at (timestamp)
+- deleted_at (timestamp) 
+- active_from (timestamp) 
+- active_until (timestamp) 
+
+So, when listing **VALID** users, should use:
+```pseudo-sql
+select * from users u
+  where u.status is 'active'
+    and u.active_from <= currend_timestamp
+    and u.active_until >+ currend_timestamp
+```
+
