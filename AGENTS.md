@@ -262,3 +262,6 @@ select * from users u
     and u.active_until >+ currend_timestamp
 ```
 
+# Users, SuperUsers and RLS
+To ensure RLS does not affect superuser, test using both: a superuser and many normal users
+
