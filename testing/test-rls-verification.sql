@@ -26,7 +26,7 @@
 \echo '-----------------------------------------------------------'
 
 -- Set user context to Account 1 user (TechFlow Admin)
-SET LOCAL app.user_id = 'u1111111-1111-1111-1111-111111111111';
+SET LOCAL app.current_account_id = '11111111-1111-1111-1111-111111111111';
 
 -- Count clients - should only see Account 1 clients
 SELECT 
@@ -58,7 +58,7 @@ SELECT
 \echo '-----------------------------------------------------------'
 
 -- Set user context to Account 2 user (Creative Minds Admin)
-SET LOCAL app.user_id = 'u2222222-2222-2222-2222-222222222221';
+SET LOCAL app.current_account_id = '22222222-2222-2222-2222-222222222222';
 
 -- Count projects - should only see Account 2 projects
 SELECT 
@@ -90,7 +90,7 @@ SELECT
 \echo '--------------------------------------------------------'
 
 -- Set user context to Account 3 user (BuildRight Employee)
-SET LOCAL app.user_id = 'u3333333-3333-3333-3333-333333333333';
+SET LOCAL app.current_account_id = '33333333-3333-3333-3333-333333333333';
 
 -- Count tasks - should only see Account 3 tasks
 SELECT 
@@ -120,7 +120,7 @@ FROM tasks;
 \echo '--------------------------------------------------------'
 
 -- Set user context to Account 4 user (HealthCare Manager)
-SET LOCAL app.user_id = 'u4444444-4444-4444-4444-444444444442';
+SET LOCAL app.current_account_id = '44444444-4444-4444-4444-444444444444';
 
 -- Count files - should only see Account 4 files
 SELECT 
@@ -154,7 +154,7 @@ SELECT
 \echo '--------------------------------------------------------'
 
 -- Reset to Account 5 user
-SET LOCAL app.user_id = 'u5555555-5555-5555-5555-555555555551';
+SET LOCAL app.current_account_id = '55555555-5555-5555-5555-555555555555';
 
 -- Check if public files from other accounts are visible
 SELECT 
@@ -190,11 +190,11 @@ AND deleted_at IS NULL;
 \echo '-------------------------------------'
 
 -- Test with Account 1 Admin
-SET LOCAL app.user_id = 'u1111111-1111-1111-1111-111111111111';
+SET LOCAL app.current_account_id = '11111111-1111-1111-1111-111111111111';
 
 SELECT 
   CASE 
-    WHEN current_setting('app.user_id', true)::uuid = 'u1111111-1111-1111-1111-111111111111'
+    WHEN current_setting('app.user_id', true)::uuid = '11111111-1111-1111-1111-111111111111'
     THEN '✅ PASS: User context correctly set'
     ELSE '❌ FAIL: User context not set correctly'
   END AS test_result;
@@ -219,7 +219,7 @@ WHERE u.id = current_setting('app.user_id', true)::uuid;
 \echo '-----------------------------------------------------'
 
 -- Set user to Account 2
-SET LOCAL app.user_id = 'u2222222-2222-2222-2222-222222222221';
+SET LOCAL app.current_account_id = '22222222-2222-2222-2222-222222222222';
 
 -- Try to explicitly query Account 1 client by ID (should return 0 rows)
 SELECT 
@@ -251,7 +251,7 @@ WHERE id = 'pr111111-1111-1111-1111-111111111111'; -- Account 1 project
 \echo '-----------------------------------------------'
 
 -- Set user to Account 1
-SET LOCAL app.user_id = 'u1111111-1111-1111-1111-111111111112';
+SET LOCAL app.current_account_id = '11111111-1111-1111-1111-111111111111';
 
 -- Count audit logs - should only see Account 1 logs
 SELECT 
@@ -283,7 +283,7 @@ SELECT
 \echo '----------------------------------------------'
 
 -- Set user to Account 3
-SET LOCAL app.user_id = 'u3333333-3333-3333-3333-333333333331';
+SET LOCAL app.current_account_id = '33333333-3333-3333-3333-333333333333';
 
 -- Count suppliers - should only see Account 3 suppliers
 SELECT 
@@ -315,7 +315,7 @@ SELECT
 \echo '--------------------------------------------------'
 
 -- Set user to Account 2
-SET LOCAL app.user_id = 'u2222222-2222-2222-2222-222222222222';
+SET LOCAL app.current_account_id = '22222222-2222-2222-2222-222222222222';
 
 -- Count professionals - should only see Account 2 professionals
 SELECT 
@@ -336,7 +336,7 @@ FROM professionals;
 \echo '-------------------------------------------'
 
 -- Set user to Account 1
-SET LOCAL app.user_id = 'u1111111-1111-1111-1111-111111111111';
+SET LOCAL app.current_account_id = '11111111-1111-1111-1111-111111111111';
 
 -- Count roles - should only see Account 1 roles
 SELECT 
@@ -366,7 +366,7 @@ FROM roles;
 \echo '-----------------------------------------------'
 
 -- Set user to Account 4
-SET LOCAL app.user_id = 'u4444444-4444-4444-4444-444444444441';
+SET LOCAL app.current_account_id = 'a4444444-4444-4444-4444-444444444441';
 
 -- Count employees (users) - should only see Account 4 users
 SELECT 
