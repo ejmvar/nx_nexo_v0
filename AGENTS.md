@@ -12,6 +12,50 @@
 
 <!-- nx configuration end-->
 
+# Feature Status Tracking
+
+**CRITICAL: ALWAYS consult FEATURE_STATUS_LIST.md before planning or proposing new development work.**
+
+## Before Any Development Planning
+
+1. **Read `FEATURE_STATUS_LIST.md`** - This is the single source of truth for all feature status
+2. **Verify what already exists** - Many features are already fully implemented
+3. **Avoid duplicate work** - Don't propose implementing features that are marked as DONE
+4. **Check "Pending" sections** - See what actually needs to be developed
+
+## When Proposing New Features
+
+- Search FEATURE_STATUS_LIST.md for related features first
+- If feature exists with status DONE: Don't propose it, reference existing implementation instead
+- If feature is PARTIAL: Propose only the missing pieces, not the whole feature
+- If feature is NOT STARTED: Safe to propose full implementation
+
+## After Implementing Features
+
+**MUST UPDATE FEATURE_STATUS_LIST.md immediately:**
+
+1. Change status from ⏸️ NOT STARTED to ✅ DONE
+2. Add implementation details (modules, files, endpoints)
+3. Move items from "Pending" to the main feature list
+4. Update summary statistics at the bottom
+5. Commit with message: `docs: Update FEATURE_STATUS_LIST for [feature name]`
+
+## Why This Matters
+
+- **The user lost confidence** when agent proposed "new" features that were already developed
+- **This document prevents that** by maintaining a comprehensive inventory
+- **Always up-to-date** - must be updated with every feature change
+- **Saves time** - avoids rediscovering what's already implemented
+
+## Quick Reference
+
+For common questions:
+- "Is X feature implemented?" → Check FEATURE_STATUS_LIST.md
+- "What needs to be done?" → Check "Pending" sections in FEATURE_STATUS_LIST.md
+- "What's the status of Y?" → Search FEATURE_STATUS_LIST.md for Y
+
+**Path**: `/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/FEATURE_STATUS_LIST.md`
+
 # Development Environment Directives
 
 ## Docker Configuration
