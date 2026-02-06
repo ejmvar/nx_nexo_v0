@@ -15,8 +15,8 @@ export interface User {
 }
 
 export interface AuthTokens {
-  access_token: string;
-  refresh_token: string;
+  accessToken: string;
+  refreshToken: string;
 }
 
 export interface RegisterData {
@@ -114,7 +114,7 @@ export const authService = {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ refresh_token: refreshToken }),
+        body: JSON.stringify({ refreshToken: refreshToken }),
       });
 
       if (!response.ok) {
@@ -122,9 +122,9 @@ export const authService = {
         return null;
       }
 
-      const data = await response.json() as { access_token: string };
-      this.setAccessToken(data.access_token);
-      return data.access_token;
+      const data = await response.json() as { accessToken: string };
+      this.setAccessToken(data.accessToken);
+      return data.accessToken;
     } catch (error) {
       console.error('Token refresh failed:', error);
       this.clearTokens();
@@ -135,12 +135,12 @@ export const authService = {
   // Token management
   setTokens(tokens: AuthTokens): void {
     if (typeof window !== 'undefined') {
-      localStorage.setItem(TOKEN_KEY, tokens.access_token);
-      localStorage.setItem(REFRESH_TOKEN_KEY, tokens.refresh_token);
+      localStorage.setItem(TOKEN_KEY, tokens.accessToken);
+      localStorage.setItem(REFRESH_TOKEN_KEY, tokens.refreshToken);
       
       // Decode and store user info
       try {
-        const decoded = jwtDecode<User>(tokens.access_token);
+        const decoded = jwtDecode<User>(tokens.accessToken);
         localStorage.setItem(USER_KEY, JSON.stringify(decoded));
       } catch (error) {
         console.error('Failed to decode token:', error);
