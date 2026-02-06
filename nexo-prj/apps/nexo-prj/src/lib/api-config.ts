@@ -52,8 +52,8 @@ export const API_ENDPOINTS = {
   
   // Health check
   HEALTH: {
-    AUTH_SERVICE: `${AUTH_SERVICE_URL}/health`,
-    CRM_SERVICE: `${CRM_SERVICE_URL}/health`,
+    AUTH_SERVICE: `${AUTH_SERVICE_URL}/api/auth/health`,
+    CRM_SERVICE: `${CRM_SERVICE_URL}/api/health`,
   },
 };
 
