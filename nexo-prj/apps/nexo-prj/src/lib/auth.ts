@@ -1,9 +1,10 @@
 // Authentication utility functions
 import { jwtDecode } from 'jwt-decode';
+import { getServiceUrl } from './api-config';
 
-// API Gateway base URL
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
-const API_PREFIX = '/api'; // Gateway routes start with /api
+// Auth service URL
+const AUTH_SERVICE_URL = process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:3001';
+const API_PREFIX = '/api'; // API routes start with /api
 
 export interface User {
   userId: string;
@@ -41,7 +42,7 @@ const USER_KEY = 'nexo_user';
 export const authService = {
   // Register new user
   async register(data: RegisterData): Promise<AuthTokens> {
-    const response = await fetch(`${API_URL}${API_PREFIX}/auth/register`, {
+    const response = await fetch(`${AUTH_SERVICE_URL}${API_PREFIX}/auth/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -61,7 +62,7 @@ export const authService = {
 
   // Login user
   async login(data: LoginData): Promise<AuthTokens> {
-    const response = await fetch(`${API_URL}${API_PREFIX}/auth/login`, {
+    const response = await fetch(`${AUTH_SERVICE_URL}${API_PREFIX}/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -85,7 +86,7 @@ export const authService = {
     
     if (token) {
       try {
-        await fetch(`${API_URL}${API_PREFIX}/auth/logout`, {
+        await fetch(`${AUTH_SERVICE_URL}${API_PREFIX}/auth/logout`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -108,7 +109,7 @@ export const authService = {
     }
 
     try {
-      const response = await fetch(`${API_URL}${API_PREFIX}/auth/refresh`, {
+      const response = await fetch(`${AUTH_SERVICE_URL}${API_PREFIX}/auth/refresh`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -211,7 +212,7 @@ export const authService = {
   },
 };
 
-// API client with automatic token injection
+// API client with automatic token injection and smart service routing
 export async function apiClient(
   endpoint: string,
   options: RequestInit = {}
@@ -227,7 +228,11 @@ export async function apiClient(
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  let response = await fetch(`${API_URL}${API_PREFIX}${endpoint}`, {
+  // Smart routing: Determine which service to call based on endpoint
+  const serviceUrl = getServiceUrl(endpoint);
+  const fullUrl = `${serviceUrl}${API_PREFIX}${endpoint}`;
+
+  let response = await fetch(fullUrl, {
     ...options,
     headers,
   });
@@ -238,7 +243,7 @@ export async function apiClient(
     
     if (newToken) {
       headers['Authorization'] = `Bearer ${newToken}`;
-      response = await fetch(`${API_URL}${API_PREFIX}${endpoint}`, {
+      response = await fetch(fullUrl, {
         ...options,
         headers,
       });

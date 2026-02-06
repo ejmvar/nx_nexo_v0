@@ -1,12 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { checkHealth } from '../lib/api-client';
-import { API_CONFIG, API_ENDPOINTS } from '../lib/api-config';
+import { checkHealth } from '../../lib/api-client';
+import { API_CONFIG, API_ENDPOINTS } from '../../lib/api-config';
 
 interface HealthStatus {
-  apiGateway: boolean;
   authService: boolean;
+  crmService: boolean;
   timestamp: string;
 }
 
@@ -66,8 +66,8 @@ export default function HealthCheckPage() {
             📡 Configuration
           </h2>
           <div className="space-y-2 text-sm font-mono bg-gray-50 p-4 rounded">
-            <div><span className="text-gray-600">API Base URL:</span> <span className="text-blue-600">{API_CONFIG.BASE_URL}</span></div>
-            <div><span className="text-gray-600">Auth Base URL:</span> <span className="text-blue-600">{API_CONFIG.AUTH_URL}</span></div>
+            <div><span className="text-gray-600">Auth Service URL:</span> <span className="text-blue-600">{API_CONFIG.AUTH_SERVICE_URL}</span></div>
+            <div><span className="text-gray-600">CRM Service URL:</span> <span className="text-blue-600">{API_CONFIG.CRM_SERVICE_URL}</span></div>
             <div><span className="text-gray-600">Timeout:</span> <span className="text-gray-900">{API_CONFIG.TIMEOUT}ms</span></div>
           </div>
         </div>
@@ -96,23 +96,6 @@ export default function HealthCheckPage() {
 
           {health && (
             <div className="space-y-4">
-              {/* API Gateway Status */}
-              <div className={`border rounded-lg p-4 ${getStatusBg(health.apiGateway)}`}>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      {getStatusIcon(health.apiGateway)} API Gateway
-                    </h3>
-                    <p className="text-sm text-gray-600 font-mono mt-1">
-                      {API_ENDPOINTS.HEALTH.API_GATEWAY}
-                    </p>
-                  </div>
-                  <span className={`text-2xl font-bold ${getStatusColor(health.apiGateway)}`}>
-                    {health.apiGateway ? 'ONLINE' : 'OFFLINE'}
-                  </span>
-                </div>
-              </div>
-
               {/* Auth Service Status */}
               <div className={`border rounded-lg p-4 ${getStatusBg(health.authService)}`}>
                 <div className="flex items-center justify-between">
@@ -130,6 +113,23 @@ export default function HealthCheckPage() {
                 </div>
               </div>
 
+              {/* CRM Service Status */}
+              <div className={`border rounded-lg p-4 ${getStatusBg(health.crmService)}`}>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      {getStatusIcon(health.crmService)} CRM Service
+                    </h3>
+                    <p className="text-sm text-gray-600 font-mono mt-1">
+                      {API_ENDPOINTS.HEALTH.CRM_SERVICE}
+                    </p>
+                  </div>
+                  <span className={`text-2xl font-bold ${getStatusColor(health.crmService)}`}>
+                    {health.crmService ? 'ONLINE' : 'OFFLINE'}
+                  </span>
+                </div>
+              </div>
+
               {/* Overall Status */}
               <div className="bg-gray-50 rounded-lg p-4 mt-6">
                 <div className="flex items-center justify-between">
@@ -142,7 +142,7 @@ export default function HealthCheckPage() {
                     </p>
                   </div>
                   <div className="text-right">
-                    {health.apiGateway && health.authService ? (
+                    {health.authService && health.crmService ? (
                       <div className="text-green-600 font-bold text-xl">
                         ✅ ALL SYSTEMS OPERATIONAL
                       </div>

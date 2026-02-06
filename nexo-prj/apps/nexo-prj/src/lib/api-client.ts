@@ -1,4 +1,4 @@
-import { API_CONFIG, API_ENDPOINTS } from './api-config';
+import { API_CONFIG, API_ENDPOINTS, getServiceUrl } from './api-config';
 
 // API Error class
 export class APIError extends Error {
@@ -95,23 +95,23 @@ export const apiClient = {
 // Health check utility
 export async function checkHealth() {
   const results = {
-    apiGateway: false,
     authService: false,
+    crmService: false,
     timestamp: new Date().toISOString(),
   };
-
-  try {
-    await apiClient.get(API_ENDPOINTS.HEALTH.API_GATEWAY);
-    results.apiGateway = true;
-  } catch (error) {
-    console.error('API Gateway health check failed:', error);
-  }
 
   try {
     await apiClient.get(API_ENDPOINTS.HEALTH.AUTH_SERVICE);
     results.authService = true;
   } catch (error) {
     console.error('Auth Service health check failed:', error);
+  }
+
+  try {
+    await apiClient.get(API_ENDPOINTS.HEALTH.CRM_SERVICE);
+    results.crmService = true;
+  } catch (error) {
+    console.error('CRM Service health check failed:', error);
   }
 
   return results;
