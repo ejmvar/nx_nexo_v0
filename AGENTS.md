@@ -30,6 +30,41 @@
 - If feature is PARTIAL: Propose only the missing pieces, not the whole feature
 - If feature is NOT STARTED: Safe to propose full implementation
 
+### Version Evolution & Multiple Implementations
+
+**Version Tracking**:
+- If feature is a new or better approach, document both versions as **separate entries** (v1, v2, v3)
+- Reason: Final implementation depends on client budget, infrastructure, scaling needs
+- Example: File Storage v1 (local), v2 (S3), v3 (RustFS) - each tracked independently
+
+**Multiple Implementation Handling**:
+When a feature has multiple implementations (adapters, backends, providers):
+1. **List each as sub-feature** in FEATURE_STATUS_LIST.md for quick scanning
+2. **Detail capabilities per implementation** for specifics
+3. **Create matrix [implementation × capability]** for completeness
+4. **ALWAYS ask user** before applying changes: "Does [feature] apply to all implementations or specific ones?"
+
+**Investigation Strategy**:
+- Investigate obvious/straightforward cases → document findings → proceed
+- Ask user about unclear/complex cases before proposing solution
+- Don't assume or simplify behavior
+
+**Partial Evolution Scenarios**:
+When evolution applies to SOME but not ALL implementations:
+- ✅ Inform about implementations that work easily (assume OK to proceed)
+- ⏸️ Document blockers for implementations needing additional work (e.g., "S3/Azure/GCP: Need CDN integration")
+- ❓ Ask about uncertain/complex implementations before proposing
+
+**Example**:
+```
+Feature: Add caching to file storage
+- Local: Easy to implement ✅ (proceed)
+- S3/Azure/GCP: Need CDN integration ⏸️ (document blocker)
+- RustFS: Built-in caching ✅ (already has it)
+→ Inform user about findings, note blockers
+```
+
+
 ## After Implementing Features
 
 **MUST UPDATE FEATURE_STATUS_LIST.md immediately:**

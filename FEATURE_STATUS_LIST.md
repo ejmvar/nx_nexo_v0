@@ -443,6 +443,173 @@ This is the **SINGLE SOURCE OF TRUTH** for feature status in NEXO CRM.
 
 ---
 
+### 3.2 File Storage - Evolution Roadmap
+
+**Purpose**: Track multiple storage implementation versions for budget/infrastructure flexibility
+
+#### Version 1: Local Filesystem ✅ DONE (Current)
+**Status**: DONE - Production ready for development/small deployments  
+**Adapter**: `adapters/local.adapter.ts`  
+**Storage**: `./media` directory  
+**Use Case**: Development, MVP, small-scale deployments  
+**Cost**: $0 (uses local disk)  
+**Scalability**: Limited to single server  
+
+**Capabilities**:
+- ✅ Upload/download
+- ✅ Soft delete
+- ✅ File metadata
+- ✅ Path-based organization
+- ❌ Redundancy/backup
+- ❌ CDN acceleration
+- ❌ Geographic distribution
+
+---
+
+#### Version 2: S3-Compatible Storage (MinIO/AWS) ⏸️ READY (Not Activated)
+**Status**: Code complete, not deployed  
+**Adapters**: `adapters/s3.adapter.ts`  
+**Options**: AWS S3, MinIO (self-hosted), Cloudflare R2, Backblaze B2  
+**Use Case**: Production, medium-to-large scale  
+**Cost**: ~$0.023/GB/month (S3 Standard) or self-hosted (MinIO)  
+**Scalability**: Unlimited, multi-region  
+
+**Capabilities**:
+- ✅ Upload/download
+- ✅ Soft delete
+- ✅ File metadata
+- ✅ Redundancy (11 9's durability for S3)
+- ✅ CDN integration (CloudFront, CloudFlare)
+- ✅ Geographic distribution
+- ✅ Versioning support
+- ⏸️ Requires CDN setup for optimal performance
+
+**Activation Steps**:
+1. Set `FILE_STORAGE_TYPE=s3` in environment
+2. Configure bucket credentials
+3. Update file_service_id to bucket name
+4. Deploy
+
+---
+
+#### Version 3: RustFS Custom Storage ⏸️ PLANNED (Future)
+**Status**: Proof of concept, not production ready  
+**Adapter**: `adapters/rustfs.adapter.ts` (to be developed)  
+**Use Case**: High-performance, custom requirements, advanced features  
+**Cost**: Infrastructure + development costs  
+**Scalability**: Custom, potentially unlimited  
+
+**Planned Capabilities**:
+- ⏸️ Built-in compression (reduce storage 30-70%)
+- ⏸️ Built-in encryption at rest
+- ⏸️ Built-in deduplication
+- ⏸️ Custom caching layer
+- ⏸️ Optimized for specific file types
+- ⏸️ Real-time transcoding (video/audio)
+- ⏸️ AI-based content analysis
+
+**Development Required**:
+- RustFS service implementation
+- TypeScript adapter
+- Migration tooling
+- Performance benchmarks
+
+---
+
+### 3.3 Storage Adapter Capabilities Matrix
+
+| Capability | Local | S3/MinIO | Azure | GCP | Cloudflare R2 | Backblaze B2 | RustFS (v3) |
+|------------|-------|----------|-------|-----|---------------|--------------|-------------|
+| **Upload/Download** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ⏸️ Planned |
+| **Soft Delete** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ⏸️ Planned |
+| **Metadata Storage** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ⏸️ Planned |
+| **RBAC Integration** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ⏸️ Planned |
+| **RLS Isolation** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ⏸️ Planned |
+| **Redundancy** | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ⏸️ Planned |
+| **CDN Support** | ❌ | ⏸️ Config | ⏸️ Config | ⏸️ Config | ✅ Native | ⏸️ Config | ⏸️ Planned |
+| **Versioning** | ❌ | ✅ | ✅ | ✅ | ❌ | ❌ | ⏸️ Planned |
+| **Compression** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ⏸️ Built-in |
+| **Encryption at Rest** | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ⏸️ Built-in |
+| **Deduplication** | ❌ | ❌ | ⏸️ Tier | ⏸️ Tier | ❌ | ❌ | ⏸️ Built-in |
+| **Geographic Dist** | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ⏸️ Custom |
+| **Cost ($/GB/mo)** | $0 | ~$0.023 | ~$0.018 | ~$0.020 | ~$0.015 | ~$0.005 | Custom |
+
+**Legend**:
+- ✅ Available and functional
+- ⏸️ Requires configuration / additional setup
+- ❌ Not supported
+- ⏸️ Planned - Future implementation
+
+---
+
+### 3.4 Sub-Feature: Storage Backend-Specific Implementations
+
+#### 3.4.1 Local Filesystem Adapter ✅ DONE
+**File**: `nexo-prj/apps/crm-service/src/storage/adapters/local.adapter.ts`  
+**Features**: Upload, download, delete, exists, getUrl  
+**Directory Structure**: `./media/uploads/{year}/{month}/{accountId}/{entityType}/{entityId}/{filename}`
+
+#### 3.4.2 S3-Compatible Adapter ✅ DONE
+**File**: `nexo-prj/apps/crm-service/src/storage/adapters/s3.adapter.ts`  
+**Compatible With**: AWS S3, MinIO, Cloudflare R2, Backblaze B2  
+**Features**: Upload, download, delete, exists, getUrl, presigned URLs  
+**Configuration**: Requires bucket name, region, credentials
+
+#### 3.4.3 Azure Blob Adapter ✅ DONE
+**File**: `nexo-prj/apps/crm-service/src/storage/adapters/azure.adapter.ts`  
+**Features**: Upload, download, delete, exists, getUrl, SAS tokens  
+**Configuration**: Requires container name, connection string
+
+#### 3.4.4 Google Cloud Storage Adapter ✅ DONE
+**File**: `nexo-prj/apps/crm-service/src/storage/adapters/gcp.adapter.ts`  
+**Features**: Upload, download, delete, exists, getUrl, signed URLs  
+**Configuration**: Requires bucket name, credentials JSON
+
+#### 3.4.5 Cloudflare R2 Adapter ✅ DONE
+**File**: `nexo-prj/apps/crm-service/src/storage/adapters/cloudflare.adapter.ts`  
+**Features**: S3-compatible with native CDN integration  
+**Advantages**: No egress fees, built-in CDN
+
+#### 3.4.6 Backblaze B2 Adapter ✅ DONE
+**File**: `nexo-prj/apps/crm-service/src/storage/adapters/backblaze.adapter.ts`  
+**Features**: S3-compatible, lowest cost option  
+**Advantages**: $0.005/GB/month, free egress with CloudFlare
+
+#### 3.4.7 RustFS Adapter ⏸️ PLANNED
+**File**: Not yet implemented  
+**Features**: Compression, encryption, deduplication, caching  
+**Status**: Proof of concept stage
+
+---
+
+### 3.5 Storage Feature Evolution Examples
+
+**Example 1: Adding Thumbnail Generation**
+
+**Investigation Results**:
+- Local: ✅ Easy - Use Sharp library, save to ./media/thumbnails
+- S3/Azure/GCP: ✅ Easy - Generate and upload thumbnail alongside original
+- Cloudflare R2: ✅ Easy - Use Cloudflare Image Resizing (built-in)
+- Backblaze B2: ⏸️ Blocker - No native thumbnail service, need worker
+- RustFS: ⏸️ Planned - Will have built-in transcoding
+
+**Decision**: Implement for all except Backblaze B2 (document blocker)
+
+**Example 2: Adding CDN Acceleration**
+
+**Investigation Results**:
+- Local: ❌ Not applicable - Local files only
+- S3: ⏸️ Requires CloudFront setup - Additional cost ~$0.085/GB egress
+- Azure: ⏸️ Requires Azure CDN setup - Additional cost ~$0.087/GB egress
+- GCP: ⏸️ Requires Cloud CDN setup - Additional cost ~$0.08/GB egress
+- Cloudflare R2: ✅ Built-in - Included, no additional cost
+- Backblaze B2: ✅ Free with CloudFlare partnership
+- RustFS: ⏸️ Planned - Custom caching layer
+
+**Decision**: Ask user if CDN setup effort is acceptable for AWS/Azure/GCP
+
+---
+
 ## 4. Frontend Application
 
 ### 4.1 Portal Selection & Navigation ✅ DONE
