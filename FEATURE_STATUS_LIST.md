@@ -492,7 +492,7 @@ This is the **SINGLE SOURCE OF TRUTH** for feature status in NEXO CRM.
 
 ---
 
-#### Version 3: RustFS Custom Storage ⏸️ PLANNED (Future)
+#### Version 3: RustFS Custom Storage 📋 PLANNED (Future)
 **Status**: Proof of concept, not production ready  
 **Adapter**: `adapters/rustfs.adapter.ts` (to be developed)  
 **Use Case**: High-performance, custom requirements, advanced features  
@@ -500,13 +500,13 @@ This is the **SINGLE SOURCE OF TRUTH** for feature status in NEXO CRM.
 **Scalability**: Custom, potentially unlimited  
 
 **Planned Capabilities**:
-- ⏸️ Built-in compression (reduce storage 30-70%)
-- ⏸️ Built-in encryption at rest
-- ⏸️ Built-in deduplication
-- ⏸️ Custom caching layer
-- ⏸️ Optimized for specific file types
-- ⏸️ Real-time transcoding (video/audio)
-- ⏸️ AI-based content analysis
+- 📋 Built-in compression (reduce storage 30-70%)
+- 📋 Built-in encryption at rest
+- 📋 Built-in deduplication
+- 📋 Built-in caching layer
+- 📋 Optimized for specific file types
+- 📋 Real-time transcoding (video/audio)
+- 📋 AI-based content analysis
 
 **Development Required**:
 - RustFS service implementation
@@ -520,25 +520,25 @@ This is the **SINGLE SOURCE OF TRUTH** for feature status in NEXO CRM.
 
 | Capability | Local | S3/MinIO | Azure | GCP | Cloudflare R2 | Backblaze B2 | RustFS (v3) |
 |------------|-------|----------|-------|-----|---------------|--------------|-------------|
-| **Upload/Download** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ⏸️ Planned |
-| **Soft Delete** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ⏸️ Planned |
-| **Metadata Storage** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ⏸️ Planned |
-| **RBAC Integration** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ⏸️ Planned |
-| **RLS Isolation** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ⏸️ Planned |
-| **Redundancy** | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ⏸️ Planned |
-| **CDN Support** | ❌ | ⏸️ Config | ⏸️ Config | ⏸️ Config | ✅ Native | ⏸️ Config | ⏸️ Planned |
-| **Versioning** | ❌ | ✅ | ✅ | ✅ | ❌ | ❌ | ⏸️ Planned |
-| **Compression** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ⏸️ Built-in |
-| **Encryption at Rest** | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ⏸️ Built-in |
-| **Deduplication** | ❌ | ❌ | ⏸️ Tier | ⏸️ Tier | ❌ | ❌ | ⏸️ Built-in |
-| **Geographic Dist** | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ⏸️ Custom |
+| **Upload/Download** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 📋 Planned |
+| **Soft Delete** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 📋 Planned |
+| **Metadata Storage** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 📋 Planned |
+| **RBAC Integration** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 📋 Planned |
+| **RLS Isolation** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 📋 Planned |
+| **Redundancy** | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | 📋 Planned |
+| **CDN Support** | ❌ | ⏸️ Config | ⏸️ Config | ⏸️ Config | ✅ Native | ⏸️ Config | 📋 Planned |
+| **Versioning** | ❌ | ✅ | ✅ | ✅ | ❌ | ❌ | 📋 Planned |
+| **Compression** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | 📋 Built-in |
+| **Encryption at Rest** | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | 📋 Built-in |
+| **Deduplication** | ❌ | ❌ | ⏸️ Tier | ⏸️ Tier | ❌ | ❌ | 📋 Built-in |
+| **Geographic Dist** | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | 📋 Custom |
 | **Cost ($/GB/mo)** | $0 | ~$0.023 | ~$0.018 | ~$0.020 | ~$0.015 | ~$0.005 | Custom |
 
 **Legend**:
 - ✅ Available and functional
 - ⏸️ Requires configuration / additional setup
 - ❌ Not supported
-- ⏸️ Planned - Future implementation
+- 📋 Planned - Future implementation
 
 ---
 
@@ -575,7 +575,7 @@ This is the **SINGLE SOURCE OF TRUTH** for feature status in NEXO CRM.
 **Features**: S3-compatible, lowest cost option  
 **Advantages**: $0.005/GB/month, free egress with CloudFlare
 
-#### 3.4.7 RustFS Adapter ⏸️ PLANNED
+#### 3.4.7 RustFS Adapter 📋 PLANNED
 **File**: Not yet implemented  
 **Features**: Compression, encryption, deduplication, caching  
 **Status**: Proof of concept stage
@@ -591,7 +591,7 @@ This is the **SINGLE SOURCE OF TRUTH** for feature status in NEXO CRM.
 - S3/Azure/GCP: ✅ Easy - Generate and upload thumbnail alongside original
 - Cloudflare R2: ✅ Easy - Use Cloudflare Image Resizing (built-in)
 - Backblaze B2: ⏸️ Blocker - No native thumbnail service, need worker
-- RustFS: ⏸️ Planned - Will have built-in transcoding
+- RustFS: 📋 Planned - Will have built-in transcoding
 
 **Decision**: Implement for all except Backblaze B2 (document blocker)
 
@@ -604,7 +604,7 @@ This is the **SINGLE SOURCE OF TRUTH** for feature status in NEXO CRM.
 - GCP: ⏸️ Requires Cloud CDN setup - Additional cost ~$0.08/GB egress
 - Cloudflare R2: ✅ Built-in - Included, no additional cost
 - Backblaze B2: ✅ Free with CloudFlare partnership
-- RustFS: ⏸️ Planned - Custom caching layer
+- RustFS: 📋 Planned - Custom caching layer
 
 **Decision**: Ask user if CDN setup effort is acceptable for AWS/Azure/GCP
 
