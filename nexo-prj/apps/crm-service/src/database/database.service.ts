@@ -8,8 +8,10 @@ const Pool = pg?.Pool || (pg as any)?.default?.Pool || pg;
 @Injectable()
 export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   private pool: any;
+  private readonly debugRLS: boolean;
 
   constructor(private configService: ConfigService) {
+    this.debugRLS = this.configService.get('DEBUG_RLS') === 'true' || process.env.DEBUG_RLS === 'true';
     this.pool = new Pool({
       host: this.configService.get('DB_HOST') || this.configService.get('POSTGRES_HOST') || 'localhost',
       port: parseInt(this.configService.get('DB_PORT') || this.configService.get('POSTGRES_PORT') || '5432'),
@@ -59,45 +61,55 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   async queryWithAccount(accountId: string, text: string, params?: any[]) {
     const client = await this.pool.connect();
     try {
-      // DEBUG: Check database user
-      const userCheck = await client.query('SELECT current_user, session_user');
-      console.log('🔍 [RLS DEBUG] Database User:', {
-        current_user: userCheck.rows[0].current_user,
-        session_user: userCheck.rows[0].session_user
-      });
+      if (this.debugRLS) {
+        // DEBUG: Check database user
+        const userCheck = await client.query('SELECT current_user, session_user');
+        console.log('🔍 [RLS DEBUG] Database User:', {
+          current_user: userCheck.rows[0].current_user,
+          session_user: userCheck.rows[0].session_user
+        });
+      }
 
       await client.query('BEGIN');
       
-      // DEBUG: Log account ID being set
-      console.log('🔍 [RLS DEBUG] Setting account context:', { accountId });
+      if (this.debugRLS) {
+        // DEBUG: Log account ID being set
+        console.log('🔍 [RLS DEBUG] Setting account context:', { accountId });
+      }
       
       // Using literal string interpolation instead of parameter binding for SET LOCAL
       // This avoids interference with subsequent parameterized queries
       await client.query(`SET LOCAL app.current_account_id = '${accountId}'`);
       
-      // DEBUG: Verify session variable was set
-      const varCheck = await client.query(`SELECT current_setting('app.current_account_id', true) as account_id`);
-      console.log('🔍 [RLS DEBUG] Session variable value:', varCheck.rows[0]);
-      
-      // DEBUG: Log query being executed
-      console.log('🔍 [RLS DEBUG] Executing query:', {
-        query: text.substring(0, 100) + (text.length > 100 ? '...' : ''),
-        paramCount: params?.length || 0
-      });
+      if (this.debugRLS) {
+        // DEBUG: Verify session variable was set
+        const varCheck = await client.query(`SELECT current_setting('app.current_account_id', true) as account_id`);
+        console.log('🔍 [RLS DEBUG] Session variable value:', varCheck.rows[0]);
+        
+        // DEBUG: Log query being executed
+        console.log('🔍 [RLS DEBUG] Executing query:', {
+          query: text.substring(0, 100) + (text.length > 100 ? '...' : ''),
+          paramCount: params?.length || 0
+        });
+      }
       
       const result = await client.query(text, params);
       
-      // DEBUG: Log result
-      console.log('🔍 [RLS DEBUG] Query result:', {
-        rowCount: result.rowCount,
-        rows: result.rows.length
-      });
+      if (this.debugRLS) {
+        // DEBUG: Log result
+        console.log('🔍 [RLS DEBUG] Query result:', {
+          rowCount: result.rowCount,
+          rows: result.rows.length
+        });
+      }
       
       await client.query('COMMIT');
       
       return result;
     } catch (error) {
-      console.error('🔍 [RLS DEBUG] Query error:', error);
+      if (this.debugRLS) {
+        console.error('🔍 [RLS DEBUG] Query error:', error);
+      }
       await client.query('ROLLBACK').catch(() => {});
       throw error;
     } finally {
