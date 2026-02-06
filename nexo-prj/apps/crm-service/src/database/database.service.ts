@@ -11,6 +11,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   private readonly debugRLS: boolean;
 
   constructor(private configService: ConfigService) {
+    // #TODO: ensure 'DEBUG_RLS' is documented as a config option
     this.debugRLS = this.configService.get('DEBUG_RLS') === 'true' || process.env.DEBUG_RLS === 'true';
     this.pool = new Pool({
       host: this.configService.get('DB_HOST') || this.configService.get('POSTGRES_HOST') || 'localhost',
