@@ -344,3 +344,545 @@ select * from users u
 # Users, SuperUsers and RLS
 To ensure RLS does not affect superuser, test using both: a superuser and many normal users
 
+
+
+# SETUP ENVIRONMENT for TEST or WORK:
+Save this to "SETUP_ENVIRONMENT_for_TEST_or_WORK.md"
+## How to Start and Test the Whole System
+
+**CRITICAL: This project uses NX + PNPM, NOT npm! Always respect the workspace tooling.**
+
+### Why the Correct Tools Matter
+
+**❌ WRONG APPROACHES** (Don't do this):
+```bash
+npm run dev                           # Wrong package manager
+cd apps/nexo-prj && npm run dev      # Ignores Nx workspace
+node dist/main.js                    # Bypasses orchestration
+```
+
+**✅ CORRECT APPROACHES** (Use these):
+```bash
+pnpm run dev                         # Nx workspace via pnpm
+mise run dev                         # Recommended: orchestrated setup
+unset DOCKER_HOST && docker compose up -d  # Full stack with Docker
+```
+
+---
+
+### 1. NX + PNPM Procedure (Development Mode)
+
+**Purpose**: Run services directly on host machine for development with hot-reload.
+
+#### Prerequisites
+```bash
+# Install mise (if not already installed)
+curl https://mise.run | sh
+
+# Setup Nx and pnpm
+mise run 100-000-001-nx-pnpm-install
+cd nexo-prj && pnpm install
+```
+
+#### Start Services
+
+**Option A: Individual Services** (Recommended for debugging)
+```bash
+# Terminal 1: Auth Service
+cd nexo-prj
+pnpm nx serve auth-service
+# Runs on: http://localhost:3001
+
+# Terminal 2: CRM Service
+cd nexo-prj
+pnpm nx serve crm-service
+# Runs on: http://localhost:3003
+
+# Terminal 3: Frontend
+cd nexo-prj
+pnpm nx serve nexo-prj
+# Runs on: http://localhost:3000
+```
+
+**Option B: All Services at Once** (Parallel execution)
+```bash
+cd nexo-prj
+pnpm run serve:all
+# or
+pnpm nx run-many --target=serve --all --parallel
+```
+
+**Option C: Using Mise Tasks**
+```bash
+mise run test-dev        # Start frontend only
+mise run test-dev-all    # Start all services
+```
+
+#### Verify Services
+```bash
+# Check auth service
+curl http://localhost:3001/health
+
+# Check CRM service
+curl http://localhost:3003/health
+
+# Check frontend
+curl http://localhost:3000
+```
+
+#### Run Tests
+```bash
+# Quick check (lint + typecheck + unit tests)
+cd nexo-prj
+pnpm run check
+
+# Full test suite
+pnpm run test
+
+# E2E tests
+pnpm run e2e
+
+# Using mise
+mise run test-all        # Complete test suite
+mise run test-quick      # Fast validation
+mise run check           # Quick health check
+```
+
+#### Development Workflow
+```bash
+# 1. Make changes to code
+# 2. Changes auto-reload (hot module replacement)
+# 3. Run tests
+mise run test-unit
+
+# 4. Lint and format
+pnpm run lint:fix
+pnpm run format
+
+# 5. Build for production test
+pnpm run build:all
+```
+
+---
+
+### 2. DOCKER Procedure (Full Stack)
+
+**Purpose**: Run complete infrastructure with all services containerized. Best for testing production-like setup.
+
+#### Prerequisites
+```bash
+# CRITICAL: Always unset DOCKER_HOST first
+unset DOCKER_HOST
+
+# Verify Docker is running
+docker --version
+docker compose version
+```
+
+#### Start Full Stack
+
+**Option A: Database Only** (Most common for development)
+```bash
+# Start PostgreSQL only
+unset DOCKER_HOST && docker compose -f docker/docker-compose.yml up -d postgres
+
+# Wait for database to be ready
+docker compose -f docker/docker-compose.yml ps postgres
+
+# Then run services with Nx (host machine)
+cd nexo-prj && pnpm run serve:all
+```
+
+**Option B: Complete Stack** (All services in containers)
+```bash
+# Start everything
+unset DOCKER_HOST && docker compose -f docker-compose.yml up -d
+
+# View logs
+docker compose logs -f
+
+# Verify all services
+docker compose ps
+```
+
+**Option C: Using Mise Tasks**
+```bash
+# Start infrastructure
+unset DOCKER_HOST && mise run docker:up
+
+# View status
+mise run docker:ps
+
+# View logs
+mise run docker:logs
+
+# Health check
+mise run health
+```
+
+#### Service Mapping (Docker Mode)
+```
+PostgreSQL:    localhost:5432  → nexo-postgres
+Redis:         localhost:6379  → nexo-redis
+RabbitMQ:      localhost:5672  → nexo-rabbitmq
+Auth Service:  localhost:3001  → nexo-auth-service
+CRM Service:   localhost:3003  → nexo-crm-service
+API Gateway:   localhost:3002  → nexo-api-gateway
+Frontend:      localhost:3000  → nexo-frontend-dev
+```
+
+#### Database Operations (Docker)
+```bash
+# Connect to PostgreSQL shell
+mise run db:shell
+# or
+docker exec -it nexo-postgres psql -U nexo_user -d nexo
+
+# Backup database
+mise run db:backup
+
+# Restore database
+mise run db:restore
+
+# Seed test data
+docker exec -it nexo-postgres psql -U nexo_user -d nexo < database/seed-test-data-v2.sql
+```
+
+#### Stop Services
+```bash
+# Stop all containers
+unset DOCKER_HOST && docker compose down
+
+# Stop and remove volumes (clean slate)
+unset DOCKER_HOST && docker compose down -v
+
+# Using mise
+mise run docker:down
+mise run docker:clean  # Remove volumes too
+```
+
+#### Troubleshooting Docker
+
+**Issue: Port already in use**
+```bash
+# Check what's using the port
+lsof -i :3000  # or :5432, :3001, etc.
+
+# Kill the process
+kill <PID>
+```
+
+**Issue: Database connection refused**
+```bash
+# Check if PostgreSQL is running
+docker compose ps postgres
+
+# Check logs
+docker compose logs postgres
+
+# Restart database
+docker compose restart postgres
+```
+
+**Issue: DOCKER_HOST error**
+```bash
+# ALWAYS run this first
+unset DOCKER_HOST
+
+# Verify it's unset
+echo $DOCKER_HOST  # Should be empty
+
+# Then run docker commands
+docker compose up -d
+```
+
+---
+
+### 3. PODMAN Explanation
+
+**Status**: ⚠️ **NOT CURRENTLY USED** (Previously used, now removed)
+
+**History**:
+- PODMAN was previously installed and configured
+- Left behind `DOCKER_HOST` environment variable pointing to podman socket
+- This causes Docker commands to fail
+
+**Why We Don't Use Podman Currently**:
+1. **Docker Compose Compatibility**: Some compose features work better with Docker
+2. **Team Consistency**: Docker is more widely used
+3. **CI/CD Pipelines**: Most CI systems use Docker by default
+4. **Development Tooling**: Better integration with IDEs and tools
+
+**If You Want to Use Podman**:
+```bash
+# Install Podman
+sudo apt install podman podman-compose
+
+# Use podman-compose instead of docker compose
+podman-compose -f docker-compose.yml up -d
+
+# Or alias docker to podman
+alias docker=podman
+alias docker-compose=podman-compose
+
+# Set DOCKER_HOST for Podman
+export DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock
+```
+
+**Why It Was Removed**:
+- The `DOCKER_HOST` variable remained after uninstalling Podman
+- This caused all Docker commands to fail silently
+- **Solution**: Always run `unset DOCKER_HOST` before Docker commands
+
+**Migration from Podman to Docker**:
+```bash
+# 1. Uninstall Podman
+sudo apt remove podman podman-compose
+
+# 2. Clear environment variables
+unset DOCKER_HOST
+unset DOCKER_SOCK
+
+# 3. Edit ~/.bashrc and remove any Podman exports
+nano ~/.bashrc
+# Remove lines like: export DOCKER_HOST=...
+
+# 4. Reload shell
+source ~/.bashrc
+
+# 5. Install/verify Docker
+sudo systemctl start docker
+docker --version
+```
+
+---
+
+### 4. OTHER Methods
+
+#### A. Mise Orchestration (Recommended for Daily Development)
+
+**Purpose**: Unified task runner that manages all workflows.
+
+```bash
+# View all available tasks
+mise tasks
+
+# Start development environment
+mise run dev              # Full stack
+mise run test-dev         # Frontend only
+mise run test-dev-all     # All services
+
+# Testing workflows
+mise run test-all         # Complete test suite
+mise run test-quick       # Fast validation
+mise run check            # Lint + typecheck + unit
+mise run test-ci          # CI simulation
+
+# Docker workflows
+mise run docker:up        # Start containers
+mise run docker:down      # Stop containers
+mise run docker:logs      # View logs
+mise run docker:ps        # List containers
+
+# Database workflows
+mise run db:shell         # Connect to psql
+mise run db:backup        # Backup database
+mise run db:restore       # Restore database
+
+# View all service URLs
+mise run urls
+
+# Health monitoring
+mise run health           # Check all services
+mise run stats            # Resource usage
+```
+
+#### B. Manual Service Start (Low-level)
+
+**When to use**: Debugging specific service issues, custom ports, etc.
+
+```bash
+# 1. Start database
+unset DOCKER_HOST && docker compose -f docker/docker-compose.yml up -d postgres
+
+# 2. Set environment variables
+export DATABASE_URL="postgresql://nexo_user:nexo_password@localhost:5432/nexo"
+export JWT_SECRET="your-secret-key"
+export REDIS_URL="redis://localhost:6379"
+
+# 3. Start auth service manually
+cd nexo-prj/apps/auth-service
+PORT=3001 pnpm nx serve auth-service
+
+# 4. Start CRM service manually
+cd nexo-prj/apps/crm-service
+PORT=3003 pnpm nx serve crm-service
+
+# 5. Start frontend manually  
+cd nexo-prj/apps/nexo-prj
+PORT=3000 pnpm nx serve nexo-prj
+```
+
+#### C. Production Build & Start
+
+**Purpose**: Test production builds locally.
+
+```bash
+# 1. Build all services
+cd nexo-prj
+pnpm run build:all
+
+# 2. Start with Docker (production mode)
+export NODE_ENV=production
+unset DOCKER_HOST && docker compose -f docker-compose.prod.yml up -d
+
+# 3. Or start manually (not recommended)
+cd nexo-prj
+NODE_ENV=production pnpm nx serve auth-service --prod
+NODE_ENV=production pnpm nx serve crm-service --prod
+NODE_ENV=production pnpm nx serve nexo-prj --prod
+```
+
+#### D. Nx CLI Direct Commands
+
+**Purpose**: Fine-grained control over Nx tasks.
+
+```bash
+cd nexo-prj
+
+# Serve specific project
+pnpm nx serve <project-name>
+pnpm nx serve auth-service
+pnpm nx serve crm-service
+pnpm nx serve nexo-prj
+
+# Build specific project
+pnpm nx build <project-name>
+
+# Test specific project
+pnpm nx test <project-name>
+
+# Lint specific project
+pnpm nx lint <project-name>
+
+# Run affected (only changed projects)
+pnpm nx affected --target=test
+pnpm nx affected --target=build
+pnpm nx affected --target=lint
+
+# View project graph
+pnpm nx graph
+
+# Clear cache
+pnpm nx reset
+```
+
+---
+
+### Quick Reference: Common Scenarios
+
+#### "I want to develop with hot-reload"
+```bash
+# Database in Docker, services on host
+unset DOCKER_HOST && docker compose -f docker/docker-compose.yml up -d postgres
+cd nexo-prj && pnpm run serve:all
+```
+
+#### "I want to test the complete system"
+```bash
+# Everything in Docker
+unset DOCKER_HOST && docker compose up -d
+mise run health
+```
+
+#### "I want to run tests"
+```bash
+cd nexo-prj
+pnpm run check          # Quick (lint + typecheck + unit)
+pnpm run test           # All unit tests
+pnpm run e2e            # End-to-end tests
+pnpm run ci             # Full CI pipeline
+```
+
+#### "I want to debug a specific service"
+```bash
+# Start only what you need
+unset DOCKER_HOST && docker compose -f docker/docker-compose.yml up -d postgres redis
+cd nexo-prj
+pnpm nx serve auth-service --verbose
+```
+
+#### "Something is broken, start fresh"
+```bash
+# Nuclear option: clean everything
+mise run docker:clean
+mise run test-reset
+# or manually:
+docker compose down -v
+cd nexo-prj && pnpm nx reset && rm -rf node_modules .next
+pnpm install
+```
+
+---
+
+### Environment Variables
+
+**Required for development**:
+```bash
+# Database
+DATABASE_URL="postgresql://nexo_user:nexo_password@localhost:5432/nexo"
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+POSTGRES_DB=nexo
+POSTGRES_USER=nexo_user
+POSTGRES_PASSWORD=nexo_password
+
+# Authentication
+JWT_SECRET="your-super-secret-jwt-key-change-in-production"
+JWT_EXPIRES_IN="1h"
+JWT_REFRESH_EXPIRES_IN="7d"
+
+# Redis (optional for development)
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=nexo_redis_password
+
+# Service URLs
+AUTH_SERVICE_URL=http://localhost:3001
+CRM_SERVICE_URL=http://localhost:3003
+API_GATEWAY_URL=http://localhost:3002
+NEXT_PUBLIC_API_URL=http://localhost:3002
+
+# Ports
+AUTH_SERVICE_PORT=3001
+API_GATEWAY_PORT=3002
+CRM_SERVICE_PORT=3003
+FRONTEND_PORT=3000
+```
+
+**Load from .env file**:
+```bash
+# Copy example
+cp .env.example .env
+
+# Edit as needed
+nano .env
+
+# Mise automatically loads .env from .mise.toml configuration
+```
+
+---
+
+### Summary: Which Method to Use?
+
+| Scenario | Method | Command |
+|----------|--------|---------|
+| **Daily development** | Mise + Docker DB | `mise run dev` |
+| **Quick frontend changes** | Nx serve frontend | `cd nexo-prj && pnpm nx serve nexo-prj` |
+| **Backend debugging** | Nx serve services | `cd nexo-prj && pnpm nx serve auth-service` |
+| **Full stack testing** | Docker Compose | `unset DOCKER_HOST && docker compose up -d` |
+| **Run all tests** | Mise test suite | `mise run test-all` |
+| **Production simulation** | Docker prod | `docker compose -f docker-compose.prod.yml up -d` |
+| **Clean slate restart** | Mise reset | `mise run docker:clean && mise run test-reset` |
+
+**Default recommendation**: Use `mise run dev` for most development work. It handles Docker infrastructure and lets you choose whether to run services on host or in containers.
