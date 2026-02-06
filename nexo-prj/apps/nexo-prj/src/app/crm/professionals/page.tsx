@@ -40,8 +40,8 @@ export default function ProfessionalsPage() {
   const fetchProfessionals = async () => {
     try {
       const response = await apiClient('/crm/professionals');
-      const data = await response.json() as Professional[];
-      setProfessionals(data);
+      const result = await response.json();
+      setProfessionals(result.data || []);
     } catch (error: any) {
       if (error.message === 'Authentication required') {
         logout();

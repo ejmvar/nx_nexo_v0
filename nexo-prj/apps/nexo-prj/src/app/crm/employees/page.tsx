@@ -43,8 +43,8 @@ export default function EmployeesPage() {
     try {
       const response = await apiClient('/crm/employees');
       if (!response.ok) throw new Error('Failed to fetch employees');
-      const data = await response.json();
-      setEmployees(data);
+      const result = await response.json();
+      setEmployees(result.data || []);
     } catch (err: any) {
       setError(err.message);
     } finally {

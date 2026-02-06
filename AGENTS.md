@@ -91,6 +91,83 @@ For common questions:
 
 **Path**: `/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/FEATURE_STATUS_LIST.md`
 
+# Testing and Quality Assurance
+
+**CRITICAL: ALWAYS test functionality yourself before handing off to user for testing.**
+
+## Before User Testing
+
+**YOU MUST test the following yourself:**
+
+1. **API Endpoints**: Test all API endpoints manually with curl or similar tools
+2. **Data Structure**: Verify API response matches frontend expectations
+3. **Frontend Pages**: Check that all CRUD pages load without errors
+4. **Authentication Flow**: Test login, token handling, and protected routes
+5. **Error Handling**: Verify error messages are displayed correctly
+
+### Testing Workflow
+
+When implementing or fixing features:
+
+1. ✅ **DO**: Test API endpoint with curl/Postman before declaring it working
+2. ✅ **DO**: Verify response structure matches what frontend expects
+3. ✅ **DO**: Check browser console for JavaScript errors
+4. ✅ **DO**: Test with actual seed data from database
+5. ❌ **DO NOT**: Assume code works without testing
+6. ❌ **DO NOT**: Hand off to user with runtime errors
+
+### Common Testing Commands
+
+```bash
+# Test auth endpoint
+TOKEN=$(curl -s -X POST http://localhost:3001/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@techflow.test","password":"test123"}' | jq -r '.accessToken')
+
+# Test CRM endpoints
+curl -s http://localhost:3003/api/clients -H "Authorization: Bearer $TOKEN" | jq '.data | length'
+curl -s http://localhost:3003/api/employees -H "Authorization: Bearer $TOKEN" | jq '.data | length'
+curl -s http://localhost:3003/api/projects -H "Authorization: Bearer $TOKEN" | jq '.data | length'
+
+# Check for JavaScript errors in browser
+# Open browser console (F12) → Check for red errors
+```
+
+### API Response Structure Checklist
+
+**Backend returns paginated responses**:
+```json
+{
+  "data": [...],    // Array of items
+  "total": 50,      // Total count
+  "page": 1,        // Current page
+  "limit": 50       // Items per page
+}
+```
+
+**Frontend must use**:
+```typescript
+const result = await response.json();
+setItems(result.data || []); // NOT: setItems(result)
+```
+
+### Why This Matters
+
+- **User lost confidence** when receiving code with runtime errors
+- **Testing catches issues** like `projects.map is not a function`
+- **Saves time** - user doesn't waste time debugging obvious errors
+- **Professional quality** - code should work on first handoff
+
+## Testing Before Commit
+
+Before committing any feature or fix:
+
+1. **Run linting**: `cd nexo-prj && pnpm run lint`
+2. **Run type checking**: `cd nexo-prj && pnpm run typecheck`
+3. **Test affected pages**: Open in browser and verify
+4. **Check console**: No red errors in browser console
+5. **Test API calls**: Verify with curl/terminal
+
 # Development Environment Directives
 
 ## Docker Configuration
