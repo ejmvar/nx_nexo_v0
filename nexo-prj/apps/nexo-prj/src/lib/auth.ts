@@ -230,7 +230,14 @@ export async function apiClient(
 
   // Smart routing: Determine which service to call based on endpoint
   const serviceUrl = getServiceUrl(endpoint);
-  const fullUrl = `${serviceUrl}${API_PREFIX}${endpoint}`;
+  
+  // Strip /crm prefix for CRM service calls
+  let processedEndpoint = endpoint;
+  if (serviceUrl === getServiceUrl('/crm/') && endpoint.startsWith('/crm/')) {
+    processedEndpoint = endpoint.replace('/crm/', '/');
+  }
+  
+  const fullUrl = `${serviceUrl}${API_PREFIX}${processedEndpoint}`;
 
   let response = await fetch(fullUrl, {
     ...options,
