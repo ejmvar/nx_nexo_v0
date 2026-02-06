@@ -199,3 +199,8 @@ project/
 **Configuration is code. Treat it with the same rigor as your application logic.**
 **Hardcoded values are technical debt and security risks.**
 **Always source from centralized .env files.**
+
+
+# TEMPORARY FOLDER and WRITE PERMISSION
+remember (put this to agents.md)
+to always write to ./tmp (under current folder, so no need to ask for permission)
