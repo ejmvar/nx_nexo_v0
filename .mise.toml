@@ -78,7 +78,12 @@ run = "cd nexo-prj && npx nx run-many --target=test --all --coverage"
 depends = ["test-install"]
 
 [tasks.test-e2e]
-description = "Run end-to-end tests (Playwright)"
+description = "Run verified E2E tests (CRM API endpoints only)"
+run = "cd nexo-prj && pnpm exec playwright test crm-api-endpoints.spec.ts --reporter=list"
+depends = ["test-install"]
+
+[tasks.test-e2e-all]
+description = "Run ALL E2E tests (includes incomplete/experimental tests)"
 run = "cd nexo-prj && pnpm exec playwright test --reporter=list"
 depends = ["test-install"]
 

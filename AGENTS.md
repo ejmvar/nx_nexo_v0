@@ -419,8 +419,10 @@ pnpm exec playwright test crm-api-endpoints.spec.ts --reporter=list
 # Result: 12/13 tests passing
 # Note: Pagination limit test skipped (backend doesn't respect limit param yet)
 
-# For user verification (visible browser):
-mise run test-e2e-headed  # Runs tests with browser visible
+# Using mise tasks:
+mise run test-e2e        # Verified CRM tests (recommended)
+mise run test-e2e-headed # Visible browser for verification
+mise run test-e2e-all    # All 96 tests (includes incomplete tests, will have failures)
 ```
 
 **2. Manual API Testing with curl** ✅ (All 6 endpoints working)
@@ -494,10 +496,13 @@ cd nexo-prj && npx nx run auth-service:lint
 # RECOMMENDED: Full API test suite (CRM endpoints only)
 cd nexo-prj && pnpm exec playwright test crm-api-endpoints.spec.ts
 
-# ALL E2E TESTS: Complete Playwright test suite
-mise run test-e2e        # Headless mode (all tests)
+# E2E TESTS: Verified CRM API tests (recommended)
+mise run test-e2e        # Verified tests only (12/13 passing)
+mise run test-e2e-headed # Visible browser (user verification)
 mise run test-e2e-ui     # Interactive UI mode
-mise run test-e2e-headed # Headed mode (visible browser for CRM tests)
+
+# ALL E2E TESTS: Including experimental/incomplete tests (may fail)
+mise run test-e2e-all    # Run all 96 tests (some incomplete, will have failures)
 
 # COMPREHENSIVE: Manual curl tests (see above)
 # Use when Playwright fails or need real-time testing
