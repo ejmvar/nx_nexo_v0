@@ -10,7 +10,9 @@
     "grep": {},
     "grepInvert": null,
     "maxFailures": 0,
-    "metadata": {},
+    "metadata": {
+      "actualWorkers": 1
+    },
     "preserveOutput": "always",
     "reporter": [
       [
@@ -40,7 +42,9 @@
         "outputDir": "/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/test-results",
         "repeatEach": 1,
         "retries": 0,
-        "metadata": {},
+        "metadata": {
+          "actualWorkers": 1
+        },
         "id": "api-auth",
         "name": "api-auth",
         "testDir": "/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/e2e-tests",
@@ -54,7 +58,9 @@
         "outputDir": "/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/test-results",
         "repeatEach": 1,
         "retries": 0,
-        "metadata": {},
+        "metadata": {
+          "actualWorkers": 1
+        },
         "id": "crm-api-endpoints",
         "name": "crm-api-endpoints",
         "testDir": "/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/e2e-tests",
@@ -68,7 +74,9 @@
         "outputDir": "/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/test-results",
         "repeatEach": 1,
         "retries": 0,
-        "metadata": {},
+        "metadata": {
+          "actualWorkers": 1
+        },
         "id": "api-crm-crud",
         "name": "api-crm-crud",
         "testDir": "/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/e2e-tests",
@@ -82,7 +90,9 @@
         "outputDir": "/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/test-results",
         "repeatEach": 1,
         "retries": 0,
-        "metadata": {},
+        "metadata": {
+          "actualWorkers": 1
+        },
         "id": "api-rbac",
         "name": "api-rbac",
         "testDir": "/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/e2e-tests",
@@ -96,7 +106,9 @@
         "outputDir": "/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/test-results",
         "repeatEach": 1,
         "retries": 0,
-        "metadata": {},
+        "metadata": {
+          "actualWorkers": 1
+        },
         "id": "api-audit",
         "name": "api-audit",
         "testDir": "/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/e2e-tests",
@@ -110,7 +122,9 @@
         "outputDir": "/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/test-results",
         "repeatEach": 1,
         "retries": 0,
-        "metadata": {},
+        "metadata": {
+          "actualWorkers": 1
+        },
         "id": "api-full-lifecycle",
         "name": "api-full-lifecycle",
         "testDir": "/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/e2e-tests",
@@ -129,19 +143,715 @@
     "workers": 1,
     "webServer": null
   },
-  "suites": [],
-  "errors": [
+  "suites": [
     {
-      "message": "Error: No tests found.\nMake sure that arguments are regular expressions matching test files.\nYou may need to escape symbols like \"$\" or \"*\" and quote the arguments.",
-      "stack": "Error: No tests found.\nMake sure that arguments are regular expressions matching test files.\nYou may need to escape symbols like \"$\" or \"*\" and quote the arguments."
+      "title": "rbac.spec.ts",
+      "file": "rbac.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "RBAC Permission Enforcement",
+          "file": "rbac.spec.ts",
+          "line": 8,
+          "column": 6,
+          "specs": [],
+          "suites": [
+            {
+              "title": "Admin Role (Full Access)",
+              "file": "rbac.spec.ts",
+              "line": 50,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "Admin should have full read access to all entities",
+                  "ok": false,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-rbac",
+                      "projectName": "api-rbac",
+                      "results": [
+                        {
+                          "workerIndex": 0,
+                          "parallelIndex": 0,
+                          "status": "failed",
+                          "duration": 3,
+                          "error": {
+                            "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeTruthy\u001b[2m()\u001b[22m\n\nReceived: \u001b[31mfalse\u001b[39m",
+                            "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeTruthy\u001b[2m()\u001b[22m\n\nReceived: \u001b[31mfalse\u001b[39m\n    at loginFn (/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/e2e-tests/fixtures.ts:57:29)\n    at /W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/e2e-tests/rbac.spec.ts:15:18",
+                            "location": {
+                              "file": "/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/e2e-tests/fixtures.ts",
+                              "column": 29,
+                              "line": 57
+                            },
+                            "snippet": "\u001b[90m   at \u001b[39mfixtures.ts:57\n\n\u001b[0m \u001b[90m 55 |\u001b[39m       })\u001b[33m;\u001b[39m\n \u001b[90m 56 |\u001b[39m       \n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 57 |\u001b[39m       expect(response\u001b[33m.\u001b[39mok())\u001b[33m.\u001b[39mtoBeTruthy()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                             \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 58 |\u001b[39m       \u001b[36mconst\u001b[39m data \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m response\u001b[33m.\u001b[39mjson()\u001b[33m;\u001b[39m\n \u001b[90m 59 |\u001b[39m       \u001b[36mreturn\u001b[39m data\u001b[33m.\u001b[39maccessToken \u001b[33m||\u001b[39m data\u001b[33m.\u001b[39maccess_token \u001b[33m||\u001b[39m data\u001b[33m.\u001b[39mtoken\u001b[33m;\u001b[39m\n \u001b[90m 60 |\u001b[39m     }\u001b[33m;\u001b[39m\u001b[0m"
+                          },
+                          "errors": [
+                            {
+                              "location": {
+                                "file": "/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/e2e-tests/fixtures.ts",
+                                "column": 29,
+                                "line": 57
+                              },
+                              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeTruthy\u001b[2m()\u001b[22m\n\nReceived: \u001b[31mfalse\u001b[39m\n\n\u001b[90m   at \u001b[39mfixtures.ts:57\n\n\u001b[0m \u001b[90m 55 |\u001b[39m       })\u001b[33m;\u001b[39m\n \u001b[90m 56 |\u001b[39m       \n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 57 |\u001b[39m       expect(response\u001b[33m.\u001b[39mok())\u001b[33m.\u001b[39mtoBeTruthy()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                             \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 58 |\u001b[39m       \u001b[36mconst\u001b[39m data \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m response\u001b[33m.\u001b[39mjson()\u001b[33m;\u001b[39m\n \u001b[90m 59 |\u001b[39m       \u001b[36mreturn\u001b[39m data\u001b[33m.\u001b[39maccessToken \u001b[33m||\u001b[39m data\u001b[33m.\u001b[39maccess_token \u001b[33m||\u001b[39m data\u001b[33m.\u001b[39mtoken\u001b[33m;\u001b[39m\n \u001b[90m 60 |\u001b[39m     }\u001b[33m;\u001b[39m\u001b[0m\n\u001b[2m    at loginFn (/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/e2e-tests/fixtures.ts:57:29)\u001b[22m\n\u001b[2m    at /W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/e2e-tests/rbac.spec.ts:15:18\u001b[22m"
+                            }
+                          ],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-02-07T04:07:08.465Z",
+                          "annotations": [],
+                          "attachments": [
+                            {
+                              "name": "trace",
+                              "contentType": "application/zip",
+                              "path": "/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/test-results/rbac-RBAC-Permission-Enfor-c1bf8-read-access-to-all-entities-api-rbac/trace.zip"
+                            }
+                          ],
+                          "errorLocation": {
+                            "file": "/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj/e2e-tests/fixtures.ts",
+                            "column": 29,
+                            "line": 57
+                          }
+                        }
+                      ],
+                      "status": "unexpected"
+                    }
+                  ],
+                  "id": "f2d4bd4479eae63a7f57-35c53a8b65cd64367f6e",
+                  "file": "rbac.spec.ts",
+                  "line": 51,
+                  "column": 9
+                },
+                {
+                  "title": "Admin should have full write access",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-rbac",
+                      "projectName": "api-rbac",
+                      "results": [
+                        {
+                          "workerIndex": -1,
+                          "parallelIndex": -1,
+                          "status": "skipped",
+                          "duration": 0,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-02-07T04:07:09.638Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "f2d4bd4479eae63a7f57-2a144dcee3f66ae9f870",
+                  "file": "rbac.spec.ts",
+                  "line": 70,
+                  "column": 9
+                },
+                {
+                  "title": "Admin should have delete access",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-rbac",
+                      "projectName": "api-rbac",
+                      "results": [
+                        {
+                          "workerIndex": -1,
+                          "parallelIndex": -1,
+                          "status": "skipped",
+                          "duration": 0,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-02-07T04:07:09.639Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "f2d4bd4479eae63a7f57-59855757daf650a0a9ab",
+                  "file": "rbac.spec.ts",
+                  "line": 91,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "Manager Role (Client/Project/Task Management)",
+              "file": "rbac.spec.ts",
+              "line": 119,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "Manager should have read access to clients",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-rbac",
+                      "projectName": "api-rbac",
+                      "results": [
+                        {
+                          "workerIndex": -1,
+                          "parallelIndex": -1,
+                          "status": "skipped",
+                          "duration": 0,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-02-07T04:07:09.640Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "f2d4bd4479eae63a7f57-aaaa4049b1a23d25410f",
+                  "file": "rbac.spec.ts",
+                  "line": 131,
+                  "column": 9
+                },
+                {
+                  "title": "Manager should have write access to projects",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-rbac",
+                      "projectName": "api-rbac",
+                      "results": [
+                        {
+                          "workerIndex": -1,
+                          "parallelIndex": -1,
+                          "status": "skipped",
+                          "duration": 0,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-02-07T04:07:09.666Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "f2d4bd4479eae63a7f57-2b951d24c5202bed8549",
+                  "file": "rbac.spec.ts",
+                  "line": 145,
+                  "column": 9
+                },
+                {
+                  "title": "Manager should NOT have access to employee salaries (if implemented)",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-rbac",
+                      "projectName": "api-rbac",
+                      "results": [
+                        {
+                          "workerIndex": -1,
+                          "parallelIndex": -1,
+                          "status": "skipped",
+                          "duration": 0,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-02-07T04:07:09.691Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "f2d4bd4479eae63a7f57-67d35b276de4e6006be4",
+                  "file": "rbac.spec.ts",
+                  "line": 167,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "Employee Role (Limited Access)",
+              "file": "rbac.spec.ts",
+              "line": 177,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "Employee should have read access to projects",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-rbac",
+                      "projectName": "api-rbac",
+                      "results": [
+                        {
+                          "workerIndex": -1,
+                          "parallelIndex": -1,
+                          "status": "skipped",
+                          "duration": 0,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-02-07T04:07:09.715Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "f2d4bd4479eae63a7f57-b2f94e57b9702db6b192",
+                  "file": "rbac.spec.ts",
+                  "line": 186,
+                  "column": 9
+                },
+                {
+                  "title": "Employee should NOT have write access to clients",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-rbac",
+                      "projectName": "api-rbac",
+                      "results": [
+                        {
+                          "workerIndex": -1,
+                          "parallelIndex": -1,
+                          "status": "skipped",
+                          "duration": 0,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-02-07T04:07:09.728Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "f2d4bd4479eae63a7f57-c062ccd4506ab6cbe55f",
+                  "file": "rbac.spec.ts",
+                  "line": 198,
+                  "column": 9
+                },
+                {
+                  "title": "Employee should NOT have delete access",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-rbac",
+                      "projectName": "api-rbac",
+                      "results": [
+                        {
+                          "workerIndex": -1,
+                          "parallelIndex": -1,
+                          "status": "skipped",
+                          "duration": 0,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-02-07T04:07:09.752Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "f2d4bd4479eae63a7f57-a1d86a06a0577d3c2fd1",
+                  "file": "rbac.spec.ts",
+                  "line": 214,
+                  "column": 9
+                },
+                {
+                  "title": "Employee should have write access to tasks",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-rbac",
+                      "projectName": "api-rbac",
+                      "results": [
+                        {
+                          "workerIndex": -1,
+                          "parallelIndex": -1,
+                          "status": "skipped",
+                          "duration": 0,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-02-07T04:07:09.759Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "f2d4bd4479eae63a7f57-0a7933967b26f3e612f5",
+                  "file": "rbac.spec.ts",
+                  "line": 223,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "Client Role (Read-Only Access)",
+              "file": "rbac.spec.ts",
+              "line": 250,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "Client should have read access to projects",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-rbac",
+                      "projectName": "api-rbac",
+                      "results": [
+                        {
+                          "workerIndex": -1,
+                          "parallelIndex": -1,
+                          "status": "skipped",
+                          "duration": 0,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-02-07T04:07:09.771Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "f2d4bd4479eae63a7f57-d7b111c556d96d4cc8dd",
+                  "file": "rbac.spec.ts",
+                  "line": 259,
+                  "column": 9
+                },
+                {
+                  "title": "Client should have read access to tasks",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-rbac",
+                      "projectName": "api-rbac",
+                      "results": [
+                        {
+                          "workerIndex": -1,
+                          "parallelIndex": -1,
+                          "status": "skipped",
+                          "duration": 0,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-02-07T04:07:09.783Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "f2d4bd4479eae63a7f57-57febaa0277bb643cff7",
+                  "file": "rbac.spec.ts",
+                  "line": 271,
+                  "column": 9
+                },
+                {
+                  "title": "Client should NOT have write access to projects",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-rbac",
+                      "projectName": "api-rbac",
+                      "results": [
+                        {
+                          "workerIndex": -1,
+                          "parallelIndex": -1,
+                          "status": "skipped",
+                          "duration": 0,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-02-07T04:07:09.795Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "f2d4bd4479eae63a7f57-7b78263184e7aac29985",
+                  "file": "rbac.spec.ts",
+                  "line": 283,
+                  "column": 9
+                },
+                {
+                  "title": "Client should NOT have access to employees",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-rbac",
+                      "projectName": "api-rbac",
+                      "results": [
+                        {
+                          "workerIndex": -1,
+                          "parallelIndex": -1,
+                          "status": "skipped",
+                          "duration": 0,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-02-07T04:07:09.808Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "f2d4bd4479eae63a7f57-cb50b40ff99b571cd506",
+                  "file": "rbac.spec.ts",
+                  "line": 301,
+                  "column": 9
+                },
+                {
+                  "title": "Client should NOT have access to suppliers",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-rbac",
+                      "projectName": "api-rbac",
+                      "results": [
+                        {
+                          "workerIndex": -1,
+                          "parallelIndex": -1,
+                          "status": "skipped",
+                          "duration": 0,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-02-07T04:07:09.820Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "f2d4bd4479eae63a7f57-1e970b0e1522134597da",
+                  "file": "rbac.spec.ts",
+                  "line": 310,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "Unauthorized Access",
+              "file": "rbac.spec.ts",
+              "line": 324,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "should deny access without token",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-rbac",
+                      "projectName": "api-rbac",
+                      "results": [
+                        {
+                          "workerIndex": -1,
+                          "parallelIndex": -1,
+                          "status": "skipped",
+                          "duration": 0,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-02-07T04:07:09.833Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "f2d4bd4479eae63a7f57-5152b5ed017d845f4684",
+                  "file": "rbac.spec.ts",
+                  "line": 325,
+                  "column": 9
+                },
+                {
+                  "title": "should deny access with invalid token",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-rbac",
+                      "projectName": "api-rbac",
+                      "results": [
+                        {
+                          "workerIndex": -1,
+                          "parallelIndex": -1,
+                          "status": "skipped",
+                          "duration": 0,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-02-07T04:07:09.834Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "f2d4bd4479eae63a7f57-fc5c63ab2bc063e4cb31",
+                  "file": "rbac.spec.ts",
+                  "line": 339,
+                  "column": 9
+                },
+                {
+                  "title": "should deny access with expired token",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api-rbac",
+                      "projectName": "api-rbac",
+                      "results": [
+                        {
+                          "workerIndex": -1,
+                          "parallelIndex": -1,
+                          "status": "skipped",
+                          "duration": 0,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-02-07T04:07:09.834Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "f2d4bd4479eae63a7f57-fdc47b9af6b89e9c7a3c",
+                  "file": "rbac.spec.ts",
+                  "line": 347,
+                  "column": 9
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ],
+  "errors": [],
   "stats": {
-    "startTime": "2026-02-07T02:30:13.224Z",
-    "duration": 14979.835,
+    "startTime": "2026-02-07T04:07:05.172Z",
+    "duration": 4698.857000000004,
     "expected": 0,
-    "skipped": 0,
-    "unexpected": 0,
+    "skipped": 17,
+    "unexpected": 1,
     "flaky": 0
   }
 }

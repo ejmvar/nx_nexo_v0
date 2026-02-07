@@ -421,6 +421,91 @@ Before running any tests:
    mise run test-dev-all
    ```
 
+### Port Conflicts and Service Cleanup
+
+**CRITICAL: E2E tests must start with clean ports. Playwright automatically starts services and may conflict with manually running services.**
+
+#### Why Port Conflicts Happen
+
+**Playwright Configuration** ([nexo-prj/playwright.config.ts](nexo-prj/playwright.config.ts)):
+- Has `webServer` config that automatically starts: auth-service (3001), api-gateway (3002), crm-service (3003)
+- Uses `reuseExistingServer: true` to reuse running services
+- **BUT**: If previous test run didn't clean up properly, ports remain occupied
+- **Port 9229**: Node.js debug/inspector port - can be left open by crashed tests
+
+#### When to Clean Up Services
+
+**Clean up services BEFORE running E2E tests if:**
+- You see error: "Port already in use" (3000, 3001, 3002, 3003, 9229)
+- You see error: "app on port:9229 must be killed before starting"
+- Previous test run crashed or was interrupted (Ctrl+C)
+- Services were started manually and you want to run E2E tests
+
+**Automatic Cleanup** (Recommended):
+- All E2E mise tasks now automatically clean up services before running
+- Tasks: `test-e2e`, `test-e2e-headed`, `test-e2e-ui`, `test-e2e-all`
+- Cleanup kills processes on ports: 3000, 3001, 3002, 3003, 9229
+
+**Manual Cleanup** (When needed):
+```bash
+# Kill all test services
+mise run test-cleanup-services
+
+# Or manually:
+lsof -ti:3001,3002,3003,3000,9229 | xargs -r kill -9
+
+# Verify ports are free:
+lsof -i:3001,3002,3003,3000,9229
+# Should return nothing
+```
+
+#### Port Reference
+
+| Port | Service | Purpose |
+|------|---------|---------|
+| 3000 | Frontend (Next.js) | Main application UI |
+| 3001 | Auth Service | Authentication/Authorization |
+| 3002 | API Gateway | Route aggregation |
+| 3003 | CRM Service | CRM business logic |
+| 9229 | Node Inspector | Debug/profiling (should not be used in tests) |
+
+#### Workflow: Manual Services + E2E Tests
+
+**Option 1: Stop manual services, let tests start them**
+```bash
+# 1. Kill all services
+mise run test-cleanup-services
+
+# 2. Run tests (Playwright will start services automatically)
+mise run test-e2e-headed
+```
+
+**Option 2: Use existing services (faster)**
+```bash
+# 1. Ensure services are running manually
+mise run test-dev-all
+
+# 2. Run tests (should detect and reuse existing services)
+mise run test-e2e
+# Note: Playwright's reuseExistingServer:true should prevent conflicts
+```
+
+**Option 3: Full clean slate**
+```bash
+# 1. Kill everything
+mise run test-cleanup-services
+
+# 2. Start services fresh
+mise run test-dev-all
+
+# 3. Wait for services to be ready (check health endpoints)
+curl http://localhost:3001/api/auth/health
+curl http://localhost:3003/api/health
+
+# 4. Run tests
+mise run test-e2e
+```
+
 ### Verified Test Commands
 
 **1. Playwright E2E Tests** ✅ (12 passed, 1 skipped)
@@ -514,9 +599,21 @@ npx nx reset
 - **Status**: ✅ RESOLVED
 - **Note**: This is a pnpm security feature. You must run `pnpm approve-builds` BEFORE `pnpm run-script allow` will work. The interactive command lets you review and approve build scripts for specific packages. Approving @nestjs/core is safe and required for proper NestJS installation.
 
+**Issue 6: E2E test port conflicts**
+- **Problem**: "Port already in use" or "app on port:9229 must be killed before starting"
+- **Root Cause**: Playwright webServer starts services (3001, 3002, 3003), previous test runs may not clean up properly
+- **Port 9229**: Node.js debug/inspector port - left open by crashed tests
+- **Solution**: All E2E mise tasks now automatically clean up services before running
+- **Manual Cleanup**: `mise run test-cleanup-services` or `lsof -ti:3001,3002,3003,3000,9229 | xargs -r kill -9`
+- **Status**: ✅ RESOLVED
+- **Note**: E2E tasks (test-e2e, test-e2e-headed, test-e2e-ui, test-e2e-all) now depend on test-cleanup-services
+
 ### Quick Test Commands Reference
 
 ```bash
+# SERVICE CLEANUP: Kill all running services (use before E2E tests)
+mise run test-cleanup-services  # Automatic cleanup (E2E tasks do this automatically)
+
 # FASTEST: Quick verification (uses NX cache)
 cd nexo-prj && npx nx run auth-service:lint
 
@@ -524,12 +621,12 @@ cd nexo-prj && npx nx run auth-service:lint
 cd nexo-prj && pnpm exec playwright test crm-api-endpoints.spec.ts
 
 # E2E TESTS: Verified CRM API tests (recommended)
-mise run test-e2e        # Verified tests only (12/13 passing)
-mise run test-e2e-headed # Visible browser (user verification)
-mise run test-e2e-ui     # Interactive UI mode
+mise run test-e2e        # Verified tests only (12/13 passing) - auto cleanup
+mise run test-e2e-headed # Visible browser (user verification) - auto cleanup
+mise run test-e2e-ui     # Interactive UI mode - auto cleanup
 
 # ALL E2E TESTS: Including experimental/incomplete tests (may fail)
-mise run test-e2e-all    # Run all 96 tests (some incomplete, will have failures)
+mise run test-e2e-all    # Run all 96 tests (some incomplete) - auto cleanup
 
 # COMPREHENSIVE: Manual curl tests (see above)
 # Use when Playwright fails or need real-time testing
