@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { apiClient } from '../lib/api-client';
+import FilePreview from './FilePreview';
 
 interface FileItem {
   id: string;
@@ -39,6 +40,7 @@ export function FileList({
   const [files, setFiles] = useState<FileItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [previewFile, setPreviewFile] = useState<FileItem | null>(null);
 
   const loadFiles = async () => {
     setIsLoading(true);
@@ -51,10 +53,10 @@ export function FileList({
       if (category) params.append('file_category', category);
 
       const response = await apiClient.get<{ data: FileItem[] }>(
-        `/files?${params.toString()}`,
+        `/api/files?${params.toString()}`,
       );
 
-      setFiles(response.data.data || []);
+      setFiles(response.data || []);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to load files';
@@ -70,12 +72,21 @@ export function FileList({
 
   const handleDownload = async (file: FileItem) => {
     try {
-      const response = await apiClient.get(`/files/${file.id}/download`, {
-        responseType: 'blob',
+      // Direct fetch for blob response
+      const token = localStorage.getItem('accessToken');
+      const response = await fetch(`/api/files/${file.id}/download`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
+      if (!response.ok) {
+        throw new Error('Download failed');
+      }
+
       // Create download link
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', file.original_filename);
@@ -234,7 +245,7 @@ export function FileList({
           <div className="flex items-center space-x-2 ml-4">
             {file.mime_type.startsWith('image/') && file.file_url && (
               <button
-                onClick={() => window.open(file.file_url, '_blank')}
+                onClick={() => setPreviewFile(file)}
                 className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
                 title="Preview"
               >
@@ -302,6 +313,22 @@ export function FileList({
           </div>
         </div>
       ))}
+
+      {/* File Preview Modal */}
+      {previewFile && previewFile.file_url && (
+        <FilePreview
+          fileId={previewFile.id}
+          fileName={previewFile.filename}
+          mimeType={previewFile.mime_type}
+          fileUrl={previewFile.file_url}
+          onClose={() => setPreviewFile(null)}
+          onDownload={() => handleDownload(previewFile)}
+          onDelete={() => {
+            handleDelete(previewFile.id);
+            setPreviewFile(null);
+          }}
+        />
+      )}
     </div>
   );
 }

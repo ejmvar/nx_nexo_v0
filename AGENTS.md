@@ -349,6 +349,46 @@ mise run test-e2e-ui     # Run with UI mode
 mise run test-e2e-headed # Run CRM API tests in headed mode (visible browser for verification)
 ```
 
+### Adding New Test Suites as Mise Tasks
+
+**CRITICAL: ALWAYS add new test suites as mise tasks for easy execution.**
+
+When creating new E2E test files or test suites:
+
+1. **Add the test suite to `.mise.toml`** in the `[tasks]` section:
+   ```toml
+   [tasks.test-file-operations]
+   description = "Run file operations E2E tests"
+   run = """
+   cd nexo-prj
+   pnpm exec playwright test --project=file-operations --reporter=list
+   """
+   depends = ["test-cleanup-services"]
+   ```
+
+2. **Follow the naming convention**: `test-{feature-name}`
+   - Examples: `test-file-operations`, `test-crm-api`, `test-auth`
+
+3. **Always add cleanup dependency**: `depends = ["test-cleanup-services"]`
+   - Ensures ports are free before running tests
+
+4. **Use descriptive descriptions**: Help users understand what the task does
+
+5. **Document in AGENTS.md**: Add example usage to this file
+
+**Example Commands:**
+```bash
+# Run file operations tests
+mise run test-file-operations
+
+# Run with headed browser (add -headed variant)
+mise run test-file-operations-headed
+
+# Generic pattern for any test suite
+cd nexo-prj
+pnpm exec playwright test --project={project-name} --reporter=list
+```
+
 ### Best Practices
 
 1. **Isolation**: Each test should be independent and not rely on other tests
