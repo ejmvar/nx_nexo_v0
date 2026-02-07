@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../../../contexts/AuthContext';
 import { apiClient } from '../../../lib/auth';
+import FileUpload from '../../../components/FileUpload';
+import FileList from '../../../components/FileList';
 
 interface Project {
   id: string;
@@ -30,6 +32,9 @@ export default function ProjectsPage() {
   const [error, setError] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [showFilesModal, setShowFilesModal] = useState(false);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [filesRefreshTrigger, setFilesRefreshTrigger] = useState(0);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -284,6 +289,15 @@ export default function ProjectsPage() {
                           Edit
                         </button>
                         <button
+                          onClick={() => {
+                            setSelectedProject(project);
+                            setShowFilesModal(true);
+                          }}
+                          className="text-blue-600 hover:text-blue-900"
+                        >
+                          Files
+                        </button>
+                        <button
                           onClick={() => handleDelete(project.id)}
                           className="text-red-600 hover:text-red-900"
                         >
@@ -402,6 +416,70 @@ export default function ProjectsPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Files Modal */}
+      {showFilesModal && selectedProject && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6">
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">
+                  Files for {selectedProject.name}
+                </h2>
+                <p className="text-sm text-gray-600 mt-1">
+                  Upload and manage files for this project
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  setShowFilesModal(false);
+                  setSelectedProject(null);
+                }}
+                className="text-gray-400 hover:text-gray-600 text-2xl font-bold"
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Upload Section */}
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">Upload New File</h3>
+              <FileUpload
+                entityType="project"
+                entityId={selectedProject.id}
+                category="document"
+                isPublic={false}
+                onSuccess={() => setFilesRefreshTrigger(prev => prev + 1)}
+                onError={(error) => console.error('Upload error:', error)}
+              />
+            </div>
+
+            {/* Files List Section */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">Attached Files</h3>
+              <FileList
+                entityType="project"
+                entityId={selectedProject.id}
+                refreshTrigger={filesRefreshTrigger}
+                onDelete={() => setFilesRefreshTrigger(prev => prev + 1)}
+                onDownload={(file) => console.log('Downloaded:', file.file_name)}
+              />
+            </div>
+
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <button
+                onClick={() => {
+                  setShowFilesModal(false);
+                  setSelectedProject(null);
+                }}
+                className="w-full px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 font-medium"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}

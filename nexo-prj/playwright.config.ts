@@ -53,6 +53,11 @@ export default defineConfig({
       // Standalone test - uses existing test data
     },
     {
+      name: 'file-operations',
+      testMatch: /file-operations\.spec\.ts/,
+      // File upload, download, delete, and entity association tests
+    },
+    {
       name: 'api-crm-crud',
       testMatch: /crm-crud\.spec\.ts/,
       dependencies: ['api-auth'],
