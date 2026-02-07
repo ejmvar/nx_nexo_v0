@@ -48,6 +48,11 @@ export default defineConfig({
       testMatch: /auth\.spec\.ts/,
     },
     {
+      name: 'crm-api-endpoints',
+      testMatch: /crm-api-endpoints\.spec\.ts/,
+      // Standalone test - uses existing test data
+    },
+    {
       name: 'api-crm-crud',
       testMatch: /crm-crud\.spec\.ts/,
       dependencies: ['api-auth'],

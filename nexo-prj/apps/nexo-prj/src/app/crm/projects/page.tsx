@@ -57,8 +57,8 @@ export default function ProjectsPage() {
       const projectsData = await projectsRes.json();
       const clientsData = await clientsRes.json();
 
-      setProjects(projectsData);
-      setClients(clientsData);
+      setProjects(projectsData.data || []);
+      setClients(clientsData.data || []);
     } catch (err: any) {
       setError(err.message);
     } finally {

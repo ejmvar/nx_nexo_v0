@@ -67,9 +67,9 @@ export default function TasksPage() {
       const projectsData = await projectsRes.json();
       const employeesData = await employeesRes.json();
 
-      setTasks(tasksData);
-      setProjects(projectsData);
-      setEmployees(employeesData);
+      setTasks(tasksData.data || []);
+      setProjects(projectsData.data || []);
+      setEmployees(employeesData.data || []);
     } catch (err: any) {
       setError(err.message);
     } finally {

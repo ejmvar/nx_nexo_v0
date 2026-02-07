@@ -41,8 +41,8 @@ export default function ClientsPage() {
     try {
       const response = await apiClient('/crm/clients');
       if (!response.ok) throw new Error('Failed to fetch clients');
-      const data = await response.json();
-      setClients(data);
+      const result = await response.json();
+      setClients(result.data || []);
     } catch (err: any) {
       setError(err.message);
     } finally {

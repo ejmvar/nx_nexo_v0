@@ -25,4 +25,5 @@ packages:
 autoInstallPeers: true
 
 ignoredBuiltDependencies:
+  - '@nestjs/core'
   - bcrypt
