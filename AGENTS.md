@@ -381,7 +381,13 @@ Before running any tests:
    cd /W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj
    ```
 
-2. **Ensure services are running**:
+2. **Approve NestJS build scripts** (one-time setup):
+   ```bash
+   pnpm run-script allow @nestjs/core
+   ```
+   **Note**: This resolves the warning: "Ignored build scripts: @nestjs/core@11.1.12"
+
+3. **Ensure services are running**:
    ```bash
    # PostgreSQL (Docker)
    unset DOCKER_HOST && docker compose -f ../docker/docker-compose.yml up -d postgres
@@ -396,7 +402,7 @@ Before running any tests:
    pnpm nx serve nexo-prj &
    ```
 
-3. **Or use mise tasks** (handles directory automatically):
+4. **Or use mise tasks** (handles directory automatically):
    ```bash
    # Start only core services (recommended)
    mise run test-dev-all
@@ -486,6 +492,12 @@ npx nx reset
 - **Impact**: `nx run @nexo-prj/nexo-prj:lint` may fail
 - **Status**: ⏸️ Known issue with Next.js integration
 - **Workaround**: Lint backend services individually
+
+**Issue 5: pnpm warning about ignored build scripts**
+- **Problem**: "Ignored build scripts: @nestjs/core@11.1.12"
+- **Solution**: Run `cd nexo-prj && pnpm run-script allow @nestjs/core` (one-time setup)
+- **Status**: ✅ RESOLVED
+- **Note**: This is a pnpm security feature. Approving @nestjs/core build scripts is safe and required for proper NestJS installation.
 
 ### Quick Test Commands Reference
 
