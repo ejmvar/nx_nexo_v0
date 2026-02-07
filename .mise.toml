@@ -47,10 +47,15 @@ run = "npx create-nx-workspace@latest {{vars.PROJECT_NAME}} --package-manager=pn
 description = "Setup testing environment and verify all tools"
 run = "echo '🔧 Setting up testing environment...' && mise doctor && echo '✅ MISE environment verified' && cd nexo-prj && pnpm install && echo '✅ Dependencies installed'"
 
+[tasks.test-approve-builds]
+description = "Approve pnpm build scripts (one-time setup)"
+run = "cd nexo-prj && pnpm approve-builds"
+depends = ["100-000-001-nx-pnpm-install"]
+
 [tasks.test-install]
 description = "Install all project dependencies"
 run = "cd nexo-prj && pnpm install"
-depends = ["100-000-001-nx-pnpm-install"]
+depends = ["test-approve-builds"]
 
 [tasks.test-lint]
 description = "Run ESLint on all projects"

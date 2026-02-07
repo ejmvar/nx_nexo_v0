@@ -381,11 +381,24 @@ Before running any tests:
    cd /W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/nexo-prj
    ```
 
-2. **Approve NestJS build scripts** (one-time setup):
+2. **Approve pnpm build scripts** (one-time setup):
    ```bash
-   pnpm run-script allow @nestjs/core
+   cd nexo-prj
+   pnpm approve-builds
+   # Select @nestjs/core when prompted (use spacebar to select, enter to confirm)
    ```
    **Note**: This resolves the warning: "Ignored build scripts: @nestjs/core@11.1.12"
+   
+   **Alternative** (non-interactive):
+   ```bash
+   cd nexo-prj
+   pnpm run-script allow @nestjs/core
+   ```
+   
+   **Or use mise task**:
+   ```bash
+   mise run test-approve-builds
+   ```
 
 3. **Ensure services are running**:
    ```bash
@@ -495,9 +508,11 @@ npx nx reset
 
 **Issue 5: pnpm warning about ignored build scripts**
 - **Problem**: "Ignored build scripts: @nestjs/core@11.1.12"
-- **Solution**: Run `cd nexo-prj && pnpm run-script allow @nestjs/core` (one-time setup)
+- **Solution**: Run `cd nexo-prj && pnpm approve-builds` (interactive, one-time setup)
+- **Alternative**: Run `cd nexo-prj && pnpm run-script allow @nestjs/core` (direct approval)
+- **Or use mise**: `mise run test-approve-builds`
 - **Status**: ✅ RESOLVED
-- **Note**: This is a pnpm security feature. Approving @nestjs/core build scripts is safe and required for proper NestJS installation.
+- **Note**: This is a pnpm security feature. You must run `pnpm approve-builds` BEFORE `pnpm run-script allow` will work. The interactive command lets you review and approve build scripts for specific packages. Approving @nestjs/core is safe and required for proper NestJS installation.
 
 ### Quick Test Commands Reference
 
