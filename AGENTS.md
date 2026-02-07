@@ -491,8 +491,13 @@ npx nx reset
 # FASTEST: Quick verification (uses NX cache)
 cd nexo-prj && npx nx run auth-service:lint
 
-# RECOMMENDED: Full API test suite
+# RECOMMENDED: Full API test suite (CRM endpoints only)
 cd nexo-prj && pnpm exec playwright test crm-api-endpoints.spec.ts
+
+# ALL E2E TESTS: Complete Playwright test suite
+mise run test-e2e        # Headless mode (all tests)
+mise run test-e2e-ui     # Interactive UI mode
+mise run test-e2e-headed # Headed mode (visible browser for CRM tests)
 
 # COMPREHENSIVE: Manual curl tests (see above)
 # Use when Playwright fails or need real-time testing
