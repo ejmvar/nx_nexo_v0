@@ -346,6 +346,7 @@ pnpm playwright show-report
 # Using mise tasks
 mise run test-e2e        # Run all E2E tests
 mise run test-e2e-ui     # Run with UI mode
+mise run test-e2e-headed # Run CRM API tests in headed mode (visible browser for verification)
 ```
 
 ### Best Practices
@@ -417,6 +418,9 @@ pnpm exec playwright test crm-api-endpoints.spec.ts --reporter=list
 
 # Result: 12/13 tests passing
 # Note: Pagination limit test skipped (backend doesn't respect limit param yet)
+
+# For user verification (visible browser):
+mise run test-e2e-headed  # Runs tests with browser visible
 ```
 
 **2. Manual API Testing with curl** ✅ (All 6 endpoints working)

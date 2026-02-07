@@ -87,6 +87,11 @@ description = "Run E2E tests with UI mode (Playwright)"
 run = "cd nexo-prj && npx nx e2e nexo-prj-e2e --ui"
 depends = ["test-install"]
 
+[tasks.test-e2e-headed]
+description = "Run E2E tests in headed mode (visible browser for user verification)"
+run = "cd nexo-prj && pnpm exec playwright test crm-api-endpoints.spec.ts --headed --reporter=list"
+depends = ["test-install"]
+
 [tasks.test-build]
 description = "Build all projects and verify production readiness"
 run = "cd nexo-prj && npx nx run-many --target=build --all"
