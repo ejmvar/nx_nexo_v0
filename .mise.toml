@@ -113,8 +113,16 @@ run = "cd nexo-prj && npx nx serve nexo-prj"
 depends = ["test-install"]
 
 [tasks.test-dev-all]
-description = "Start all development servers"
-run = "cd nexo-prj && npx nx run-many --target=serve --all --parallel"
+description = "Start core development servers (auth, crm, frontend)"
+# # DON'T REMOVE : # run = "cd nexo-prj && npx nx run-many --target=serve --all --parallel"
+
+run = """
+cd nexo-prj && \
+npx nx serve auth-service & \
+npx nx serve crm-service & \
+npx nx serve nexo-prj & \
+wait
+"""
 depends = ["test-install"]
 
 [tasks.test-clean]
