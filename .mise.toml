@@ -47,10 +47,15 @@ run = "npx create-nx-workspace@latest {{vars.PROJECT_NAME}} --package-manager=pn
 description = "Setup testing environment and verify all tools"
 run = "echo '🔧 Setting up testing environment...' && mise doctor && echo '✅ MISE environment verified' && cd nexo-prj && pnpm install && echo '✅ Dependencies installed'"
 
+[tasks.test-approve-builds]
+description = "Approve pnpm build scripts (one-time setup)"
+run = "cd nexo-prj && pnpm approve-builds"
+depends = ["100-000-001-nx-pnpm-install"]
+
 [tasks.test-install]
 description = "Install all project dependencies"
 run = "cd nexo-prj && pnpm install"
-depends = ["100-000-001-nx-pnpm-install"]
+depends = ["test-approve-builds"]
 
 [tasks.test-lint]
 description = "Run ESLint on all projects"
@@ -77,15 +82,32 @@ description = "Run unit tests with coverage report"
 run = "cd nexo-prj && npx nx run-many --target=test --all --coverage"
 depends = ["test-install"]
 
+[tasks.test-cleanup-services]
+description = "Kill all running test services (auth, crm, gateway, frontend)"
+run = """
+lsof -ti:3001,3002,3003,3000,9229 2>/dev/null | xargs -r kill -9 || true
+echo "Services cleaned up"
+"""
+
 [tasks.test-e2e]
-description = "Run end-to-end tests"
-run = "cd nexo-prj && npx nx run-many --target=e2e --all"
-depends = ["test-install"]
+description = "Run verified E2E tests (CRM API endpoints only)"
+run = "cd nexo-prj && pnpm exec playwright test crm-api-endpoints.spec.ts --reporter=list"
+depends = ["test-install", "test-cleanup-services"]
+
+[tasks.test-e2e-all]
+description = "Run ALL E2E tests (includes incomplete/experimental tests)"
+run = "cd nexo-prj && pnpm exec playwright test --reporter=list"
+depends = ["test-install", "test-cleanup-services"]
 
 [tasks.test-e2e-ui]
 description = "Run E2E tests with UI mode (Playwright)"
-run = "cd nexo-prj && npx nx e2e nexo-prj-e2e --ui"
-depends = ["test-install"]
+run = "cd nexo-prj && pnpm exec playwright test --ui"
+depends = ["test-install", "test-cleanup-services"]
+
+[tasks.test-e2e-headed]
+description = "Run E2E tests in headed mode (visible browser for user verification)"
+run = "cd nexo-prj && pnpm exec playwright test crm-api-endpoints.spec.ts --headed --reporter=list"
+depends = ["test-install", "test-cleanup-services"]
 
 [tasks.test-build]
 description = "Build all projects and verify production readiness"
@@ -113,8 +135,16 @@ run = "cd nexo-prj && npx nx serve nexo-prj"
 depends = ["test-install"]
 
 [tasks.test-dev-all]
-description = "Start all development servers"
-run = "cd nexo-prj && npx nx run-many --target=serve --all --parallel"
+description = "Start core development servers (auth, crm, frontend)"
+# # DON'T REMOVE : # run = "cd nexo-prj && npx nx run-many --target=serve --all --parallel"
+
+run = """
+cd nexo-prj && \
+npx nx serve auth-service & \
+npx nx serve crm-service & \
+npx nx serve nexo-prj & \
+wait
+"""
 depends = ["test-install"]
 
 [tasks.test-clean]
@@ -151,10 +181,9 @@ description = "Test main application"
 run = "cd nexo-prj && npx nx test nexo-prj --coverage"
 depends = ["test-install"]
 
-[tasks.test-e2e-app]
-description = "Test main app E2E"
-run = "cd nexo-prj && npx nx e2e nexo-prj-e2e"
-depends = ["test-install"]
+# Removed: nexo-prj-e2e project doesn't exist
+# E2E tests are now in root playwright.config.ts
+# Use: mise run test-e2e, test-e2e-headed, test-e2e-ui, or test-e2e-all
 
 # ===============================
 # DEBUGGING TASKS

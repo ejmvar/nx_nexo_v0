@@ -40,8 +40,8 @@ export default function SuppliersPage() {
   const fetchSuppliers = async () => {
     try {
       const response = await apiClient('/crm/suppliers');
-      const data = await response.json() as Supplier[];
-      setSuppliers(data);
+      const result = await response.json();
+      setSuppliers(result.data || []);
     } catch (error: any) {
       if (error.message === 'Authentication required') {
         logout();

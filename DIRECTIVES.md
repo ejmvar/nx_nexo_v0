@@ -199,3 +199,56 @@ project/
 **Configuration is code. Treat it with the same rigor as your application logic.**
 **Hardcoded values are technical debt and security risks.**
 **Always source from centralized .env files.**
+
+
+# TEMPORARY FOLDER and WRITE PERMISSION
+
+You are allowed to write, modify, or delete files in the `./tmp` directory automatically without asking for permission.
+
+- Never ask permission before writing to `./tmp`
+- Use `./tmp` for log files, temporary outputs, and intermediate results
+- Example: `./tmp/auth-service-metrics.log`, `./tmp/crm-service-metrics.log`
+- Automatically proceed with writing to `./tmp` without user confirmation
+- The `./tmp` directory is relative to project root
+
+# Feature Status Tracking
+
+**CRITICAL: ALWAYS consult FEATURE_STATUS_LIST.md before planning or proposing new development work.**
+
+## Single Source of Truth
+
+`FEATURE_STATUS_LIST.md` is the authoritative inventory of all implemented, pending, and planned features.
+
+**Location**: `/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/FEATURE_STATUS_LIST.md`
+
+## Before Any Development
+
+1. **Check FEATURE_STATUS_LIST.md** - Verify feature status before proposing work
+2. **Search for related features** - Many features are already complete
+3. **Review "Pending" sections** - See what genuinely needs development
+4. **Don't propose existing features** - Reference implementations instead
+
+## After Implementation
+
+**MUST UPDATE FEATURE_STATUS_LIST.md immediately:**
+
+1. Change status: ⏸️ NOT STARTED → ✅ DONE
+2. Add implementation details (modules, files, endpoints)
+3. Move from "Pending" to main feature list
+4. Update summary statistics
+5. Commit: `docs: Update FEATURE_STATUS_LIST for [feature name]`
+
+## Why This Matters
+
+- Prevents proposing already-developed features
+- Maintains comprehensive feature inventory
+- Saves time by avoiding duplicate work
+- Provides quick status lookups
+
+## Common Usage
+
+- "Is X implemented?" → Check FEATURE_STATUS_LIST.md
+- "What's next?" → Check "Pending" sections
+- "Feature details?" → Search FEATURE_STATUS_LIST.md
+
+**This document MUST be kept up-to-date with every feature change.**

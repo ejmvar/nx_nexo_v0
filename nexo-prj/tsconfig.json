@@ -35,6 +35,39 @@
     },
     {
       "path": "./libs"
+    },
+    {
+      "path": "./api-gateway-e2e"
+    },
+    {
+      "path": "./libs/shared-ui"
+    },
+    {
+      "path": "./notifications"
+    },
+    {
+      "path": "./api-gateway"
+    },
+    {
+      "path": "./production"
+    },
+    {
+      "path": "./purchases"
+    },
+    {
+      "path": "./crm-core"
+    },
+    {
+      "path": "./apps-e2e"
+    },
+    {
+      "path": "./sales"
+    },
+    {
+      "path": "./stock"
+    },
+    {
+      "path": "./auth"
     }
   ]
 }

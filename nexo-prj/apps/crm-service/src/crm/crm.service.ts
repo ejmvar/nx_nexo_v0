@@ -343,7 +343,7 @@ export class CrmService {
     // Data query
     const result = await this.db.queryWithAccount(
       accountId,
-      `SELECT id, name, email, phone, category, payment_terms, status, created_at, updated_at
+      `SELECT id, name, email, phone, company, address, status, created_at, updated_at
        FROM suppliers
        ${whereClause}
        ${orderByClause}
