@@ -584,6 +584,237 @@ The architecture supports seamless evolution:
 
 **No application code changes required** - just update environment variables and deploy.
 
+## Multi-Environment Docker Infrastructure (Phase 9)
+
+**CRITICAL: The system supports 5 isolated environments that can run simultaneously for parallel testing and development.**
+
+### Port Allocation Strategy
+
+**Why Multiple Isolated Environments?**
+- Test against dockerized versions while developing locally
+- Run parallel tests across DEV, TEST, QA, PROD environments
+- Completely isolated from local NX development
+- Production-like testing without affecting development
+
+**Port Ranges**:
+- **Local NX** (3xxx): Local development with hot-reload (`pnpm nx serve`)
+- **Docker DEV** (4xxx): Containerized development with full logging
+- **Docker TEST** (5xxx): CI/CD and automated testing (fast startup)
+- **Docker QA** (6xxx): Pre-production testing and UAT
+- **Docker PROD** (7xxx): Production simulation with security hardening
+
+**Complete Port Mapping**:
+
+| Service | Local NX | Docker DEV | Docker TEST | Docker QA | Docker PROD |
+|---------|----------|------------|-------------|-----------|-------------|
+| Frontend | 3000 | 4000 | 5000 | 6000 | 7000 |
+| Auth Service | 3001 | 4001 | 5001 | 6001 | 7001 |
+| API Gateway | 3002 | 4002 | 5002 | 6002 | 7002 |
+| CRM Service | 3003 | 4003 | 5003 | 6003 | 7003 |
+| PostgreSQL | 5432 | 4432 | 5432 | 6432 | 7432 |
+| Redis | 6379 | 4379 | 5379 | 6379 | 7379 |
+
+### Environment Files
+
+**Files**:
+- `docker/docker-compose.dev.yml` (DEV environment, ports 4xxx)
+- `docker/docker-compose.test.yml` (TEST environment, ports 5xxx)
+- `docker/docker-compose.qa.yml` (QA environment, ports 6xxx)
+- `docker/docker-compose.prod.yml` (PROD environment, ports 7xxx)
+
+**Documentation**:
+- `DOCKER_MULTI_ENV.md` - Complete multi-environment guide
+
+### Isolation Features
+
+**Network Isolation**:
+- `nexo-dev-network` (DEV environment)
+- `nexo-test-network` (TEST environment)
+- `nexo-qa-network` (QA environment)
+- `nexo-prod-network` (PROD environment)
+
+**Volume Isolation**:
+- `postgres_dev_data`, `redis_dev_data` (DEV, persistent)
+- `postgres_test_data`, `redis_test_data` (TEST, fast, ephemeral)
+- `postgres_qa_data`, `redis_qa_data` (QA, persistent + backups)
+- `postgres_prod_data`, `redis_prod_data` (PROD, persistent + backups)
+
+### Environment-Specific Configuration
+
+**DEV (4xxx)**:
+- `NODE_ENV: development`
+- `LOG_LEVEL: debug`
+- No resource limits
+- `restart: unless-stopped`
+- Purpose: Containerized development, debugging
+
+**TEST (5xxx)**:
+- `NODE_ENV: test`
+- `LOG_LEVEL: warn`
+- Fast health checks (5-10s intervals)
+- No restart policy (ephemeral for CI/CD)
+- No Redis persistence (speed priority)
+- Purpose: Automated testing, CI/CD pipelines
+
+**QA (6xxx)**:
+- `NODE_ENV: staging`
+- `LOG_LEVEL: info`
+- Resource limits: CPU 0.5-2 cores, Memory 512M-2G
+- Backup volumes: `./backups/qa`
+- Monitoring: `ENABLE_METRICS=true`, Sentry integration
+- `restart: unless-stopped`
+- Purpose: Pre-production testing, UAT, integration testing
+
+**PROD (7xxx)**:
+- `NODE_ENV: production`
+- `LOG_LEVEL: warn`
+- Resource limits: CPU 1-4 cores, Memory 1G-4G
+- PostgreSQL performance tuning:
+  * `max_connections=200`
+  * `shared_buffers=256MB`
+  * `effective_cache_size=1GB`
+  * WAL tuning: `wal_buffers=16MB`, `min_wal_size=1GB`, `max_wal_size=4GB`
+- Security:
+  * Redis: `requirepass ${REDIS_PASSWORD}`
+  * PostgreSQL: `sslmode=prefer`, password-protected
+  * JWT: Secret via `${JWT_SECRET}`, short expiry (15m)
+- Monitoring: Full (metrics, tracing, Sentry)
+- Rate limiting: Enabled on API Gateway
+- `restart: always`
+- Backup volumes: `./backups/prod`
+- Purpose: Production simulation, final validation
+
+### Quick Start Commands
+
+**Start environments**:
+```bash
+mise run docker-dev:up      # DEV (4xxx)
+mise run docker-test:up     # TEST (5xxx)
+mise run docker-qa:up       # QA (6xxx)
+mise run docker-prod:up     # PROD (7xxx)
+mise run docker-all:up      # ALL at once
+```
+
+**Check health**:
+```bash
+mise run docker-dev:health
+mise run docker-all:health
+```
+
+**View logs**:
+```bash
+mise run docker-dev:logs
+mise run docker-all:ps
+```
+
+**Stop environments**:
+```bash
+mise run docker-dev:down
+mise run docker-all:down
+```
+
+**Clean (remove volumes)**:
+```bash
+mise run docker-dev:clean
+mise run docker-all:clean
+```
+
+### Parallel Testing Example
+
+```bash
+# Start all Docker environments
+mise run docker-all:up
+
+# Run local NX dev simultaneously
+mise run startup
+
+# Now you have 5 environments running:
+# - Local NX:    http://localhost:3000
+# - Docker DEV:  http://localhost:4000
+# - Docker TEST: http://localhost:5000
+# - Docker QA:   http://localhost:6000
+# - Docker PROD: http://localhost:7000
+
+# Test against any environment
+NEXT_PUBLIC_API_URL=http://localhost:5002 pnpm nx e2e nexo-prj  # TEST
+NEXT_PUBLIC_API_URL=http://localhost:6002 pnpm nx e2e nexo-prj  # QA
+NEXT_PUBLIC_API_URL=http://localhost:7002 pnpm nx e2e nexo-prj  # PROD
+```
+
+### When to Use Each Environment
+
+| Environment | Use Case | Command |
+|-------------|----------|---------|
+| **Local NX** | Daily development (hot-reload) | `mise run startup` |
+| **Docker DEV** | Containerized development | `mise run docker-dev:up` |
+| **Docker TEST** | CI/CD, automated tests | `mise run docker-test:up` |
+| **Docker QA** | UAT, integration tests | `mise run docker-qa:up` |
+| **Docker PROD** | Final validation | `mise run docker-prod:up` |
+
+### Security Configuration
+
+**PROD environment requires `.env.prod` file**:
+
+```bash
+# Create from example
+cp docker/.env.prod.example docker/.env.prod
+
+# Edit with strong secrets
+nano docker/.env.prod
+```
+
+**Required variables**:
+```bash
+POSTGRES_PASSWORD=your-strong-password
+REDIS_PASSWORD=your-strong-password
+JWT_SECRET=your-jwt-secret-key
+SENTRY_DSN=https://your-sentry-dsn@sentry.io/project
+```
+
+### Benefits
+
+✅ **Complete Isolation**: Separate networks, volumes, containers  
+✅ **Parallel Execution**: Run all environments simultaneously  
+✅ **Environment Parity**: Test against production-like configs  
+✅ **CI/CD Ready**: Fast TEST environment for pipelines  
+✅ **No Conflicts**: Different ports prevent interference  
+✅ **Local Dev Preserved**: Local NX (3xxx) untouched, runs independently  
+
+### Troubleshooting
+
+**Port conflicts**:
+```bash
+# Check what's using the port
+lsof -i :4000
+
+# Kill the process
+kill <PID>
+```
+
+**Services won't start**:
+```bash
+# View logs
+mise run docker-dev:logs
+
+# Rebuild
+mise run docker-dev:build
+
+# Clean start
+mise run docker-dev:clean
+mise run docker-dev:up
+```
+
+**Database connection failed**:
+```bash
+# Check PostgreSQL
+docker logs nexo-postgres-dev
+
+# Verify health
+docker exec nexo-postgres-dev pg_isready -U nexo_user
+```
+
+For complete documentation, see `DOCKER_MULTI_ENV.md`.
+
 
 
 # Database schemas and logging
