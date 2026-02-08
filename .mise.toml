@@ -109,6 +109,26 @@ description = "Run E2E tests in headed mode (visible browser for user verificati
 run = "cd nexo-prj && pnpm exec playwright test crm-api-endpoints.spec.ts --headed --reporter=list"
 depends = ["test-install", "test-cleanup-services"]
 
+[tasks.test-file-operations]
+description = "Run file operations E2E tests (API-level)"
+run = "cd nexo-prj && pnpm exec playwright test --project=file-operations --reporter=list"
+depends = ["test-install", "test-cleanup-services"]
+
+[tasks.test-file-upload-ui]
+description = "Run file upload UI E2E tests (browser-based)"
+run = "cd nexo-prj && pnpm exec playwright test --project=file-upload-ui --reporter=list"
+depends = ["test-install", "test-cleanup-services"]
+
+[tasks.test-file-upload-ui-headed]
+description = "Run file upload UI tests in headed mode (visible browser)"
+run = "cd nexo-prj && pnpm exec playwright test --project=file-upload-ui --headed --reporter=list"
+depends = ["test-install", "test-cleanup-services"]
+
+[tasks.test-files-all]
+description = "Run all file-related tests (API + UI)"
+run = "cd nexo-prj && pnpm exec playwright test file-operations.spec.ts file-upload-ui.spec.ts --reporter=list"
+depends = ["test-install", "test-cleanup-services"]
+
 [tasks.test-build]
 description = "Build all projects and verify production readiness"
 run = "cd nexo-prj && npx nx run-many --target=build --all"

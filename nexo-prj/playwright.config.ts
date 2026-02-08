@@ -55,7 +55,17 @@ export default defineConfig({
     {
       name: 'file-operations',
       testMatch: /file-operations\.spec\.ts/,
-      // File upload, download, delete, and entity association tests
+      // File upload, download, delete, and entity association tests (API)
+    },
+    {
+      name: 'file-upload-ui',
+      testMatch: /file-upload-ui\.spec\.ts/,
+      // File upload UI tests (browser-based)
+      // Tests FileUpload, FileList, FilePreview components
+      use: {
+        baseURL: 'http://localhost:3000',
+        viewport: { width: 1280, height: 720 },
+      },
     },
     {
       name: 'api-crm-crud',
@@ -97,6 +107,12 @@ export default defineConfig({
       command: 'pnpm nx serve crm-service',
       url: 'http://localhost:3003/api/health',
       timeout: 60 * 1000,
+      reuseExistingServer: true,
+    },
+    {
+      command: 'pnpm nx serve nexo-prj',
+      url: 'http://localhost:3000',
+      timeout: 120 * 1000,
       reuseExistingServer: true,
     },
   ],
