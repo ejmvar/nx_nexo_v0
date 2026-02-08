@@ -486,6 +486,42 @@ run = "echo '=== DEV ===' && mise run docker-dev:ps && echo '=== TEST ===' && mi
 description = "🌐 Check ALL Docker environments health"
 run = "echo '=== DEV (4xxx) ===' && mise run docker-dev:health && echo '=== TEST (5xxx) ===' && mise run docker-test:health && echo '=== QA (6xxx) ===' && mise run docker-qa:health && echo '=== PROD (7xxx) ===' && mise run docker-prod:health"
 
+# ============================================================================
+# DOCKER MONITORING & LOGGING TASKS
+# ============================================================================
+
+[tasks."docker:health-dashboard"]
+description = "📊 Open health dashboard for all environments"
+run = "open docker/health-dashboard.html || xdg-open docker/health-dashboard.html"
+
+[tasks."docker:logs-aggregate"]
+description = "📋 Aggregate logs from ALL environments"
+run = "bash scripts/aggregate-logs.sh"
+
+[tasks."docker:logs-dev"]
+description = "📋 Aggregate DEV environment logs"
+run = "bash scripts/aggregate-logs.sh dev"
+
+[tasks."docker:logs-test"]
+description = "📋 Aggregate TEST environment logs"
+run = "bash scripts/aggregate-logs.sh test"
+
+[tasks."docker:logs-qa"]
+description = "📋 Aggregate QA environment logs"
+run = "bash scripts/aggregate-logs.sh qa"
+
+[tasks."docker:logs-prod"]
+description = "📋 Aggregate PROD environment logs"
+run = "bash scripts/aggregate-logs.sh prod"
+
+[tasks."docker:logs-auth"]
+description = "📋 Aggregate auth-service logs from all environments"
+run = "bash scripts/aggregate-logs.sh all auth-service"
+
+[tasks."docker:logs-crm"]
+description = "📋 Aggregate crm-service logs from all environments"
+run = "bash scripts/aggregate-logs.sh all crm-service"
+
 [tasks."test:docker:health"]
 description = "Test Docker services health"
 run = "bash scripts/test-docker-health.sh"

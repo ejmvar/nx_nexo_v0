@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXO Multi-Environment Health Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #e0e7ff;
+            color: #667eea;
+        }
+
+        .btn-secondary:hover {
+            background: #c7d2fe;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .status.checking {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status.healthy {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status.unhealthy {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .environments {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .environment {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .environment:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 12px rgba(0,0,0,0.15);
+        }
+
+        .env-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f3f4f6;
+        }
+
+        .env-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .env-badge {
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .env-badge.dev { background: #dbeafe; color: #1e40af; }
+        .env-badge.test { background: #d1fae5; color: #065f46; }
+        .env-badge.qa { background: #fef3c7; color: #92400e; }
+        .env-badge.prod { background: #fee2e2; color: #991b1b; }
+
+        .services {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .service {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: #f9fafb;
+            border-radius: 5px;
+            border-left: 3px solid #e5e7eb;
+        }
+
+        .service.healthy {
+            border-left-color: #10b981;
+            background: #ecfdf5;
+        }
+
+        .service.unhealthy {
+            border-left-color: #ef4444;
+            background: #fef2f2;
+        }
+
+        .service-name {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .service-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+        }
+
+        .indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .indicator.checking {
+            background: #fbbf24;
+            animation: pulse 1.5s infinite;
+        }
+
+        .indicator.healthy {
+            background: #10b981;
+        }
+
+        .indicator.unhealthy {
+            background: #ef4444;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .response-time {
+            font-size: 0.85rem;
+            color: #6b7280;
+        }
+
+        .quick-links {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .quick-link {
+            padding: 5px 10px;
+            background: #f3f4f6;
+            border-radius: 5px;
+            text-decoration: none;
+            color: #4b5563;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .quick-link:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .stats {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-box {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #6b7280;
+            margin-top: 5px;
+        }
+
+        footer {
+            text-align: center;
+            color: white;
+            margin-top: 30px;
+            padding: 20px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 NEXO Multi-Environment Health Dashboard</h1>
+            <p class="subtitle">Monitor all 5 environments in real-time</p>
+        </header>
+
+        <div class="controls">
+            <div>
+                <span class="status checking" id="overall-status">Checking...</span>
+                <span style="margin-left: 15px; color: #6b7280;">Last updated: <span id="last-update">Never</span></span>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-primary" onclick="checkAllHealth()">🔄 Refresh All</button>
+                <button class="btn btn-secondary" onclick="toggleAutoRefresh()">⏱️ Auto-refresh: <span id="auto-status">OFF</span></button>
+            </div>
+        </div>
+
+        <div class="environments" id="environments"></div>
+
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-value" id="stat-total">0</div>
+                <div class="stat-label">Total Services</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="stat-healthy" style="color: #10b981;">0</div>
+                <div class="stat-label">Healthy</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="stat-unhealthy" style="color: #ef4444;">0</div>
+                <div class="stat-label">Unhealthy</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="stat-avg-response">-</div>
+                <div class="stat-label">Avg Response Time</div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Phase 9: Multi-Environment Docker Infrastructure</p>
+            <p style="margin-top: 5px; opacity: 0.8;">Built with ❤️ for parallel testing and development</p>
+        </footer>
+    </div>
+
+    <script>
+        const environments = [
+            {
+                name: 'Local NX',
+                badge: 'dev',
+                ports: { frontend: 3000, auth: 3001, gateway: 3002, crm: 3003 },
+                description: 'Hot-reload development'
+            },
+            {
+                name: 'Docker DEV',
+                badge: 'dev',
+                ports: { frontend: 4000, auth: 4001, gateway: 4002, crm: 4003 },
+                description: 'Containerized development'
+            },
+            {
+                name: 'Docker TEST',
+                badge: 'test',
+                ports: { frontend: 5000, auth: 5001, gateway: 5002, crm: 5003 },
+                description: 'CI/CD automation'
+            },
+            {
+                name: 'Docker QA',
+                badge: 'qa',
+                ports: { frontend: 6000, auth: 6001, gateway: 6002, crm: 6003 },
+                description: 'Pre-production UAT'
+            },
+            {
+                name: 'Docker PROD',
+                badge: 'prod',
+                ports: { frontend: 7000, auth: 7001, gateway: 7002, crm: 7003 },
+                description: 'Production simulation'
+            }
+        ];
+
+        let autoRefreshInterval = null;
+
+        function renderEnvironments() {
+            const container = document.getElementById('environments');
+            container.innerHTML = environments.map(env => `
+                <div class="environment" id="env-${env.badge}-${env.ports.frontend}">
+                    <div class="env-header">
+                        <div class="env-name">${env.name}</div>
+                        <span class="env-badge ${env.badge}">${env.badge.toUpperCase()}</span>
+                    </div>
+                    <p style="color: #6b7280; margin-bottom: 15px; font-size: 0.9rem;">${env.description}</p>
+                    <div class="services">
+                        ${Object.entries(env.ports).map(([name, port]) => `
+                            <div class="service" id="service-${port}">
+                                <div class="service-name">
+                                    <span class="indicator checking"></span>
+                                    ${name.charAt(0).toUpperCase() + name.slice(1)}
+                                </div>
+                                <div class="service-status">
+                                    <span class="response-time" id="time-${port}">-</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="quick-links">
+                        <a href="http://localhost:${env.ports.frontend}" target="_blank" class="quick-link">🌐 Frontend</a>
+                        <a href="http://localhost:${env.ports.auth}/health" target="_blank" class="quick-link">🔐 Auth</a>
+                        <a href="http://localhost:${env.ports.crm}/health" target="_blank" class="quick-link">💼 CRM</a>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function checkHealth(port, name) {
+            const startTime = Date.now();
+            try {
+                const endpoint = name === 'frontend' ? `http://localhost:${port}` : `http://localhost:${port}/health`;
+                const response = await fetch(endpoint, { 
+                    method: 'GET',
+                    mode: 'no-cors', // Required for cross-origin requests
+                    cache: 'no-cache'
+                });
+                const responseTime = Date.now() - startTime;
+                return { healthy: true, responseTime };
+            } catch (error) {
+                const responseTime = Date.now() - startTime;
+                return { healthy: false, responseTime };
+            }
+        }
+
+        async function checkAllHealth() {
+            document.getElementById('overall-status').className = 'status checking';
+            document.getElementById('overall-status').textContent = 'Checking...';
+
+            let totalServices = 0;
+            let healthyServices = 0;
+            let totalResponseTime = 0;
+
+            for (const env of environments) {
+                for (const [name, port] of Object.entries(env.ports)) {
+                    totalServices++;
+                    const serviceEl = document.getElementById(`service-${port}`);
+                    const indicatorEl = serviceEl.querySelector('.indicator');
+                    const timeEl = document.getElementById(`time-${port}`);
+
+                    indicatorEl.className = 'indicator checking';
+                    serviceEl.className = 'service';
+                    timeEl.textContent = 'Checking...';
+
+                    const result = await checkHealth(port, name);
+                    totalResponseTime += result.responseTime;
+
+                    if (result.healthy) {
+                        healthyServices++;
+                        indicatorEl.className = 'indicator healthy';
+                        serviceEl.className = 'service healthy';
+                        timeEl.textContent = `${result.responseTime}ms`;
+                    } else {
+                        indicatorEl.className = 'indicator unhealthy';
+                        serviceEl.className = 'service unhealthy';
+                        timeEl.textContent = 'Offline';
+                    }
+                }
+            }
+
+            // Update overall status
+            const overallStatus = document.getElementById('overall-status');
+            if (healthyServices === totalServices) {
+                overallStatus.className = 'status healthy';
+                overallStatus.textContent = '✅ All Systems Operational';
+            } else if (healthyServices === 0) {
+                overallStatus.className = 'status unhealthy';
+                overallStatus.textContent = '❌ All Systems Down';
+            } else {
+                overallStatus.className = 'status unhealthy';
+                overallStatus.textContent = `⚠️ ${healthyServices}/${totalServices} Services Up`;
+            }
+
+            // Update stats
+            document.getElementById('stat-total').textContent = totalServices;
+            document.getElementById('stat-healthy').textContent = healthyServices;
+            document.getElementById('stat-unhealthy').textContent = totalServices - healthyServices;
+            const avgResponse = Math.round(totalResponseTime / totalServices);
+            document.getElementById('stat-avg-response').textContent = `${avgResponse}ms`;
+
+            // Update last update time
+            document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
+        }
+
+        function toggleAutoRefresh() {
+            const statusEl = document.getElementById('auto-status');
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+                autoRefreshInterval = null;
+                statusEl.textContent = 'OFF';
+            } else {
+                autoRefreshInterval = setInterval(checkAllHealth, 30000); // Every 30 seconds
+                statusEl.textContent = 'ON (30s)';
+                checkAllHealth(); // Immediate check
+            }
+        }
+
+        // Initialize
+        renderEnvironments();
+        checkAllHealth();
+    </script>
+</body>
+</html>
