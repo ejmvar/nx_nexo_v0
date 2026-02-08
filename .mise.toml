@@ -40,6 +40,62 @@ raw = true
 run = "npx create-nx-workspace@latest {{vars.PROJECT_NAME}} --package-manager=pnpm"
 
 # ===============================
+# ROBUST STARTUP & SHUTDOWN - ALL ENVIRONMENTS
+# ===============================
+
+[tasks.startup]
+description = "🚀 Robust startup for TEST/DEV/QA/PROD environments"
+run = "bash scripts/startup.sh start"
+
+[tasks.startup-test]
+description = "🧪 Start test environment"
+run = "NEXO_ENV=test bash scripts/startup.sh start"
+
+[tasks.startup-dev]
+description = "💻 Start development environment"
+run = "NEXO_ENV=dev bash scripts/startup.sh start"
+
+[tasks.startup-qa]
+description = "🔍 Start QA/staging environment"
+run = "NEXO_ENV=qa bash scripts/startup.sh start"
+
+[tasks.shutdown]
+description = "🛑 Graceful shutdown (preserve database)"
+run = "bash scripts/shutdown.sh stop"
+
+[tasks.shutdown-force]
+description = "⚠️  Force shutdown (ignore errors)"
+run = "bash scripts/shutdown.sh force"
+
+[tasks.shutdown-clean]
+description = "🧹 Complete shutdown (including database)"
+run = "bash scripts/shutdown.sh clean"
+
+[tasks.restart]
+description = "🔄 Restart all services"
+run = "mise run shutdown && sleep 2 && mise run startup"
+
+[tasks.restart-clean]
+description = "🔄 Clean restart (full reset)"
+run = "mise run shutdown-clean && sleep 5 && mise run startup"
+
+[tasks.status]
+description = "📊 Show system status"
+run = "bash scripts/startup.sh status"
+
+[tasks.health]
+description = "🏥 Check all services health"
+run = "bash scripts/health-check.sh"
+
+[tasks.logs-startup]
+description = "📋 View startup logs"
+run = "tail -100 tmp/logs/startup-*.log | tail -100"
+
+[tasks.logs-shutdown]
+description = "📋 View shutdown logs"  
+run = "tail -100 tmp/logs/shutdown-*.log | tail -100"
+
+# ===============================
 # TESTING TASKS - DEVELOPMENT CYCLE
 # ===============================
 
@@ -84,10 +140,7 @@ depends = ["test-install"]
 
 [tasks.test-cleanup-services]
 description = "Kill all running test services (auth, crm, gateway, frontend)"
-run = """
-lsof -ti:3001,3002,3003,3000,9229 2>/dev/null | xargs -r kill -9 || true
-echo "Services cleaned up"
-"""
+run = "bash scripts/shutdown.sh stop"
 
 [tasks.test-e2e]
 description = "Run verified E2E tests (CRM API endpoints only)"
@@ -159,15 +212,7 @@ description = "Start core development servers (auth, crm, frontend)"
 # # DON'T REMOVE : # run = "cd nexo-prj && npx nx run-many --target=serve --all --parallel"
 
 run = """
-cd nexo-prj && \
-npx nx serve auth-service & \
-npx nx serve crm-service & \
-npx nx serve nexo-prj & \
-wait
-"""
-depends = ["test-install"]
-
-[tasks.test-clean]
+run = "NEXO_ENV=dev bash scripts/startup.sh startasks.test-clean]
 description = "Clean all build artifacts and caches"
 run = "cd nexo-prj && npx nx reset && rm -rf .next node_modules/.cache"
 
@@ -427,23 +472,11 @@ run = "mise run docker:down"
 
 [tasks."test:all"]
 description = "Run ALL tests (Docker, K8s, Application)"
-run = """echo '🧪 Running comprehensive test suite...'
-mise run docker:validate
-mise run test:docker:health
-mise run k8s:validate
-mise run test:nx:install
-mise run test:pnpm:install
-echo '✅ All tests passed!'
-"""
+run = "bash scripts/ci-test.sh"
 
 [tasks."test:quick"]
 description = "Quick validation tests"
-run = """echo '⚡ Running quick tests...'
-mise run docker:validate
-mise run k8s:validate
-mise run test:nx:install
-echo '✅ Quick tests passed!'
-"""
+run = "mise run docker:validate && mise run k8s:validate && mise run test:nx:install && echo 'Quick tests passed'"
 
 [tasks."ci:test"]
 description = "CI/CD test pipeline"
@@ -454,8 +487,9 @@ run = "bash scripts/ci-test.sh"
 # ============================================================================
 
 [tasks."clean:all"]
-description = "Clean everything (Docker, node_modules, dist)"
-run = """mise run docker:clean
+descripti
+mise run docker:clean
+cd $PROJECT_NAME:clean
 cd {{vars.PROJECT_NAME}} && rm -rf node_modules dist .nx
 echo '✓ Cleaned all build artifacts'
 """
@@ -513,8 +547,8 @@ run = "docker exec nexo-postgres psql -U nexo_admin -d nexo_crm -f /docker-entry
 # HEALTH & MONITORING
 # ============================================================================
 
-[tasks."health"]
-description = "Check all services health status"
+[tasks."health-docker"]
+description = "Check Docker services health status"
 run = "docker compose -f docker-compose.full.yml ps && echo '\\nTesting endpoints...' && curl -s http://localhost:3000/health > /dev/null && echo '✅ Frontend: OK' || echo '❌ Frontend: DOWN'"
 
 [tasks."stats"]
