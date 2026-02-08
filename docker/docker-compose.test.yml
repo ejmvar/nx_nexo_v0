@@ -1,0 +1,195 @@
+version: '3.8'
+
+# ============================================================================
+# NEXO CRM - Docker Compose Configuration for TEST Environment
+# ============================================================================
+# Port Mapping: 5xxx ports (5000, 5001, 5003, 5002)
+# Purpose: Automated testing, CI/CD pipeline integration
+# Features:
+# - Ephemeral containers (no restart policy)
+# - Fast startup with minimal logging
+# - Isolated test database with seed data
+# ============================================================================
+
+services:
+  # ============================================================================
+  # INFRASTRUCTURE
+  # ============================================================================
+  
+  postgres-test:
+    image: postgres:15-alpine
+    container_name: nexo-postgres-test
+    environment:
+      POSTGRES_DB: nexo_test
+      POSTGRES_USER: nexo_user
+      POSTGRES_PASSWORD: nexo_test_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+      - ../database:/docker-entrypoint-initdb.d:ro
+    networks:
+      - nexo-test-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nexo_user -d nexo_test"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis-test:
+    image: redis:7-alpine
+    container_name: nexo-redis-test
+    ports:
+      - "5379:6379"
+    volumes:
+      - redis_test_data:/data
+    networks:
+      - nexo-test-network
+    command: redis-server --appendonly yes --save ""
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 2s
+      retries: 10
+
+  # ============================================================================
+  # BACKEND SERVICES
+  # ============================================================================
+
+  auth-service-test:
+    build:
+      context: ../nexo-prj
+      dockerfile: apps/auth-service/Dockerfile
+    container_name: nexo-auth-service-test
+    environment:
+      NODE_ENV: test
+      PORT: 3001
+      DATABASE_URL: postgresql://nexo_user:nexo_test_password@postgres-test:5432/nexo_test
+      REDIS_URL: redis://redis-test:6379
+      JWT_SECRET: test-jwt-secret
+      JWT_EXPIRES_IN: 1h
+      JWT_REFRESH_EXPIRES_IN: 7d
+      LOG_LEVEL: warn
+    ports:
+      - "5001:3001"
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+      redis-test:
+        condition: service_healthy
+    networks:
+      - nexo-test-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  crm-service-test:
+    build:
+      context: ../nexo-prj
+      dockerfile: apps/crm-service/Dockerfile
+    container_name: nexo-crm-service-test
+    environment:
+      NODE_ENV: test
+      PORT: 3003
+      DATABASE_URL: postgresql://nexo_user:nexo_test_password@postgres-test:5432/nexo_test
+      REDIS_URL: redis://redis-test:6379
+      AUTH_SERVICE_URL: http://auth-service-test:3001
+      JWT_SECRET: test-jwt-secret
+      LOG_LEVEL: warn
+    ports:
+      - "5003:3003"
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+      redis-test:
+        condition: service_healthy
+      auth-service-test:
+        condition: service_healthy
+    networks:
+      - nexo-test-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3003/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  api-gateway-test:
+    build:
+      context: ../nexo-prj
+      dockerfile: apps/api-gateway/Dockerfile
+    container_name: nexo-api-gateway-test
+    environment:
+      NODE_ENV: test
+      PORT: 3002
+      AUTH_SERVICE_URL: http://auth-service-test:3001
+      CRM_SERVICE_URL: http://crm-service-test:3003
+      REDIS_URL: redis://redis-test:6379
+      LOG_LEVEL: warn
+    ports:
+      - "5002:3002"
+    depends_on:
+      auth-service-test:
+        condition: service_healthy
+      crm-service-test:
+        condition: service_healthy
+    networks:
+      - nexo-test-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3002/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  # ============================================================================
+  # FRONTEND
+  # ============================================================================
+
+  frontend-test:
+    build:
+      context: ../nexo-prj
+      dockerfile: apps/nexo-prj/Dockerfile
+      args:
+        NODE_ENV: test
+    container_name: nexo-frontend-test
+    environment:
+      NODE_ENV: test
+      NEXT_PUBLIC_API_URL: http://localhost:5002
+      NEXT_PUBLIC_AUTH_URL: http://localhost:5001
+      NEXT_PUBLIC_ENV: test
+    ports:
+      - "5000:3000"
+    depends_on:
+      api-gateway-test:
+        condition: service_healthy
+    networks:
+      - nexo-test-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+# ============================================================================
+# NETWORKS
+# ============================================================================
+
+networks:
+  nexo-test-network:
+    name: nexo-test-network
+    driver: bridge
+
+# ============================================================================
+# VOLUMES
+# ============================================================================
+
+volumes:
+  postgres_test_data:
+    name: nexo-postgres-test-data
+  redis_test_data:
+    name: nexo-redis-test-data

@@ -40,6 +40,62 @@ raw = true
 run = "npx create-nx-workspace@latest {{vars.PROJECT_NAME}} --package-manager=pnpm"
 
 # ===============================
+# ROBUST STARTUP & SHUTDOWN - ALL ENVIRONMENTS
+# ===============================
+
+[tasks.startup]
+description = "🚀 Robust startup for TEST/DEV/QA/PROD environments"
+run = "bash scripts/startup.sh start"
+
+[tasks.startup-test]
+description = "🧪 Start test environment"
+run = "NEXO_ENV=test bash scripts/startup.sh start"
+
+[tasks.startup-dev]
+description = "💻 Start development environment"
+run = "NEXO_ENV=dev bash scripts/startup.sh start"
+
+[tasks.startup-qa]
+description = "🔍 Start QA/staging environment"
+run = "NEXO_ENV=qa bash scripts/startup.sh start"
+
+[tasks.shutdown]
+description = "🛑 Graceful shutdown (preserve database)"
+run = "bash scripts/shutdown.sh stop"
+
+[tasks.shutdown-force]
+description = "⚠️  Force shutdown (ignore errors)"
+run = "bash scripts/shutdown.sh force"
+
+[tasks.shutdown-clean]
+description = "🧹 Complete shutdown (including database)"
+run = "bash scripts/shutdown.sh clean"
+
+[tasks.restart]
+description = "🔄 Restart all services"
+run = "mise run shutdown && sleep 2 && mise run startup"
+
+[tasks.restart-clean]
+description = "🔄 Clean restart (full reset)"
+run = "mise run shutdown-clean && sleep 5 && mise run startup"
+
+[tasks.status]
+description = "📊 Show system status"
+run = "bash scripts/startup.sh status"
+
+[tasks.health]
+description = "🏥 Check all services health"
+run = "bash scripts/health-check.sh"
+
+[tasks.logs-startup]
+description = "📋 View startup logs"
+run = "tail -100 tmp/logs/startup-*.log | tail -100"
+
+[tasks.logs-shutdown]
+description = "📋 View shutdown logs"  
+run = "tail -100 tmp/logs/shutdown-*.log | tail -100"
+
+# ===============================
 # TESTING TASKS - DEVELOPMENT CYCLE
 # ===============================
 
@@ -84,10 +140,7 @@ depends = ["test-install"]
 
 [tasks.test-cleanup-services]
 description = "Kill all running test services (auth, crm, gateway, frontend)"
-run = """
-lsof -ti:3001,3002,3003,3000,9229 2>/dev/null | xargs -r kill -9 || true
-echo "Services cleaned up"
-"""
+run = "bash scripts/shutdown.sh stop"
 
 [tasks.test-e2e]
 description = "Run verified E2E tests (CRM API endpoints only)"
@@ -107,6 +160,26 @@ depends = ["test-install", "test-cleanup-services"]
 [tasks.test-e2e-headed]
 description = "Run E2E tests in headed mode (visible browser for user verification)"
 run = "cd nexo-prj && pnpm exec playwright test crm-api-endpoints.spec.ts --headed --reporter=list"
+depends = ["test-install", "test-cleanup-services"]
+
+[tasks.test-file-operations]
+description = "Run file operations E2E tests (API-level)"
+run = "cd nexo-prj && pnpm exec playwright test --project=file-operations --reporter=list"
+depends = ["test-install", "test-cleanup-services"]
+
+[tasks.test-file-upload-ui]
+description = "Run file upload UI E2E tests (browser-based)"
+run = "cd nexo-prj && pnpm exec playwright test --project=file-upload-ui --reporter=list"
+depends = ["test-install", "test-cleanup-services"]
+
+[tasks.test-file-upload-ui-headed]
+description = "Run file upload UI tests in headed mode (visible browser)"
+run = "cd nexo-prj && pnpm exec playwright test --project=file-upload-ui --headed --reporter=list"
+depends = ["test-install", "test-cleanup-services"]
+
+[tasks.test-files-all]
+description = "Run all file-related tests (API + UI)"
+run = "cd nexo-prj && pnpm exec playwright test file-operations.spec.ts file-upload-ui.spec.ts --reporter=list"
 depends = ["test-install", "test-cleanup-services"]
 
 [tasks.test-build]
@@ -139,15 +212,7 @@ description = "Start core development servers (auth, crm, frontend)"
 # # DON'T REMOVE : # run = "cd nexo-prj && npx nx run-many --target=serve --all --parallel"
 
 run = """
-cd nexo-prj && \
-npx nx serve auth-service & \
-npx nx serve crm-service & \
-npx nx serve nexo-prj & \
-wait
-"""
-depends = ["test-install"]
-
-[tasks.test-clean]
+run = "NEXO_ENV=dev bash scripts/startup.sh startasks.test-clean]
 description = "Clean all build artifacts and caches"
 run = "cd nexo-prj && npx nx reset && rm -rf .next node_modules/.cache"
 
@@ -210,9 +275,17 @@ description = "Test test execution performance"
 run = "cd nexo-prj && time npx nx run-many --target=test --all"
 
 # ============================================================================
-# DOCKER INFRASTRUCTURE TESTING TASKS
+# DOCKER MULTI-ENVIRONMENT TASKS
+# ============================================================================
+# Port Strategy:
+# - Local NX Dev:  3xxx ports (3000, 3001, 3003, 3002)
+# - Docker DEV:    4xxx ports (4000, 4001, 4003, 4002)
+# - Docker TEST:   5xxx ports (5000, 5001, 5003, 5002)
+# - Docker QA:     6xxx ports (6000, 6001, 6003, 6002)
+# - Docker PROD:   7xxx ports (7000, 7001, 7003, 7002)
 # ============================================================================
 
+# LEGACY DOCKER TASKS (Original docker-compose.yml)
 [tasks."docker:validate"]
 description = "Validate docker-compose.yml syntax"
 run = "docker compose -f {{vars.DOCKER_COMPOSE_FILE}} config > /dev/null && echo '✓ Docker Compose configuration is valid'"
@@ -244,6 +317,210 @@ run = "docker compose -f {{vars.DOCKER_COMPOSE_FILE}} down -v --remove-orphans"
 [tasks."docker:restart"]
 description = "Restart Docker services"
 run = "mise run docker:down && mise run docker:up"
+
+# ============================================================================
+# DOCKER DEV ENVIRONMENT (Port 4xxx)
+# ============================================================================
+
+[tasks."docker-dev:up"]
+description = "🔵 Start Docker DEV environment (port 4xxx)"
+run = "unset DOCKER_HOST && docker compose -f docker/docker-compose.dev.yml up -d"
+
+[tasks."docker-dev:down"]
+description = "🔵 Stop Docker DEV environment"
+run = "unset DOCKER_HOST && docker compose -f docker/docker-compose.dev.yml down"
+
+[tasks."docker-dev:logs"]
+description = "🔵 View Docker DEV logs"
+run = "unset DOCKER_HOST && docker compose -f docker/docker-compose.dev.yml logs -f"
+
+[tasks."docker-dev:ps"]
+description = "🔵 List Docker DEV containers"
+run = "unset DOCKER_HOST && docker compose -f docker/docker-compose.dev.yml ps"
+
+[tasks."docker-dev:restart"]
+description = "🔵 Restart Docker DEV environment"
+run = "mise run docker-dev:down && sleep 2 && mise run docker-dev:up"
+
+[tasks."docker-dev:clean"]
+description = "🔵 Clean Docker DEV (remove volumes)"
+run = "unset DOCKER_HOST && docker compose -f docker/docker-compose.dev.yml down -v --remove-orphans"
+
+[tasks."docker-dev:build"]
+description = "🔵 Build Docker DEV images"
+run = "unset DOCKER_HOST && docker compose -f docker/docker-compose.dev.yml build"
+
+[tasks."docker-dev:health"]
+description = "🔵 Check Docker DEV health"
+run = "curl -sf http://localhost:4001/health && curl -sf http://localhost:4003/health && curl -sf http://localhost:4000 && echo 'DEV environment healthy'"
+
+# ============================================================================
+# DOCKER TEST ENVIRONMENT (Port 5xxx)
+# ============================================================================
+
+[tasks."docker-test:up"]
+description = "🟢 Start Docker TEST environment (port 5xxx)"
+run = "unset DOCKER_HOST && docker compose -f docker/docker-compose.test.yml up -d"
+
+[tasks."docker-test:down"]
+description = "🟢 Stop Docker TEST environment"
+run = "unset DOCKER_HOST && docker compose -f docker/docker-compose.test.yml down"
+
+[tasks."docker-test:logs"]
+description = "🟢 View Docker TEST logs"
+run = "unset DOCKER_HOST && docker compose -f docker/docker-compose.test.yml logs -f"
+
+[tasks."docker-test:ps"]
+description = "🟢 List Docker TEST containers"
+run = "unset DOCKER_HOST && docker compose -f docker/docker-compose.test.yml ps"
+
+[tasks."docker-test:restart"]
+description = "🟢 Restart Docker TEST environment"
+run = "mise run docker-test:down && sleep 2 && mise run docker-test:up"
+
+[tasks."docker-test:clean"]
+description = "🟢 Clean Docker TEST (remove volumes)"
+run = "unset DOCKER_HOST && docker compose -f docker/docker-compose.test.yml down -v --remove-orphans"
+
+[tasks."docker-test:build"]
+description = "🟢 Build Docker TEST images"
+run = "unset DOCKER_HOST && docker compose -f docker/docker-compose.test.yml build"
+
+[tasks."docker-test:health"]
+description = "🟢 Check Docker TEST health"
+run = "curl -sf http://localhost:5001/health && curl -sf http://localhost:5003/health && curl -sf http://localhost:5000 && echo 'TEST environment healthy'"
+
+# ============================================================================
+# DOCKER QA ENVIRONMENT (Port 6xxx)
+# ============================================================================
+
+[tasks."docker-qa:up"]
+description = "🟡 Start Docker QA environment (port 6xxx)"
+run = "unset DOCKER_HOST && docker compose -f docker/docker-compose.qa.yml up -d"
+
+[tasks."docker-qa:down"]
+description = "🟡 Stop Docker QA environment"
+run = "unset DOCKER_HOST && docker compose -f docker/docker-compose.qa.yml down"
+
+[tasks."docker-qa:logs"]
+description = "🟡 View Docker QA logs"
+run = "unset DOCKER_HOST && docker compose -f docker/docker-compose.qa.yml logs -f"
+
+[tasks."docker-qa:ps"]
+description = "🟡 List Docker QA containers"
+run = "unset DOCKER_HOST && docker compose -f docker/docker-compose.qa.yml ps"
+
+[tasks."docker-qa:restart"]
+description = "🟡 Restart Docker QA environment"
+run = "mise run docker-qa:down && sleep 2 && mise run docker-qa:up"
+
+[tasks."docker-qa:clean"]
+description = "🟡 Clean Docker QA (remove volumes)"
+run = "unset DOCKER_HOST && docker compose -f docker/docker-compose.qa.yml down -v --remove-orphans"
+
+[tasks."docker-qa:build"]
+description = "🟡 Build Docker QA images"
+run = "unset DOCKER_HOST && docker compose -f docker/docker-compose.qa.yml build"
+
+[tasks."docker-qa:health"]
+description = "🟡 Check Docker QA health"
+run = "curl -sf http://localhost:6001/health && curl -sf http://localhost:6003/health && curl -sf http://localhost:6000 && echo 'QA environment healthy'"
+
+# ============================================================================
+# DOCKER PROD ENVIRONMENT (Port 7xxx)
+# ============================================================================
+
+[tasks."docker-prod:up"]
+description = "🔴 Start Docker PROD environment (port 7xxx)"
+run = "unset DOCKER_HOST && docker compose -f docker/docker-compose.prod.yml up -d"
+
+[tasks."docker-prod:down"]
+description = "🔴 Stop Docker PROD environment"
+run = "unset DOCKER_HOST && docker compose -f docker/docker-compose.prod.yml down"
+
+[tasks."docker-prod:logs"]
+description = "🔴 View Docker PROD logs"
+run = "unset DOCKER_HOST && docker compose -f docker/docker-compose.prod.yml logs -f"
+
+[tasks."docker-prod:ps"]
+description = "🔴 List Docker PROD containers"
+run = "unset DOCKER_HOST && docker compose -f docker/docker-compose.prod.yml ps"
+
+[tasks."docker-prod:restart"]
+description = "🔴 Restart Docker PROD environment"
+run = "mise run docker-prod:down && sleep 2 && mise run docker-prod:up"
+
+[tasks."docker-prod:clean"]
+description = "🔴 Clean Docker PROD (remove volumes)"
+run = "unset DOCKER_HOST && docker compose -f docker/docker-compose.prod.yml down -v --remove-orphans"
+
+[tasks."docker-prod:build"]
+description = "🔴 Build Docker PROD images"
+run = "unset DOCKER_HOST && docker compose -f docker/docker-compose.prod.yml build"
+
+[tasks."docker-prod:health"]
+description = "🔴 Check Docker PROD health"
+run = "curl -sf http://localhost:7001/health && curl -sf http://localhost:7003/health && curl -sf http://localhost:7000 && echo 'PROD environment healthy'"
+
+# ========================================================================
+# MULTI-ENVIRONMENT MANAGEMENT
+# ============================================================================
+
+[tasks."docker-all:up"]
+description = "🌐 Start ALL Docker environments (DEV+TEST+QA+PROD)"
+run = "mise run docker-dev:up && mise run docker-test:up && mise run docker-qa:up && mise run docker-prod:up"
+
+[tasks."docker-all:down"]
+description = "🌐 Stop ALL Docker environments"
+run = "mise run docker-dev:down && mise run docker-test:down && mise run docker-qa:down && mise run docker-prod:down"
+
+[tasks."docker-all:clean"]
+description = "🌐 Clean ALL Docker environments"
+run = "mise run docker-dev:clean && mise run docker-test:clean && mise run docker-qa:clean && mise run docker-prod:clean"
+
+[tasks."docker-all:ps"]
+description = "🌐 List ALL Docker containers"
+run = "echo '=== DEV ===' && mise run docker-dev:ps && echo '=== TEST ===' && mise run docker-test:ps && echo '=== QA ===' && mise run docker-qa:ps && echo '=== PROD ===' && mise run docker-prod:ps"
+
+[tasks."docker-all:health"]
+description = "🌐 Check ALL Docker environments health"
+run = "echo '=== DEV (4xxx) ===' && mise run docker-dev:health && echo '=== TEST (5xxx) ===' && mise run docker-test:health && echo '=== QA (6xxx) ===' && mise run docker-qa:health && echo '=== PROD (7xxx) ===' && mise run docker-prod:health"
+
+# ============================================================================
+# DOCKER MONITORING & LOGGING TASKS
+# ============================================================================
+
+[tasks."docker:health-dashboard"]
+description = "📊 Open health dashboard for all environments"
+run = "open docker/health-dashboard.html || xdg-open docker/health-dashboard.html"
+
+[tasks."docker:logs-aggregate"]
+description = "📋 Aggregate logs from ALL environments"
+run = "bash scripts/aggregate-logs.sh"
+
+[tasks."docker:logs-dev"]
+description = "📋 Aggregate DEV environment logs"
+run = "bash scripts/aggregate-logs.sh dev"
+
+[tasks."docker:logs-test"]
+description = "📋 Aggregate TEST environment logs"
+run = "bash scripts/aggregate-logs.sh test"
+
+[tasks."docker:logs-qa"]
+description = "📋 Aggregate QA environment logs"
+run = "bash scripts/aggregate-logs.sh qa"
+
+[tasks."docker:logs-prod"]
+description = "📋 Aggregate PROD environment logs"
+run = "bash scripts/aggregate-logs.sh prod"
+
+[tasks."docker:logs-auth"]
+description = "📋 Aggregate auth-service logs from all environments"
+run = "bash scripts/aggregate-logs.sh all auth-service"
+
+[tasks."docker:logs-crm"]
+description = "📋 Aggregate crm-service logs from all environments"
+run = "bash scripts/aggregate-logs.sh all crm-service"
 
 [tasks."test:docker:health"]
 description = "Test Docker services health"
@@ -407,23 +684,11 @@ run = "mise run docker:down"
 
 [tasks."test:all"]
 description = "Run ALL tests (Docker, K8s, Application)"
-run = """echo '🧪 Running comprehensive test suite...'
-mise run docker:validate
-mise run test:docker:health
-mise run k8s:validate
-mise run test:nx:install
-mise run test:pnpm:install
-echo '✅ All tests passed!'
-"""
+run = "bash scripts/ci-test.sh"
 
 [tasks."test:quick"]
 description = "Quick validation tests"
-run = """echo '⚡ Running quick tests...'
-mise run docker:validate
-mise run k8s:validate
-mise run test:nx:install
-echo '✅ Quick tests passed!'
-"""
+run = "mise run docker:validate && mise run k8s:validate && mise run test:nx:install && echo 'Quick tests passed'"
 
 [tasks."ci:test"]
 description = "CI/CD test pipeline"
@@ -434,8 +699,9 @@ run = "bash scripts/ci-test.sh"
 # ============================================================================
 
 [tasks."clean:all"]
-description = "Clean everything (Docker, node_modules, dist)"
-run = """mise run docker:clean
+descripti
+mise run docker:clean
+cd $PROJECT_NAME:clean
 cd {{vars.PROJECT_NAME}} && rm -rf node_modules dist .nx
 echo '✓ Cleaned all build artifacts'
 """
@@ -493,8 +759,8 @@ run = "docker exec nexo-postgres psql -U nexo_admin -d nexo_crm -f /docker-entry
 # HEALTH & MONITORING
 # ============================================================================
 
-[tasks."health"]
-description = "Check all services health status"
+[tasks."health-docker"]
+description = "Check Docker services health status"
 run = "docker compose -f docker-compose.full.yml ps && echo '\\nTesting endpoints...' && curl -s http://localhost:3000/health > /dev/null && echo '✅ Frontend: OK' || echo '❌ Frontend: DOWN'"
 
 [tasks."stats"]
