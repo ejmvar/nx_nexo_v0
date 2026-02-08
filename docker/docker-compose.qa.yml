@@ -1,0 +1,280 @@
+version: '3.8'
+
+# ============================================================================
+# NEXO CRM - Docker Compose Configuration for QA/Staging Environment
+# ============================================================================
+# Port Mapping: 6xxx ports (6000, 6001, 6003, 6002)
+# Purpose: Pre-production testing, UAT, integration testing
+# Features:
+# - Production-like configuration
+# - Monitoring and logging enabled
+# - Backup strategies
+# - Resource limits enforced
+# ============================================================================
+
+services:
+  # ============================================================================
+  # INFRASTRUCTURE
+  # ============================================================================
+  
+  postgres-qa:
+    image: postgres:15-alpine
+    container_name: nexo-postgres-qa
+    environment:
+      POSTGRES_DB: nexo_qa
+      POSTGRES_USER: nexo_user
+      POSTGRES_PASSWORD: nexo_qa_password
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "6432:5432"
+    volumes:
+      - postgres_qa_data:/var/lib/postgresql/data
+      - ../database:/docker-entrypoint-initdb.d:ro
+      - ./backups/qa:/backups
+    networks:
+      - nexo-qa-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nexo_user -d nexo_qa"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis-qa:
+    image: redis:7-alpine
+    container_name: nexo-redis-qa
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_qa_data:/data
+      - ./redis-qa.conf:/usr/local/etc/redis/redis.conf:ro
+    networks:
+      - nexo-qa-network
+    restart: unless-stopped
+    command: redis-server /usr/local/etc/redis/redis.conf
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # ============================================================================
+  # BACKEND SERVICES
+  # ============================================================================
+
+  auth-service-qa:
+    build:
+      context: ../nexo-prj
+      dockerfile: apps/auth-service/Dockerfile
+    container_name: nexo-auth-service-qa
+    environment:
+      NODE_ENV: staging
+      PORT: 3001
+      DATABASE_URL: postgresql://nexo_user:nexo_qa_password@postgres-qa:5432/nexo_qa
+      REDIS_URL: redis://redis-qa:6379
+      JWT_SECRET: qa-jwt-secret-change-before-production
+      JWT_EXPIRES_IN: 1h
+      JWT_REFRESH_EXPIRES_IN: 7d
+      LOG_LEVEL: info
+      ENABLE_METRICS: "true"
+      SENTRY_DSN: ${SENTRY_DSN:-}
+    ports:
+      - "6001:3001"
+    depends_on:
+      postgres-qa:
+        condition: service_healthy
+      redis-qa:
+        condition: service_healthy
+    networks:
+      - nexo-qa-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  crm-service-qa:
+    build:
+      context: ../nexo-prj
+      dockerfile: apps/crm-service/Dockerfile
+    container_name: nexo-crm-service-qa
+    environment:
+      NODE_ENV: staging
+      PORT: 3003
+      DATABASE_URL: postgresql://nexo_user:nexo_qa_password@postgres-qa:5432/nexo_qa
+      REDIS_URL: redis://redis-qa:6379
+      AUTH_SERVICE_URL: http://auth-service-qa:3001
+      JWT_SECRET: qa-jwt-secret-change-before-production
+      LOG_LEVEL: info
+      ENABLE_METRICS: "true"
+      SENTRY_DSN: ${SENTRY_DSN:-}
+    ports:
+      - "6003:3003"
+    depends_on:
+      postgres-qa:
+        condition: service_healthy
+      redis-qa:
+        condition: service_healthy
+      auth-service-qa:
+        condition: service_healthy
+    networks:
+      - nexo-qa-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  api-gateway-qa:
+    build:
+      context: ../nexo-prj
+      dockerfile: apps/api-gateway/Dockerfile
+    container_name: nexo-api-gateway-qa
+    environment:
+      NODE_ENV: staging
+      PORT: 3002
+      AUTH_SERVICE_URL: http://auth-service-qa:3001
+      CRM_SERVICE_URL: http://crm-service-qa:3003
+      REDIS_URL: redis://redis-qa:6379
+      LOG_LEVEL: info
+      ENABLE_METRICS: "true"
+      SENTRY_DSN: ${SENTRY_DSN:-}
+    ports:
+      - "6002:3002"
+    depends_on:
+      auth-service-qa:
+        condition: service_healthy
+      crm-service-qa:
+        condition: service_healthy
+    networks:
+      - nexo-qa-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ============================================================================
+  # FRONTEND
+  # ============================================================================
+
+  frontend-qa:
+    build:
+      context: ../nexo-prj
+      dockerfile: apps/nexo-prj/Dockerfile
+      args:
+        NODE_ENV: production
+    container_name: nexo-frontend-qa
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: http://localhost:6002
+      NEXT_PUBLIC_AUTH_URL: http://localhost:6001
+      NEXT_PUBLIC_ENV: qa
+      SENTRY_DSN: ${SENTRY_DSN:-}
+    ports:
+      - "6000:3000"
+    depends_on:
+      api-gateway-qa:
+        condition: service_healthy
+    networks:
+      - nexo-qa-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+# ============================================================================
+# NETWORKS
+# ============================================================================
+
+networks:
+  nexo-qa-network:
+    name: nexo-qa-network
+    driver: bridge
+
+# ============================================================================
+# VOLUMES
+# ============================================================================
+
+volumes:
+  postgres_qa_data:
+    name: nexo-postgres-qa-data
+  redis_qa_data:
+    name: nexo-redis-qa-data

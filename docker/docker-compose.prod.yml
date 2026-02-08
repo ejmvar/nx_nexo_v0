@@ -1,0 +1,334 @@
+version: '3.8'
+
+# ============================================================================
+# NEXO CRM - Docker Compose Configuration for PRODUCTION-LIKE Environment
+# ============================================================================
+# Port Mapping: 7xxx ports (7000, 7001, 7003, 7002)
+# Purpose: Local production simulation, final testing before deployment
+# Features:
+# - Production configuration
+# - Security hardening
+# - Performance optimization
+# - Monitoring and alerting
+# - Backup and recovery
+# ============================================================================
+# WARNING: This is for LOCAL production simulation only!
+# For real production, use Kubernetes/ECS/similar orchestration
+# ============================================================================
+
+services:
+  # ============================================================================
+  # INFRASTRUCTURE
+  # ============================================================================
+  
+  postgres-prod:
+    image: postgres:15-alpine
+    container_name: nexo-postgres-prod
+    environment:
+      POSTGRES_DB: nexo_prod
+      POSTGRES_USER: nexo_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme-use-secrets}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --locale=C"
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "7432:5432"
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
+      - ../database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./backups/prod:/backups
+    networks:
+      - nexo-prod-network
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '4.0'
+          memory: 4G
+        reservations:
+          cpus: '1.0'
+          memory: 1G
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nexo_user -d nexo_prod"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    command:
+      - "postgres"
+      - "-c"
+      - "max_connections=200"
+      - "-c"
+      - "shared_buffers=256MB"
+      - "-c"
+      - "effective_cache_size=1GB"
+      - "-c"
+      - "maintenance_work_mem=64MB"
+      - "-c"
+      - "checkpoint_completion_target=0.9"
+      - "-c"
+      - "wal_buffers=16MB"
+      - "-c"
+      - "default_statistics_target=100"
+      - "-c"
+      - "random_page_cost=1.1"
+      - "-c"
+      - "effective_io_concurrency=200"
+      - "-c"
+      - "work_mem=1310kB"
+      - "-c"
+      - "huge_pages=off"
+      - "-c"
+      - "min_wal_size=1GB"
+      - "-c"
+      - "max_wal_size=4GB"
+
+  redis-prod:
+    image: redis:7-alpine
+    container_name: nexo-redis-prod
+    ports:
+      - "7379:6379"
+    volumes:
+      - redis_prod_data:/data
+      - ./redis-prod.conf:/usr/local/etc/redis/redis.conf:ro
+    networks:
+      - nexo-prod-network
+    restart: always
+    command: redis-server /usr/local/etc/redis/redis.conf --requirepass ${REDIS_PASSWORD:-changeme-use-secrets}
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # ============================================================================
+  # BACKEND SERVICES
+  # ============================================================================
+
+  auth-service-prod:
+    build:
+      context: ../nexo-prj
+      dockerfile: apps/auth-service/Dockerfile
+      args:
+        NODE_ENV: production
+    container_name: nexo-auth-service-prod
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: postgresql://nexo_user:${POSTGRES_PASSWORD:-changeme}@postgres-prod:5432/nexo_prod?sslmode=prefer
+      REDIS_URL: redis://:${REDIS_PASSWORD:-changeme}@redis-prod:6379
+      JWT_SECRET: ${JWT_SECRET:-CHANGE-THIS-IN-REAL-PRODUCTION}
+      JWT_EXPIRES_IN: 15m
+      JWT_REFRESH_EXPIRES_IN: 7d
+      LOG_LEVEL: warn
+      ENABLE_METRICS: "true"
+      ENABLE_TRACING: "true"
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      SENTRY_ENVIRONMENT: production
+    ports:
+      - "7001:3001"
+    depends_on:
+      postgres-prod:
+        condition: service_healthy
+      redis-prod:
+        condition: service_healthy
+    networks:
+      - nexo-prod-network
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+        compress: "true"
+
+  crm-service-prod:
+    build:
+      context: ../nexo-prj
+      dockerfile: apps/crm-service/Dockerfile
+      args:
+        NODE_ENV: production
+    container_name: nexo-crm-service-prod
+    environment:
+      NODE_ENV: production
+      PORT: 3003
+      DATABASE_URL: postgresql://nexo_user:${POSTGRES_PASSWORD:-changeme}@postgres-prod:5432/nexo_prod?sslmode=prefer
+      REDIS_URL: redis://:${REDIS_PASSWORD:-changeme}@redis-prod:6379
+      AUTH_SERVICE_URL: http://auth-service-prod:3001
+      JWT_SECRET: ${JWT_SECRET:-CHANGE-THIS-IN-REAL-PRODUCTION}
+      LOG_LEVEL: warn
+      ENABLE_METRICS: "true"
+      ENABLE_TRACING: "true"
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      SENTRY_ENVIRONMENT: production
+    ports:
+      - "7003:3003"
+    depends_on:
+      postgres-prod:
+        condition: service_healthy
+      redis-prod:
+        condition: service_healthy
+      auth-service-prod:
+        condition: service_healthy
+    networks:
+      - nexo-prod-network
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+        compress: "true"
+
+  api-gateway-prod:
+    build:
+      context: ../nexo-prj
+      dockerfile: apps/api-gateway/Dockerfile
+      args:
+        NODE_ENV: production
+    container_name: nexo-api-gateway-prod
+    environment:
+      NODE_ENV: production
+      PORT: 3002
+      AUTH_SERVICE_URL: http://auth-service-prod:3001
+      CRM_SERVICE_URL: http://crm-service-prod:3003
+      REDIS_URL: redis://:${REDIS_PASSWORD:-changeme}@redis-prod:6379
+      LOG_LEVEL: warn
+      ENABLE_METRICS: "true"
+      ENABLE_TRACING: "true"
+      RATE_LIMIT_ENABLED: "true"
+      RATE_LIMIT_MAX: 100
+      RATE_LIMIT_WINDOW: 60000
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      SENTRY_ENVIRONMENT: production
+    ports:
+      - "7002:3002"
+    depends_on:
+      auth-service-prod:
+        condition: service_healthy
+      crm-service-prod:
+        condition: service_healthy
+    networks:
+      - nexo-prod-network
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+        compress: "true"
+
+  # ============================================================================
+  # FRONTEND
+  # ============================================================================
+
+  frontend-prod:
+    build:
+      context: ../nexo-prj
+      dockerfile: apps/nexo-prj/Dockerfile
+      args:
+        NODE_ENV: production
+    container_name: nexo-frontend-prod
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: http://localhost:7002
+      NEXT_PUBLIC_AUTH_URL: http://localhost:7001
+      NEXT_PUBLIC_ENV: production
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      SENTRY_ENVIRONMENT: production
+    ports:
+      - "7000:3000"
+    depends_on:
+      api-gateway-prod:
+        condition: service_healthy
+    networks:
+      - nexo-prod-network
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+        compress: "true"
+
+# ============================================================================
+# NETWORKS
+# ============================================================================
+
+networks:
+  nexo-prod-network:
+    name: nexo-prod-network
+    driver: bridge
+
+# ============================================================================
+# VOLUMES
+# ============================================================================
+
+volumes:
+  postgres_prod_data:
+    name: nexo-postgres-prod-data
+  redis_prod_data:
+    name: nexo-redis-prod-data

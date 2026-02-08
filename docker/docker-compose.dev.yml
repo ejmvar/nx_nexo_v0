@@ -1,0 +1,206 @@
+version: '3.8'
+
+# ============================================================================
+# NEXO CRM - Docker Compose Configuration for DEV Environment
+# ============================================================================
+# Port Mapping Strategy:
+# - Local NX Dev:  3xxx ports (3000, 3001, 3003, 3002)
+# - Docker DEV:    4xxx ports (4000, 4001, 4003, 4002)
+# - Docker TEST:   5xxx ports (5000, 5001, 5003, 5002)
+# - Docker QA:     6xxx ports (6000, 6001, 6003, 6002)
+# - Docker PROD:   7xxx ports (7000, 7001, 7003, 7002)
+#
+# This allows:
+# - Parallel execution of all environments
+# - Testing against different versions simultaneously
+# - Isolated databases and caches per environment
+# ============================================================================
+
+services:
+  # ============================================================================
+  # INFRASTRUCTURE
+  # ============================================================================
+  
+  postgres-dev:
+    image: postgres:15-alpine
+    container_name: nexo-postgres-dev
+    environment:
+      POSTGRES_DB: nexo_dev
+      POSTGRES_USER: nexo_user
+      POSTGRES_PASSWORD: nexo_dev_password
+    ports:
+      - "4432:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+      - ../database:/docker-entrypoint-initdb.d:ro
+    networks:
+      - nexo-dev-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nexo_user -d nexo_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis-dev:
+    image: redis:7-alpine
+    container_name: nexo-redis-dev
+    ports:
+      - "4379:6379"
+    volumes:
+      - redis_dev_data:/data
+    networks:
+      - nexo-dev-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # ============================================================================
+  # BACKEND SERVICES
+  # ============================================================================
+
+  auth-service-dev:
+    build:
+      context: ../nexo-prj
+      dockerfile: apps/auth-service/Dockerfile
+    container_name: nexo-auth-service-dev
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      DATABASE_URL: postgresql://nexo_user:nexo_dev_password@postgres-dev:5432/nexo_dev
+      REDIS_URL: redis://redis-dev:6379
+      JWT_SECRET: dev-jwt-secret-change-in-production
+      JWT_EXPIRES_IN: 1h
+      JWT_REFRESH_EXPIRES_IN: 7d
+      LOG_LEVEL: debug
+    ports:
+      - "4001:3001"
+    depends_on:
+      postgres-dev:
+        condition: service_healthy
+      redis-dev:
+        condition: service_healthy
+    networks:
+      - nexo-dev-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  crm-service-dev:
+    build:
+      context: ../nexo-prj
+      dockerfile: apps/crm-service/Dockerfile
+    container_name: nexo-crm-service-dev
+    environment:
+      NODE_ENV: development
+      PORT: 3003
+      DATABASE_URL: postgresql://nexo_user:nexo_dev_password@postgres-dev:5432/nexo_dev
+      REDIS_URL: redis://redis-dev:6379
+      AUTH_SERVICE_URL: http://auth-service-dev:3001
+      JWT_SECRET: dev-jwt-secret-change-in-production
+      LOG_LEVEL: debug
+    ports:
+      - "4003:3003"
+    depends_on:
+      postgres-dev:
+        condition: service_healthy
+      redis-dev:
+        condition: service_healthy
+      auth-service-dev:
+        condition: service_healthy
+    networks:
+      - nexo-dev-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  api-gateway-dev:
+    build:
+      context: ../nexo-prj
+      dockerfile: apps/api-gateway/Dockerfile
+    container_name: nexo-api-gateway-dev
+    environment:
+      NODE_ENV: development
+      PORT: 3002
+      AUTH_SERVICE_URL: http://auth-service-dev:3001
+      CRM_SERVICE_URL: http://crm-service-dev:3003
+      REDIS_URL: redis://redis-dev:6379
+      LOG_LEVEL: debug
+    ports:
+      - "4002:3002"
+    depends_on:
+      auth-service-dev:
+        condition: service_healthy
+      crm-service-dev:
+        condition: service_healthy
+    networks:
+      - nexo-dev-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================================================
+  # FRONTEND
+  # ============================================================================
+
+  frontend-dev:
+    build:
+      context: ../nexo-prj
+      dockerfile: apps/nexo-prj/Dockerfile
+      args:
+        NODE_ENV: development
+    container_name: nexo-frontend-dev
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_API_URL: http://localhost:4002
+      NEXT_PUBLIC_AUTH_URL: http://localhost:4001
+      NEXT_PUBLIC_ENV: dev
+    ports:
+      - "4000:3000"
+    depends_on:
+      api-gateway-dev:
+        condition: service_healthy
+    networks:
+      - nexo-dev-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+# ============================================================================
+# NETWORKS
+# ============================================================================
+
+networks:
+  nexo-dev-network:
+    name: nexo-dev-network
+    driver: bridge
+
+# ============================================================================
+# VOLUMES
+# ============================================================================
+
+volumes:
+  postgres_dev_data:
+    name: nexo-postgres-dev-data
+  redis_dev_data:
+    name: nexo-redis-dev-data
