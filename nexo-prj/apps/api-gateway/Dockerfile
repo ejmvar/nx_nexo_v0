@@ -3,7 +3,7 @@
 # ============================================================================
 
 # Stage 1: Builder
-FROM node:22.6.0-alpine AS builder
+FROM node:22.12-alpine AS builder
 
 WORKDIR /app
 
@@ -25,7 +25,7 @@ RUN pnpm install --frozen-lockfile
 RUN pnpm nx build api-gateway --prod
 
 # Stage 2: Production
-FROM node:22.6.0-alpine AS production
+FROM node:22.12-alpine AS production
 
 WORKDIR /app
 
