@@ -26,7 +26,7 @@ RUN pnpm install --frozen-lockfile
 COPY apps/nexo-prj ./apps/nexo-prj
 
 # Build the Next.js application (will transpile shared-ui on the fly)
-RUN cd apps/nexo-prj && pnpm build
+RUN pnpm nx build nexo-prj
 
 # Expose port
 EXPOSE 3000
