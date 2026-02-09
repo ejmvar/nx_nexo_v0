@@ -1,8 +1,7 @@
 {
-  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "composite": false,
-    "module": "CommonJS",
+    "module": "commonjs",
     "moduleResolution": "node",
     "declaration": true,
     "emitDeclarationOnly": false,

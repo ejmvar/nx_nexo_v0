@@ -56,9 +56,9 @@ RUN npm install -g pnpm@latest && \
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nestjs -u 1001
 
-# Copy only production dependencies
-COPY --from=deps /app/package.json ./
-COPY --from=deps /app/node_modules ./node_modules
+# Copy only production dependencies (from builder to include generated Prisma Client)
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/node_modules ./node_modules
 
 # Copy built application
 COPY --from=builder /app/dist/apps/crm-service ./dist
