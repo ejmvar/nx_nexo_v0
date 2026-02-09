@@ -6,7 +6,7 @@ import { existsSync, mkdirSync } from 'fs';
 
 @Injectable()
 export class ExportService {
-  private readonly exportDir = '/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/tmp/exports';
+  private readonly exportDir = process.env.EXPORT_DIR || '/tmp/exports';
 
   constructor() {
     // Ensure export directory exists

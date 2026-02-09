@@ -1,19 +1,16 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import pg from 'pg';
-
-// Handle both ESM and CommonJS imports
-const Pool = pg?.Pool || (pg as any)?.default?.Pool || pg;
+import * as pg from 'pg';
 
 @Injectable()
 export class DatabaseService implements OnModuleInit, OnModuleDestroy {
-  private pool: any;
+  private pool: pg.Pool;
   private readonly debugRLS: boolean;
 
   constructor(private configService: ConfigService) {
     // #TODO: ensure 'DEBUG_RLS' is documented as a config option
     this.debugRLS = this.configService.get('DEBUG_RLS') === 'true' || process.env.DEBUG_RLS === 'true';
-    this.pool = new Pool({
+    this.pool = new pg.Pool({
       host: this.configService.get('DB_HOST') || this.configService.get('POSTGRES_HOST') || 'localhost',
       port: parseInt(this.configService.get('DB_PORT') || this.configService.get('POSTGRES_PORT') || '5432'),
       database: this.configService.get('DB_NAME') || this.configService.get('POSTGRES_DB') || 'nexo_crm',

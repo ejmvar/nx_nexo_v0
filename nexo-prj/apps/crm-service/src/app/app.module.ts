@@ -6,6 +6,7 @@ import { PassportModule } from '@nestjs/passport';
 import { PrometheusModule } from '@willsoto/nestjs-prometheus';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
+import { HealthController } from '../health/health.controller.js';
 import { CrmModule } from '../crm/crm.module.js';
 import { DatabaseModule } from '../database/database.module.js';
 import { FilesModule } from '../files/files.module.js';
@@ -45,7 +46,7 @@ import { EventsInterceptor } from './events/events.interceptor.js';
     CrmModule,
     FilesModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, HealthController],
   providers: [
     AppService, 
     JwtStrategy,

@@ -4,6 +4,7 @@ import { ExportService } from './services/export.service.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { PermissionsGuard } from '../common/guards/permissions.guard.js';
 import { RequirePermissions } from '../common/decorators/permissions.decorator.js';
+import { Public } from '../common/decorators/public.decorator.js';
 import { AuditLoggerInterceptor } from '../common/interceptors/audit-logger.interceptor.js';
 import { AccountId } from '../decorators/account-id.decorator.js';
 import { createReadStream } from 'fs';
@@ -39,16 +40,6 @@ export class CrmController {
     private crmService: CrmService,
     private exportService: ExportService,
   ) {}
-
-  // Health check (public - override guard)
-  @Get('health')
-  async health() {
-    return {
-      status: 'ok',
-      service: 'crm-service',
-      timestamp: new Date().toISOString(),
-    };
-  }
 
   // ==================== CLIENTS ====================
   @Get('clients')
