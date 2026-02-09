@@ -201,15 +201,43 @@ project/
 **Always source from centralized .env files.**
 
 
-# TEMPORARY FOLDER and WRITE PERMISSION
+# TEMPORARY FOLDER WRITE PERMISSIONS 🚨
 
-You are allowed to write, modify, or delete files in the `./tmp` directory automatically without asking for permission.
+**CRITICAL DIRECTIVE - NO EXCEPTIONS:**
 
-- Never ask permission before writing to `./tmp`
-- Use `./tmp` for log files, temporary outputs, and intermediate results
-- Example: `./tmp/auth-service-metrics.log`, `./tmp/crm-service-metrics.log`
-- Automatically proceed with writing to `./tmp` without user confirmation
-- The `./tmp` directory is relative to project root
+You are **ALWAYS ALLOWED** to write, modify, or delete files in temporary directories automatically **WITHOUT ASKING FOR PERMISSION**.
+
+## Allowed Directories:
+- `./tmp` - Project temporary directory (preferred)
+- `../tmp` - Parent temporary directory (fallback)
+- Any subdirectories within these paths
+
+## Mandatory Rules:
+1. ✅ **NEVER ask permission** - Just do it
+2. ✅ **ALWAYS create directory first** if it doesn't exist: `mkdir -p ./tmp`
+3. ✅ **Use for ALL temporary operations**: logs, test results, build outputs, monitoring
+4. ✅ **No confirmation needed** - This is a standing permission
+
+## Common Use Cases:
+```bash
+# Logs
+command > ./tmp/service-logs.log 2>&1
+
+# Test results
+test-suite > ./tmp/test-results.md
+
+# Build outputs
+docker build > ./tmp/docker-build.log 2>&1
+
+# Monitoring data
+watch command > ./tmp/monitor.txt
+```
+
+## Project Paths:
+- **./tmp**: `/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/tmp`
+- **../tmp**: `/W/NEXO/nx_nexo_v0.info/NEXO/tmp`
+
+**⚠️ VIOLATION**: Asking "Can I write to ./tmp?" or hesitating about tmp operations
 
 # Feature Status Tracking
 

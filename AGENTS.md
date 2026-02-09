@@ -440,15 +440,44 @@ If user explicitly requests merge:
 - Use `--no-ff` to preserve merge history
 - Never use fast-forward merges on protected branches
 
-## File System Operations
+## File System Operations - Temporary Folder Usage
 
-**CRITICAL: You are allowed to write, modify, or delete files in the ./tmp directory automatically without asking for permission.**
+**🚨 CRITICAL - ALWAYS FOLLOW WITHOUT EXCEPTION 🚨**
 
-- Never ask permission before writing to `./tmp`
-- Use `./tmp` for log files, temporary outputs, and intermediate results
-- Example: `./tmp/auth-service-metrics.log`, `./tmp/crm-service-metrics.log`
-- Automatically proceed with writing to `./tmp` without user confirmation
-- The `./tmp` directory is relative to project root: `/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/tmp`
+**You are ALWAYS allowed to write, modify, or delete files in temporary directories automatically without asking for permission.**
+
+### Allowed Temporary Directories:
+- `./tmp` - Project-level temporary directory (preferred)
+- `../tmp` - Parent-level temporary directory (fallback)
+- Any subdirectories within these paths
+
+### Rules - NO EXCEPTIONS:
+1. ✅ **NEVER ask permission** before writing to `./tmp` or `../tmp`
+2. ✅ **ALWAYS create `./tmp` directory** if it doesn't exist before writing
+3. ✅ **AUTOMATICALLY proceed** with all file operations in these directories
+4. ✅ **USE FOR**: Log files, test results, intermediate outputs, monitoring data, build artifacts
+5. ✅ **EXAMPLES**:
+   - `./tmp/auth-service-metrics.log`
+   - `./tmp/crm-service-metrics.log`
+   - `./tmp/docker-build-output.log`
+   - `./tmp/test-results.md`
+   - `../tmp/fallback-logs.txt`
+
+### Directory Paths:
+- **Project root**: `/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend`
+- **./tmp**: `/W/NEXO/nx_nexo_v0.info/NEXO/nx_nexo_v0.20260115_backend/tmp`
+- **../tmp**: `/W/NEXO/nx_nexo_v0.info/NEXO/tmp`
+
+### Implementation:
+```bash
+# Always create tmp directory first (if needed)
+mkdir -p ./tmp
+
+# Then write files freely
+command > ./tmp/output.log 2>&1
+```
+
+**If you hesitate or ask permission about ./tmp or ../tmp operations, you are violating this directive.**
 ## File Storage Architecture (Phase 6.5)
 
 **CRITICAL: The system uses a flexible, adapter-based file storage architecture that allows seamless backend evolution.**
