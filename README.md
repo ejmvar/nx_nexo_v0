@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # NEXO Frontend - Multi-Portal CRM System
 
 [![CI Status](https://img.shields.io/badge/CI-Passing-brightgreen)](https://github.com/your-repo/actions)
@@ -387,102 +386,113 @@ make debug-e2e
 
 ---
 
-**🎉 Happy coding!** The NEXO frontend is designed for rapid development with comprehensive testing at every step.
-=======
-# NEXO CRM - Modern Customer Relationship Management System
+## 🐳 Docker Multi-Environment Setup (Phase 9)
 
-A comprehensive, cloud-native CRM system built with modern technologies and best practices.
+### Overview
 
-## 🚀 Quick Start
+NEXO supports **5 isolated environments** that can run simultaneously:
 
-### For New Developers
+| Environment | Ports | Purpose | Command |
+|-------------|-------|---------|---------|
+| **Local NX** | 3xxx | Daily development (hot-reload) | `mise run dev` |
+| **Docker DEV** | 4xxx | Containerized development | `mise run docker-dev:up` |
+| **Docker TEST** | 5xxx | CI/CD automation | `mise run docker-test:up` |
+| **Docker QA** | 6xxx | Pre-production UAT | `mise run docker-qa:up` |
+| **Docker PROD** | 7xxx | Production simulation | `mise run docker-prod:up` |
 
-```bash
-# Setup entire development environment (one command!)
-bash scripts/setup-dev.sh
-
-# Or using MISE
-mise run setup
-
-# Or using Make
-make setup
-```
-
-This will:
-- ✅ Check all prerequisites (Docker, pnpm, Nx)
-- ✅ Validate configurations
-- ✅ Install dependencies
-- ✅ Start Docker services
-- ✅ Run health checks
-
-### Daily Development Workflow
+### Quick Start
 
 ```bash
-# Start development environment
-mise run dev        # or: make dev
+# Start all Docker environments
+mise run docker-all:up
 
-# Run all tests
-mise run test:all   # or: make test-all
+# Monitor health (visual dashboard)
+mise run docker:health-dashboard
 
-# View service URLs
-mise run urls       # or: make urls
+# Aggregate logs
+mise run docker:logs-aggregate
 
-# Stop environment
-mise run dev:stop   # or: make dev-stop
+# Access environments
+# - Local NX:    http://localhost:3000
+# - Docker DEV:  http://localhost:4000
+# - Docker TEST: http://localhost:5000
+# - Docker QA:   http://localhost:6000
+# - Docker PROD: http://localhost:7000
 ```
 
-## 📋 Prerequisites
+### Key Features
 
-- **Docker** 24.0+ with Docker Compose
-- **Node.js** 22.6.0+
-- **pnpm** 9.13.2+
-- **Nx** 20.2.2+ (optional, will be installed)
-- **MISE** (optional but recommended) - [Install](https://mise.jdx.dev/getting-started.html)
-- **Make** (optional alternative to MISE)
+✅ **Complete Isolation** - Separate networks, volumes, containers  
+✅ **Parallel Testing** - Run all 5 environments simultaneously  
+✅ **Health Dashboard** - Visual monitoring of 20 services  
+✅ **Log Aggregation** - Centralized log collection and analysis  
+✅ **Production-Ready** - Redis configs, monitoring, security  
 
-## 🏗️ Architecture
+### Documentation
 
-NEXO CRM follows a microservices architecture with:
+- **[DOCKER_MULTI_ENV.md](DOCKER_MULTI_ENV.md)** - Complete guide (600+ lines)
+- **[tmp/docker-multi-env-quickstart.md](tmp/docker-multi-env-quickstart.md)** - Quick reference
+- **[AGENTS.md](AGENTS.md)** - Development directives with Phase 9 section
 
-- **Frontend**: Next.js 15 (App Router) with React 19
-- **Backend**: NestJS with GraphQL
-- **Database**: PostgreSQL 16
-- **Cache**: Redis 7
-- **Auth**: Keycloak (OAuth 2.0 / OpenID Connect)
-- **Monitoring**: Prometheus + Grafana
-- **Container Orchestration**: Docker Compose (dev) / Kubernetes (prod)
+### Common Commands
+
+```bash
+# Environment management
+mise run docker-dev:up          # Start DEV environment
+mise run docker-all:up          # Start all environments
+mise run docker-all:down        # Stop all environments
+mise run docker-all:health      # Health check all
+
+# Monitoring & Logging
+mise run docker:health-dashboard  # Open visual dashboard
+mise run docker:logs-dev          # DEV logs
+mise run docker:logs-qa           # QA logs
+mise run docker:logs-prod         # PROD logs
+mise run docker:logs-aggregate    # All logs from all envs
+```
+
+---
+
+## 🎯 Backend Services
+
+The NEXO CRM system includes the following microservices:
+
+- **Auth Service** (port 3001) - JWT-based authentication with multi-tenant support
+- **CRM Service** (port 3003) - Core business logic for clients, projects, employees
+- **API Gateway** (port 3002) - Unified entry point with rate limiting
+- **Frontend** (port 3000) - Next.js 16 web application
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed architecture documentation.
 
-## 🧪 Testing
+---
 
-**Testing Philosophy**: Every step must be testable and simple.
+## 📚 Documentation Hub
 
-### Quick Tests (30 seconds)
+| Document | Description |
+|----------|-------------|
+| [ARCHITECTURE.md](ARCHITECTURE.md) | System architecture and design |
+| [DOCKER_MULTI_ENV.md](DOCKER_MULTI_ENV.md) | Multi-environment Docker guide |
+| [AGENTS.md](AGENTS.md) | Development directives and workflows |
+| [FEATURE_STATUS_LIST.md](FEATURE_STATUS_LIST.md) | Feature implementation status |
+| [TASKS.md](TASKS.md) | Complete task runner reference |
+| [TESTING.md](testing/README.md) | Testing strategy and guidelines |
 
-```bash
-mise run test:quick
-# or
-make test-quick
-```
+---
 
-Validates:
-- Docker Compose configuration
-- Kubernetes manifests
-- Nx installation
+## 🤝 Contributing
 
-### Full Test Suite (5 minutes)
+1. Read [ARCHITECTURE.md](ARCHITECTURE.md) to understand the system
+2. Check [FEATURE_STATUS_LIST.md](FEATURE_STATUS_LIST.md) for what's implemented
+3. Create a feature branch: `git checkout -b ft/phase-X/feature-name/YYYYMMDD-HHMMSS`
+4. Make your changes and test thoroughly
+5. Commit using conventional commits: `feat:`, `fix:`, `docs:`, etc.
+6. Follow the guidelines in [AGENTS.md](AGENTS.md)
 
-```bash
-mise run test:all
-# or
-make test-all
-```
+---
 
-Runs:
-- ✅ Configuration validation
-- ✅ Docker services health checks
-- ✅ Service connectivity tests
+## 📝 Additional Resources
+
+### Learning Resources
 - ✅ Application linting
 - ✅ Unit tests
 - ✅ Build verification
@@ -869,5 +879,4 @@ See [docs/TESTING.md](docs/TESTING.md) for more troubleshooting tips.
 
 ---
 
-**Made with ❤️ by the NEXO CRM Team**
->>>>>>> ft/docker
+**🎉 Happy coding!** The NEXO CRM system is designed for scalability, maintainability, and developer productivity.

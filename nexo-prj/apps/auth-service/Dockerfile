@@ -34,10 +34,14 @@ COPY --from=deps /app/apps/auth-service/node_modules ./apps/auth-service/node_mo
 # Copy source files
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY nx.json tsconfig.base.json ./
+COPY prisma ./prisma
 COPY apps/auth-service ./apps/auth-service
 
+# Generate Prisma Client
+RUN npx prisma generate --schema=./prisma/schema.prisma
+
 # Build the application
-RUN cd apps/auth-service && pnpm build
+RUN pnpm nx build auth-service --skip-nx-cache
 
 # Stage 3: Production (Minimal)
 FROM node:20-alpine AS production
@@ -57,7 +61,7 @@ COPY --from=deps /app/package.json ./
 COPY --from=deps /app/node_modules ./node_modules
 
 # Copy built application
-COPY --from=builder /app/apps/auth-service/dist ./dist
+COPY --from=builder /app/dist/apps/auth-service ./dist
 
 # Change ownership to non-root user
 RUN chown -R nestjs:nodejs /app
