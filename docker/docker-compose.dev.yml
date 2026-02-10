@@ -167,9 +167,7 @@ services:
   frontend-dev:
     build:
       context: ../nexo-prj
-      dockerfile: apps/nexo-prj/Dockerfile
-      args:
-        NODE_ENV: development
+      dockerfile: apps/nexo-prj/Dockerfile.local
     container_name: nexo-frontend-dev
     environment:
       NODE_ENV: development
