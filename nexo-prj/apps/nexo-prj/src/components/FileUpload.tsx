@@ -90,6 +90,10 @@ export function FileUpload({
       if (category) formData.append('file_category', category);
       formData.append('is_public', isPublic.toString());
 
+      // Note: fetch API doesn't support onUploadProgress
+      // For progress tracking, would need to implement chunked uploads or use XMLHttpRequest
+      setUploadProgress(50); // Show intermediate progress
+
       const response = await apiClient.post<UploadedFileResponse>(
         '/files/upload',
         formData,
@@ -97,19 +101,11 @@ export function FileUpload({
           headers: {
             'Content-Type': 'multipart/form-data',
           },
-          onUploadProgress: (progressEvent) => {
-            if (progressEvent.total) {
-              const progress = Math.round(
-                (progressEvent.loaded * 100) / progressEvent.total,
-              );
-              setUploadProgress(progress);
-            }
-          },
         },
       );
 
       setUploadProgress(100);
-      onSuccess?.(response.data);
+      onSuccess?.(response);
       
       // Reset after success
       setTimeout(() => {

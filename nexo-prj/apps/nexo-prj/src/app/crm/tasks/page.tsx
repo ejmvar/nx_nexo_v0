@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../../../contexts/AuthContext';
 import { apiClient } from '../../../lib/auth';
-import FileUpload from '../../../components/FileUpload';
-import FileList from '../../../components/FileList';
+import { FileUpload } from '../../../components/FileUpload';
+import { FileList } from '../../../components/FileList';
 
 interface Task {
   id: string;
@@ -501,7 +501,7 @@ export default function TasksPage() {
                 entityId={selectedTask.id}
                 refreshTrigger={filesRefreshTrigger}
                 onDelete={() => setFilesRefreshTrigger(prev => prev + 1)}
-                onDownload={(file) => console.log('Downloaded:', file.file_name)}
+                onDownload={(file) => console.log('Downloaded:', file.filename)}
               />
             </div>
 

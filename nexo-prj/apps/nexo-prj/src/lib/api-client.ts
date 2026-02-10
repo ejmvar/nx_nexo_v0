@@ -1,4 +1,4 @@
-import { API_CONFIG, API_ENDPOINTS, getServiceUrl } from './api-config';
+import { API_CONFIG, API_ENDPOINTS } from './api-config';
 
 // API Error class
 export class APIError extends Error {

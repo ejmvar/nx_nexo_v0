@@ -34,7 +34,25 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      const { confirmPassword, ...registerData } = formData;
+      const { confirmPassword, full_name, ...baseData } = formData;
+      
+      // Split full_name into firstName and lastName
+      const nameParts = full_name.trim().split(' ');
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+      
+      // Generate account details
+      const accountName = `${firstName} ${lastName}`.trim() || formData.username;
+      const accountSlug = formData.email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '-');
+      
+      const registerData = {
+        ...baseData,
+        firstName,
+        lastName,
+        accountName,
+        accountSlug,
+      };
+      
       await register(registerData);
     } catch (err: any) {
       setError(err.message || 'Registration failed. Please try again.');
