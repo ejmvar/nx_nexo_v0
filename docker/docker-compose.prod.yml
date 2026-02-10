@@ -115,9 +115,7 @@ services:
   auth-service-prod:
     build:
       context: ../nexo-prj
-      dockerfile: apps/auth-service/Dockerfile
-      args:
-        NODE_ENV: production
+      dockerfile: apps/auth-service/Dockerfile.local
     container_name: nexo-auth-service-prod
     environment:
       NODE_ENV: production
@@ -166,9 +164,7 @@ services:
   crm-service-prod:
     build:
       context: ../nexo-prj
-      dockerfile: apps/crm-service/Dockerfile
-      args:
-        NODE_ENV: production
+      dockerfile: apps/crm-service/Dockerfile.local
     container_name: nexo-crm-service-prod
     environment:
       NODE_ENV: production
@@ -218,9 +214,7 @@ services:
   api-gateway-prod:
     build:
       context: ../nexo-prj
-      dockerfile: apps/api-gateway/Dockerfile
-      args:
-        NODE_ENV: production
+      dockerfile: apps/api-gateway/Dockerfile.local
     container_name: nexo-api-gateway-prod
     environment:
       NODE_ENV: production
@@ -274,9 +268,7 @@ services:
   frontend-prod:
     build:
       context: ../nexo-prj
-      dockerfile: apps/nexo-prj/Dockerfile
-      args:
-        NODE_ENV: production
+      dockerfile: apps/nexo-prj/Dockerfile.local
     container_name: nexo-frontend-prod
     environment:
       NODE_ENV: production

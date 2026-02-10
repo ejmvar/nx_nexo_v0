@@ -59,7 +59,7 @@ services:
   auth-service-test:
     build:
       context: ../nexo-prj
-      dockerfile: apps/auth-service/Dockerfile
+      dockerfile: apps/auth-service/Dockerfile.local
     container_name: nexo-auth-service-test
     environment:
       NODE_ENV: test
@@ -89,7 +89,7 @@ services:
   crm-service-test:
     build:
       context: ../nexo-prj
-      dockerfile: apps/crm-service/Dockerfile
+      dockerfile: apps/crm-service/Dockerfile.local
     container_name: nexo-crm-service-test
     environment:
       NODE_ENV: test
@@ -120,7 +120,7 @@ services:
   api-gateway-test:
     build:
       context: ../nexo-prj
-      dockerfile: apps/api-gateway/Dockerfile
+      dockerfile: apps/api-gateway/Dockerfile.local
     container_name: nexo-api-gateway-test
     environment:
       NODE_ENV: test
@@ -152,9 +152,7 @@ services:
   frontend-test:
     build:
       context: ../nexo-prj
-      dockerfile: apps/nexo-prj/Dockerfile
-      args:
-        NODE_ENV: test
+      dockerfile: apps/nexo-prj/Dockerfile.local
     container_name: nexo-frontend-test
     environment:
       NODE_ENV: test

@@ -1,0 +1,49 @@
+# ============================================================================
+# CRM Service - Simple Dockerfile using pre-built local dist
+# ============================================================================
+# This Dockerfile uses a pre-built dist from the host machine (pnpm nx build)
+# Avoids Docker monorepo + ESM complexity by using proven working local build
+# 
+# Build process:
+#   1. Build locally: cd nexo-prj && pnpm nx build crm-service --prod
+#   2. Build Docker: docker build -f Dockerfile.local -t docker-crm-service-dev .
+#   3. Run: docker compose up -d crm-service-dev
+
+FROM node:22.12-alpine AS production
+
+WORKDIR /app
+
+# Install tini for proper signal handling
+RUN apk add --no-cache tini
+
+# Copy pre-built application from local machine
+COPY dist/apps/crm-service ./dist
+
+# Copy node_modules from local machine (includes all dependencies)
+COPY node_modules ./node_modules
+
+# Copy package.json for reference
+COPY package.json ./
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nestjs -u 1001
+
+# Change ownership
+RUN chown -R nestjs:nodejs /app
+
+# Switch to non-root user
+USER nestjs
+
+# Expose port
+EXPOSE 3003
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
+  CMD node -e "require('http').get('http://127.0.0.1:3003/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+
+# Use tini for proper signal handling
+ENTRYPOINT ["/sbin/tini", "--"]
+
+# Start application
+CMD ["node", "dist/src/main.js"]

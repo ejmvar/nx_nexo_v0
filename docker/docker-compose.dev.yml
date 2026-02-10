@@ -66,7 +66,7 @@ services:
   auth-service-dev:
     build:
       context: ../nexo-prj
-      dockerfile: apps/auth-service/Dockerfile
+      dockerfile: apps/auth-service/Dockerfile.local
     container_name: nexo-auth-service-dev
     environment:
       NODE_ENV: development
@@ -97,7 +97,7 @@ services:
   crm-service-dev:
     build:
       context: ../nexo-prj
-      dockerfile: apps/crm-service/Dockerfile
+      dockerfile: apps/crm-service/Dockerfile.local
     container_name: nexo-crm-service-dev
     environment:
       NODE_ENV: development

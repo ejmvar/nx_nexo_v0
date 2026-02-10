@@ -81,7 +81,7 @@ services:
   auth-service-qa:
     build:
       context: ../nexo-prj
-      dockerfile: apps/auth-service/Dockerfile
+      dockerfile: apps/auth-service/Dockerfile.local
     container_name: nexo-auth-service-qa
     environment:
       NODE_ENV: staging
@@ -127,7 +127,7 @@ services:
   crm-service-qa:
     build:
       context: ../nexo-prj
-      dockerfile: apps/crm-service/Dockerfile
+      dockerfile: apps/crm-service/Dockerfile.local
     container_name: nexo-crm-service-qa
     environment:
       NODE_ENV: staging
@@ -174,7 +174,7 @@ services:
   api-gateway-qa:
     build:
       context: ../nexo-prj
-      dockerfile: apps/api-gateway/Dockerfile
+      dockerfile: apps/api-gateway/Dockerfile.local
     container_name: nexo-api-gateway-qa
     environment:
       NODE_ENV: staging
@@ -222,9 +222,7 @@ services:
   frontend-qa:
     build:
       context: ../nexo-prj
-      dockerfile: apps/nexo-prj/Dockerfile
-      args:
-        NODE_ENV: production
+      dockerfile: apps/nexo-prj/Dockerfile.local
     container_name: nexo-frontend-qa
     environment:
       NODE_ENV: production
