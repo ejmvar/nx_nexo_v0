@@ -134,7 +134,7 @@ services:
   api-gateway-dev:
     build:
       context: ../nexo-prj
-      dockerfile: apps/api-gateway/Dockerfile
+      dockerfile: apps/api-gateway/Dockerfile.local
     container_name: nexo-api-gateway-dev
     environment:
       NODE_ENV: development
