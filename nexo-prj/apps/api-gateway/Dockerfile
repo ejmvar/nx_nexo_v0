@@ -18,6 +18,9 @@ COPY nx.json tsconfig.base.json ./
 COPY apps/api-gateway ./apps/api-gateway
 COPY libs ./libs
 
+# Configure npm mirror (faster, more reliable for builds)
+RUN pnpm config set registry https://registry.npmmirror.com
+
 # Install dependencies
 RUN pnpm install --frozen-lockfile
 
@@ -32,11 +35,9 @@ WORKDIR /app
 # Install pnpm
 RUN npm install -g pnpm@9.13.2
 
-# Copy package files
-COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
-
-# Install production dependencies only
-RUN pnpm install --prod --frozen-lockfile
+# Copy package files and node_modules from builder (includes all deps)
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/node_modules ./node_modules
 
 # Copy built application from builder
 COPY --from=builder /app/dist/apps/api-gateway ./dist
@@ -59,4 +60,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
   CMD node -e "require('http').get('http://127.0.0.1:3002/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
 # Start application
-CMD ["node", "dist/main.js"]
+CMD ["node", "dist/src/main.js"]
