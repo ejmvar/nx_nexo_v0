@@ -209,10 +209,9 @@ depends = ["test-install"]
 
 [tasks.test-dev-all]
 description = "Start core development servers (auth, crm, frontend)"
-# # DON'T REMOVE : # run = "cd nexo-prj && npx nx run-many --target=serve --all --parallel"
+run = "cd nexo-prj && npx nx run-many --target=serve --projects=auth-service,crm-service,nexo-prj --parallel=3"
 
-run = """
-run = "NEXO_ENV=dev bash scripts/startup.sh startasks.test-clean]
+[tasks.test-clean]
 description = "Clean all build artifacts and caches"
 run = "cd nexo-prj && npx nx reset && rm -rf .next node_modules/.cache"
 
@@ -352,7 +351,7 @@ run = "unset DOCKER_HOST && docker compose -f docker/docker-compose.dev.yml buil
 
 [tasks."docker-dev:health"]
 description = "🔵 Check Docker DEV health"
-run = "curl -sf http://localhost:4001/health && curl -sf http://localhost:4003/health && curl -sf http://localhost:4000 && echo 'DEV environment healthy'"
+run = "curl -sf http://localhost:4001/api/auth/health && curl -sf http://localhost:4003/api/health && curl -sf http://localhost:4002/health && curl -sf http://localhost:4000 && echo 'DEV environment healthy'"
 
 # ============================================================================
 # DOCKER TEST ENVIRONMENT (Port 5xxx)
@@ -388,7 +387,7 @@ run = "unset DOCKER_HOST && docker compose -f docker/docker-compose.test.yml bui
 
 [tasks."docker-test:health"]
 description = "🟢 Check Docker TEST health"
-run = "curl -sf http://localhost:5001/health && curl -sf http://localhost:5003/health && curl -sf http://localhost:5000 && echo 'TEST environment healthy'"
+run = "curl -sf http://localhost:5001/api/auth/health && curl -sf http://localhost:5003/api/health && curl -sf http://localhost:5002/health && curl -sf http://localhost:5000 && echo 'TEST environment healthy'"
 
 # ============================================================================
 # DOCKER QA ENVIRONMENT (Port 6xxx)
@@ -424,7 +423,7 @@ run = "unset DOCKER_HOST && docker compose -f docker/docker-compose.qa.yml build
 
 [tasks."docker-qa:health"]
 description = "🟡 Check Docker QA health"
-run = "curl -sf http://localhost:6001/health && curl -sf http://localhost:6003/health && curl -sf http://localhost:6000 && echo 'QA environment healthy'"
+run = "curl -sf http://localhost:6001/api/auth/health && curl -sf http://localhost:6003/api/health && curl -sf http://localhost:6002/health && curl -sf http://localhost:6000 && echo 'QA environment healthy'"
 
 # ============================================================================
 # DOCKER PROD ENVIRONMENT (Port 7xxx)
@@ -460,7 +459,7 @@ run = "unset DOCKER_HOST && docker compose -f docker/docker-compose.prod.yml bui
 
 [tasks."docker-prod:health"]
 description = "🔴 Check Docker PROD health"
-run = "curl -sf http://localhost:7001/health && curl -sf http://localhost:7003/health && curl -sf http://localhost:7000 && echo 'PROD environment healthy'"
+run = "curl -sf http://localhost:7001/api/auth/health && curl -sf http://localhost:7003/api/health && curl -sf http://localhost:7002/health && curl -sf http://localhost:7000 && echo 'PROD environment healthy'"
 
 # ========================================================================
 # MULTI-ENVIRONMENT MANAGEMENT
@@ -484,7 +483,7 @@ run = "echo '=== DEV ===' && mise run docker-dev:ps && echo '=== TEST ===' && mi
 
 [tasks."docker-all:health"]
 description = "🌐 Check ALL Docker environments health"
-run = "echo '=== DEV (4xxx) ===' && mise run docker-dev:health && echo '=== TEST (5xxx) ===' && mise run docker-test:health && echo '=== QA (6xxx) ===' && mise run docker-qa:health && echo '=== PROD (7xxx) ===' && mise run docker-prod:health"
+run = "echo '=== DEV (4xxx) ===' && mise run docker-dev:health && echo '' && echo '=== TEST (5xxx) ===' && mise run docker-test:health && echo '' && echo '=== QA (6xxx) ===' && mise run docker-qa:health && echo '' && echo '=== PROD (7xxx) ===' && mise run docker-prod:health"
 
 # ============================================================================
 # DOCKER MONITORING & LOGGING TASKS
@@ -699,12 +698,8 @@ run = "bash scripts/ci-test.sh"
 # ============================================================================
 
 [tasks."clean:all"]
-descripti
-mise run docker:clean
-cd $PROJECT_NAME:clean
-cd {{vars.PROJECT_NAME}} && rm -rf node_modules dist .nx
-echo '✓ Cleaned all build artifacts'
-"""
+description = "Clean all build artifacts"
+run = "mise run docker:clean && cd {{vars.PROJECT_NAME}} && rm -rf node_modules dist .nx && echo '✓ Cleaned all build artifacts'"
 
 [tasks."setup"]
 description = "Setup development environment for new users"
