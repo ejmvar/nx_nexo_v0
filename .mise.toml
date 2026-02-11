@@ -387,7 +387,7 @@ run = "unset DOCKER_HOST && docker compose -f docker/docker-compose.test.yml bui
 
 [tasks."docker-test:health"]
 description = "🟢 Check Docker TEST health"
-run = "curl -sf http://localhost:5001/api/auth/health && curl -sf http://localhost:5003/api/health && curl -sf http://localhost:5002/health && curl -sf http://localhost:5000 && echo 'TEST environment healthy'"
+run = "curl -sf http://localhost:5101/api/auth/health && curl -sf http://localhost:5103/api/health && curl -sf http://localhost:5102/health && curl -sf http://localhost:5100 && echo 'TEST environment healthy'"
 
 # ============================================================================
 # DOCKER QA ENVIRONMENT (Port 6xxx)
